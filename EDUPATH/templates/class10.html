@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+    .c10-slim-banner {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-left: 4px solid var(--accent);
+        border-radius: 16px;
+        padding: 16px 20px;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 12px;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.03);
+    }
+    .c10-pill {
+        display: inline-block;
+        font-size: 0.7rem;
+        font-weight: 800;
+        letter-spacing: 0.06em;
+        padding: 3px 10px;
+        border-radius: 999px;
+        background: color-mix(in srgb, var(--accent) 14%, transparent);
+        color: var(--accent);
+        margin-bottom: 5px;
+    }
+    .c10-slim-banner h1 {
+        font-size: 1.48rem;
+        margin: 0 0 3px;
+        line-height: 1.25;
+    }
+    .c10-slim-banner p {
+        color: var(--muted);
+        font-size: 0.88rem;
+        margin: 0;
+    }
+    .subj-card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-top: 3px solid var(--accent);
+        border-radius: 18px;
+        padding: 20px;
+        box-shadow: 0 8px 22px rgba(0, 0, 0, 0.03);
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        gap: 14px;
+        transition: transform 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease;
+    }
+    .subj-card:hover {
+        transform: translateY(-2px);
+        border-color: var(--accent);
+        box-shadow: 0 12px 26px rgba(16, 185, 129, 0.12);
+    }
+    .subj-meta-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 0.74rem;
+        font-weight: 800;
+        color: var(--accent);
+        background: color-mix(in srgb, var(--accent) 13%, transparent);
+        padding: 3px 9px;
+        border-radius: 999px;
+    }
+
+    @media (max-width: 768px) {
+        .c10-slim-banner {
+            padding: 12px 14px !important;
+            border-radius: 14px !important;
+            border-left-width: 4px !important;
+            margin-bottom: 14px !important;
+        }
+        .c10-slim-banner h1 {
+            font-size: 1.18rem !important;
+        }
+        .c10-slim-banner p {
+            font-size: 0.8rem !important;
+        }
+        .c10-subj-grid {
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 10px !important;
+            margin-bottom: 16px !important;
+        }
+        .c10-subj-grid .subj-card {
+            flex-direction: row !important;
+            align-items: center !important;
+            justify-content: space-between !important;
+            gap: 12px !important;
+            background: var(--card) !important;
+            border: 1px solid var(--border) !important;
+            border-left: 4px solid var(--accent) !important;
+            border-top: 1px solid var(--border) !important;
+            border-radius: 14px !important;
+            padding: 12px 13px !important;
+        }
+        .c10-subj-grid .subj-card > div:first-child {
+            flex: 1 1 auto;
+            min-width: 0;
+        }
+        .c10-subj-grid .subj-card > div:first-child > div:first-child {
+            justify-content: flex-start !important;
+            gap: 8px !important;
+            margin-bottom: 4px !important;
+        }
+        .c10-subj-grid .subj-card h2 {
+            font-size: 0.96rem !important;
+            font-weight: 800 !important;
+            margin-bottom: 0 !important;
+            line-height: 1.25 !important;
+        }
+        .c10-subj-grid .subj-card .btn {
+            width: auto !important;
+            flex-shrink: 0 !important;
+            padding: 7px 12px !important;
+            font-size: 0.76rem !important;
+            border-radius: 10px !important;
+            white-space: nowrap;
+        }
+    }
+</style>
+
+<div class="c10-slim-banner">
+    <div>
+        <span class="c10-pill">BOARD FOUNDATION • CLASS 10</span>
+        <h1>📗 Class 10 Subject Portals</h1>
+        <p>Apna subject kholein — andar saare chapters, video lectures aur PDF notes organized milenge.</p>
+    </div>
+    <div style="display:flex; gap:8px; flex-wrap:wrap;">
+        <a href="{{ url_for('mock_test_portal', portal='Class 10') }}" class="btn-outline" style="padding:8px 14px; font-size:0.82rem;">📝 Class 10 Mock Tests</a>
+    </div>
+</div>
+
+<div class="grid-3 c10-subj-grid" style="margin-bottom: 22px;">
+    {% for s in subjects %}
+    <div class="subj-card">
+        <div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <span style="font-size: 1.55rem;">{{ s['icon'] }}</span>
+                <span class="subj-meta-pill">{{ s['chapters']|length }} Chapters</span>
+            </div>
+            <h2 style="font-size: 1.12rem; margin-bottom: 6px;">{{ s['name'] }}</h2>
+            <p style="font-size: 0.86rem; color: var(--muted); line-height: 1.45;">{{ s['detail'] }}</p>
+        </div>
+        <a href="{{ url_for('subject_portal', section='class10', subj_slug=slugify(s['name'])) }}" class="btn" style="width: 100%;">Open Portal →</a>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

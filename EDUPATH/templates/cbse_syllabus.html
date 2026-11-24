@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>CBSE Syllabus & Exam Pattern | EDUPATH</title>
+<style>
+  :root {
+    --bg: #07130e;
+    --surface: #0d1f18;
+    --surface-2: #132c22;
+    --border: rgba(52, 211, 153, 0.22);
+    --emerald: #10b981;
+    --emerald-bright: #34d399;
+    --emerald-soft: rgba(16, 185, 129, 0.14);
+    --text: #ecfdf5;
+    --muted: #9ec5b6;
+    --radius: 16px;
+    --shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: radial-gradient(circle at top right, rgba(16, 185, 129, 0.14), transparent 45%), var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    line-height: 1.55;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .navbar {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    backdrop-filter: blur(14px);
+    background: rgba(7, 19, 14, 0.86);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .nav-inner {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    font-size: 1.15rem;
+  }
+
+  .brand-badge {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, var(--emerald), #059669);
+    display: grid;
+    place-items: center;
+    color: #04120c;
+    font-weight: 900;
+    box-shadow: 0 6px 18px rgba(16, 185, 129, 0.35);
+  }
+
+  .nav-links {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .nav-link {
+    padding: 8px 14px;
+    border-radius: 999px;
+    font-size: 0.92rem;
+    font-weight: 600;
+    color: var(--muted);
+    border: 1px solid transparent;
+    transition: all 0.2s ease;
+  }
+
+  .nav-link:hover {
+    color: var(--text);
+    background: var(--emerald-soft);
+    border-color: var(--border);
+  }
+
+  .nav-link.active {
+    color: #04120c;
+    background: var(--emerald-bright);
+    border-color: var(--emerald-bright);
+  }
+
+  .container {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 24px 18px 56px;
+  }
+
+  .hero {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.16), rgba(13, 31, 24, 0.92));
+    border: 1px solid var(--border);
+    border-radius: 22px;
+    padding: 24px;
+    margin-bottom: 22px;
+    box-shadow: var(--shadow);
+  }
+
+  .eyebrow {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    background: var(--emerald-soft);
+    color: var(--emerald-bright);
+    border: 1px solid var(--border);
+    margin-bottom: 10px;
+  }
+
+  h1 {
+    font-size: clamp(1.45rem, 3.2vw, 2.2rem);
+    font-weight: 800;
+    margin-bottom: 8px;
+  }
+
+  .subtitle {
+    color: var(--muted);
+    font-size: 0.98rem;
+    max-width: 760px;
+  }
+
+  .controls-bar {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .pill-group {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .pill {
+    padding: 8px 16px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--muted);
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .pill:hover, .pill.active {
+    background: var(--emerald);
+    color: #04120c;
+    border-color: var(--emerald);
+  }
+
+  .search-input {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 9px 14px;
+    border-radius: 12px;
+    font-size: 0.92rem;
+    min-width: 230px;
+    outline: none;
+  }
+
+  .search-input:focus {
+    border-color: var(--emerald-bright);
+  }
+
+  .stat-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(155px, 1fr));
+    gap: 12px;
+    margin-bottom: 22px;
+  }
+
+  .stat-box {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 14px 16px;
+  }
+
+  .stat-label {
+    font-size: 0.8rem;
+    color: var(--muted);
+    margin-bottom: 4px;
+  }
+
+  .stat-val {
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: var(--emerald-bright);
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    box-shadow: var(--shadow);
+    margin-bottom: 18px;
+  }
+
+  .unit-item {
+    border-top: 1px solid rgba(52, 211, 153, 0.12);
+    padding: 12px 0;
+  }
+
+  .unit-item:first-child {
+    border-top: none;
+    padding-top: 4px;
+  }
+
+  .unit-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 6px;
+  }
+
+  .unit-name {
+    font-weight: 700;
+    font-size: 1rem;
+  }
+
+  .marks-badge {
+    background: var(--emerald-soft);
+    color: var(--emerald-bright);
+    border: 1px solid var(--border);
+    padding: 2px 10px;
+    border-radius: 999px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  .chapter-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .chap-chip {
+    font-size: 0.82rem;
+    color: var(--muted);
+    background: var(--surface-2);
+    border: 1px solid rgba(52, 211, 153, 0.14);
+    padding: 3px 9px;
+    border-radius: 8px;
+  }
+
+  .tag {
+    font-size: 0.78rem;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    color: var(--emerald-bright);
+  }
+
+  .footer {
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.85rem;
+    padding: 20px;
+    border-top: 1px solid rgba(52, 211, 153, 0.12);
+    margin-top: 32px;
+  }
+
+  @media (max-width: 640px) {
+    .hero {
+      padding: 18px;
+    }
+    .card {
+      padding: 16px;
+    }
+    .search-input {
+      width: 100%;
+    }
+  }
+</style>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-inner">
+      <a href="#top" class="brand">
+        <span class="brand-badge">E</span>
+        <span>EDUPATH</span>
+      </a>
+      <div class="nav-links">
+        <a href="/syllabus/10" class="nav-link active">CBSE Syllabus & Pattern</a>
+        <a href="/competency-questions" class="nav-link">Competency Questions</a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container" id="top">
+    <section class="hero">
+      <span class="eyebrow">Syllabus & Blueprint</span>
+      <h1 id="hero-title">Class 10 CBSE Syllabus & Exam Pattern</h1>
+      <p class="subtitle" id="hero-subtitle">Latest Board Structure, Unit Weightage & Competency Focus</p>
+    </section>
+
+    <div class="controls-bar">
+      <div class="pill-group" id="class-pills">
+        <button type="button" class="pill active" data-cls="10">Class 10</button>
+        <button type="button" class="pill" data-cls="11">Class 11</button>
+        <button type="button" class="pill" data-cls="12">Class 12</button>
+      </div>
+      <input type="text" id="chapter-search" class="search-input" placeholder="Search subject, unit or chapter..." />
+    </div>
+
+    <div class="stat-row" id="stats-row"></div>
+
+    <div class="card">
+      <h2 style="font-size:1.2rem; margin-bottom:10px;">Question Paper Typology & Weightage</h2>
+      <div id="typology-list"></div>
+    </div>
+
+    <h2 style="font-size:1.3rem; margin-bottom:14px;">Subject-Wise Unit & Marks Distribution</h2>
+    <div id="subjects-container"></div>
+  </main>
+
+  <footer class="footer">
+    EDUPATH • CBSE Class 10–12 Syllabus & Exam Pattern Portal
+  </footer>
+
+  <script>
+    const SYLLABUS_DATA = {
+      "10": {
+        title: "Class 10 CBSE Syllabus & Exam Pattern",
+        subtitle: "Latest Board Structure, Unit Weightage & Competency Focus",
+        totalMarks: 100,
+        theoryMarks: "80 Marks",
+        internalMarks: "20 Marks",
+        duration: "3 Hours",
+        typology: [
+          { type: "Competency-Based Questions (Case Study, Source-Based, Assertion-Reason, MCQs)", share: "50%", note: "Tests conceptual application & real-life reasoning" },
+          { type: "Select Response / Objective (MCQs)", share: "20%", note: "Direct concept checks & quick accuracy" },
+          { type: "Short & Long Answer Questions", share: "30%", note: "Step-wise derivations, diagrams, explanations & numericals" }
+        ],
+        subjects: [
+          {
+            name: "Mathematics (Standard / Basic)",
+            code: "041 / 241",
+            units: [
+              { unit: "Number Systems", marks: 6, chapters: ["Real Numbers"] },
+              { unit: "Algebra", marks: 20, chapters: ["Polynomials", "Pair of Linear Equations in Two Variables", "Quadratic Equations", "Arithmetic Progressions"] },
+              { unit: "Coordinate Geometry", marks: 6, chapters: ["Coordinate Geometry"] },
+              { unit: "Geometry", marks: 15, chapters: ["Triangles", "Circles"] },
+              { unit: "Trigonometry", marks: 12, chapters: ["Introduction to Trigonometry", "Some Applications of Trigonometry"] },
+              { unit: "Mensuration", marks: 10, chapters: ["Areas Related to Circles", "Surface Areas and Volumes"] },
+              { unit: "Statistics & Probability", marks: 11, chapters: ["Statistics", "Probability"] }
+            ]
+          },
+          {
+            name: "Science",
+            code: "086",
+            units: [
+              { unit: "Chemical Substances - Nature and Behaviour", marks: 25, chapters: ["Chemical Reactions and Equations", "Acids, Bases and Salts", "Metals and Non-metals", "Carbon and its Compounds"] },
+              { unit: "World of Living", marks: 25, chapters: ["Life Processes", "Control and Coordination", "How do Organisms Reproduce?", "Heredity"] },
+              { unit: "Natural Phenomena", marks: 12, chapters: ["Light - Reflection and Refraction", "The Human Eye and the Colourful World"] },
+              { unit: "Effects of Current", marks: 13, chapters: ["Electricity", "Magnetic Effects of Electric Current"] },
+              { unit: "Natural Resources", marks: 5, chapters: ["Our Environment"] }
+            ]
+          },
+          {
+            name: "Social Science",
+            code: "087",
+            units: [
+              { unit: "India and the Contemporary World - II (History)", marks: 20, chapters: ["The Rise of Nationalism in Europe", "Nationalism in India", "The Making of a Global World", "The Age of Industrialisation", "Print Culture and the Modern World"] },
+              { unit: "Contemporary India - II (Geography)", marks: 20, chapters: ["Resources and Development", "Forest and Wildlife Resources", "Water Resources", "Agriculture", "Minerals and Energy Resources", "Manufacturing Industries", "Lifelines of National Economy"] },
+              { unit: "Democratic Politics - II (Political Science)", marks: 20, chapters: ["Power Sharing", "Federalism", "Gender, Religion and Caste", "Political Parties", "Outcomes of Democracy"] },
+              { unit: "Understanding Economic Development (Economics)", marks: 20, chapters: ["Development", "Sectors of the Indian Economy", "Money and Credit", "Globalisation and the Indian Economy", "Consumer Rights"] }
+            ]
+          }
+        ]
+      },
+      "11": {
+        title: "Class 11 CBSE Syllabus & Exam Pattern",
+        subtitle: "Foundational Senior Secondary Units & Assessment Blueprint",
+        totalMarks: 100,
+        theoryMarks: "70 Marks",
+        internalMarks: "30 Marks",
+        duration: "3 Hours",
+        typology: [
+          { type: "Competency-Based Questions (Case-Based / Source-Based / Analytical)", share: "40%", note: "Application of principles & data interpretation" },
+          { type: "Objective Type Questions (MCQs / Assertion-Reason)", share: "20%", note: "Concept clarity & definitions" },
+          { type: "Short Answer & Long Answer Questions", share: "40%", note: "Derivations, numericals, diagrams & structured answers" }
+        ],
+        subjects: [
+          {
+            name: "Physics",
+            code: "042",
+            units: [
+              { unit: "Kinematics", marks: 23, chapters: ["Units and Measurements", "Motion in a Straight Line", "Motion in a Plane"] },
+              { unit: "Laws of Motion", marks: 23, chapters: ["Laws of Motion", "Work, Energy and Power", "Rotational Motion", "Gravitation"] },
+              { unit: "Properties of Bulk Matter", marks: 17, chapters: ["Mechanical Properties of Solids", "Mechanical Properties of Fluids", "Thermal Properties of Matter"] },
+              { unit: "Thermodynamics & Kinetic Theory", marks: 17, chapters: ["Thermodynamics", "Kinetic Theory"] },
+              { unit: "Oscillations and Waves", marks: 10, chapters: ["Oscillations", "Waves"] }
+            ]
+          },
+          {
+            name: "Mathematics",
+            code: "041",
+            units: [
+              { unit: "Sets and Functions", marks: 23, chapters: ["Sets", "Relations and Functions", "Trigonometric Functions"] },
+              { unit: "Algebra", marks: 25, chapters: ["Complex Numbers and Quadratic Equations", "Linear Inequalities", "Permutations and Combinations", "Binomial Theorem", "Sequences and Series"] },
+              { unit: "Coordinate Geometry", marks: 12, chapters: ["Straight Lines", "Conic Sections", "Introduction to Three Dimensional Geometry"] },
+              { unit: "Calculus", marks: 5, chapters: ["Limits and Derivatives"] },
+              { unit: "Statistics and Probability", marks: 15, chapters: ["Statistics", "Probability"] }
+            ]
+          }
+        ]
+      },
+      "12": {
+        title: "Class 12 CBSE Syllabus & Exam Pattern",
+        subtitle: "Board Exam Blueprint, High-Weightage Units & Competency Weightage",
+        totalMarks: 100,
+        theoryMarks: "70 Marks",
+        internalMarks: "30 Marks",
+        duration: "3 Hours",
+        typology: [
+          { type: "Competency-Based Questions (Case Study, Source-Based, Analytical)", share: "40%", note: "High-weightage real-world & experimental scenarios" },
+          { type: "Objective Type Questions (MCQs & Assertion-Reason)", share: "20%", note: "Formula precision, exceptions & conceptual traps" },
+          { type: "Short Answer & Long Answer Questions", share: "40%", note: "Numericals, derivations, mechanisms & board-style writing" }
+        ],
+        subjects: [
+          {
+            name: "Physics",
+            code: "042",
+            units: [
+              { unit: "Electrostatics & Current Electricity", marks: 16, chapters: ["Electric Charges and Fields", "Electrostatic Potential and Capacitance", "Current Electricity"] },
+              { unit: "Magnetic Effects of Current & Magnetism", marks: 17, chapters: ["Moving Charges and Magnetism", "Magnetism and Matter"] },
+              { unit: "Electromagnetic Induction & Alternating Current", marks: 17, chapters: ["Electromagnetic Induction", "Alternating Current", "Electromagnetic Waves"] },
+              { unit: "Optics", marks: 18, chapters: ["Ray Optics and Optical Instruments", "Wave Optics"] },
+              { unit: "Dual Nature, Atoms & Nuclei", marks: 12, chapters: ["Dual Nature of Radiation and Matter", "Atoms", "Nuclei"] },
+              { unit: "Electronic Devices", marks: 7, chapters: ["Semiconductor Electronics"] }
+            ]
+          },
+          {
+            name: "Mathematics",
+            code: "041",
+            units: [
+              { unit: "Relations and Functions", marks: 8, chapters: ["Relations and Functions", "Inverse Trigonometric Functions"] },
+              { unit: "Algebra", marks: 10, chapters: ["Matrices", "Determinants"] },
+              { unit: "Calculus", marks: 35, chapters: ["Continuity and Differentiability", "Applications of Derivatives", "Integrals", "Applications of Integrals", "Differential Equations"] },
+              { unit: "Vectors and Three-Dimensional Geometry", marks: 14, chapters: ["Vectors", "Three Dimensional Geometry"] },
+              { unit: "Linear Programming", marks: 5, chapters: ["Linear Programming"] },
+              { unit: "Probability", marks: 8, chapters: ["Probability"] }
+            ]
+          }
+        ]
+      }
+    };
+
+    let currentClass = "10";
+    let searchQuery = "";
+
+    function renderSyllabus() {
+      const data = SYLLABUS_DATA[currentClass];
+      document.getElementById("hero-title").textContent = data.title;
+      document.getElementById("hero-subtitle").textContent = data.subtitle;
+
+      document.getElementById("stats-row").innerHTML = `
+        <div class="stat-box"><div class="stat-label">Total Marks</div><div class="stat-val">${data.totalMarks}</div></div>
+        <div class="stat-box"><div class="stat-label">Theory Paper</div><div class="stat-val">${data.theoryMarks}</div></div>
+        <div class="stat-box"><div class="stat-label">Internal / Practical</div><div class="stat-val">${data.internalMarks}</div></div>
+        <div class="stat-box"><div class="stat-label">Duration</div><div class="stat-val">${data.duration}</div></div>
+      `;
+
+      document.getElementById("typology-list").innerHTML = data.typology.map(item => `
+        <div class="unit-item">
+          <div class="unit-head">
+            <span class="unit-name">${item.type}</span>
+            <span class="marks-badge">${item.share}</span>
+          </div>
+          <p style="color:var(--muted); font-size:0.9rem;">${item.note}</p>
+        </div>
+      `).join("");
+
+      const q = searchQuery.trim().toLowerCase();
+      let subjectsHtml = "";
+
+      data.subjects.forEach(subj => {
+        const filteredUnits = subj.units.filter(u => {
+          if (!q) return true;
+          const matchSubj = subj.name.toLowerCase().includes(q);
+          const matchUnit = u.unit.toLowerCase().includes(q);
+          const matchChap = u.chapters.some(c => c.toLowerCase().includes(q));
+          return matchSubj || matchUnit || matchChap;
+        });
+
+        if (filteredUnits.length === 0) return;
+
+        const unitsHtml = filteredUnits.map(u => `
+          <div class="unit-item">
+            <div class="unit-head">
+              <span class="unit-name">${u.unit}</span>
+              <span class="marks-badge">${u.marks} Marks</span>
+            </div>
+            <div class="chapter-list">
+              ${u.chapters.map(ch => `<span class="chap-chip">${ch}</span>`).join("")}
+            </div>
+          </div>
+        `).join("");
+
+        subjectsHtml += `
+          <div class="card">
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:10px;">
+              <h3 style="font-size:1.2rem;">${subj.name}</h3>
+              <span class="tag">Code: ${subj.code}</span>
+            </div>
+            ${unitsHtml}
+          </div>
+        `;
+      });
+
+      document.getElementById("subjects-container").innerHTML = subjectsHtml || `
+        <div class="card">
+          <p style="color:var(--muted);">No matching subject, unit, or chapter found for "<strong>${searchQuery}</strong>".</p>
+        </div>
+      `;
+    }
+
+    document.querySelectorAll("#class-pills .pill").forEach(btn => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll("#class-pills .pill").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        currentClass = btn.dataset.cls;
+        renderSyllabus();
+      });
+    });
+
+    document.getElementById("chapter-search").addEventListener("input", (e) => {
+      searchQuery = e.target.value;
+      renderSyllabus();
+    });
+
+    renderSyllabus();
+  </script>
+</body>
+</html>

@@ -1,0 +1,1800 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="{{ user['theme'] if user else 'light' }}">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EDUPATH — Dashboard</title>
+  <style>
+    :root {
+      --bg: #eef7f2;
+      --card: rgba(255, 255, 255, 0.94);
+      --card-solid: #ffffff;
+      --text: #0f172a;
+      --muted: #466155;
+      --border: #c5e8d8;
+      --accent: #10b981;
+      --accent-dark: #059669;
+      --accent-soft: #dcf5ea;
+      --accent-border: #8ae2bc;
+      --surface-elev: #f5fbf8;
+      --grain-opacity: 0.032;
+      --ring: rgba(16, 185, 129, 0.24);
+      --shadow-sm: 0 6px 18px rgba(15, 23, 42, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+      --shadow-md: 0 18px 38px rgba(15, 23, 42, 0.085), inset 0 1px 0 rgba(255, 255, 255, 0.85);
+      --shadow-lg: 0 24px 52px rgba(15, 23, 42, 0.11);
+      --ease-drawer: cubic-bezier(0.16, 1, 0.3, 1);
+      --ease-ui: cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    [data-theme="dark"] {
+      --bg: #060f0b;
+      --card: rgba(15, 28, 22, 0.94);
+      --card-solid: #0f1c16;
+      --text: #f8fafc;
+      --muted: #94a99f;
+      --border: #1c382c;
+      --accent-soft: #122920;
+      --accent-border: #1e4b39;
+      --surface-elev: #13231c;
+      --grain-opacity: 0.045;
+      --ring: rgba(16, 185, 129, 0.3);
+      --shadow-sm: 0 8px 22px rgba(0, 0, 0, 0.32), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+      --shadow-md: 0 18px 38px rgba(0, 0, 0, 0.44), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+      --shadow-lg: 0 26px 56px rgba(0, 0, 0, 0.56);
+    }
+
+    [data-theme="amoled"] {
+      --bg: #000000;
+      --card: rgba(9, 13, 11, 0.96);
+      --card-solid: #090d0b;
+      --text: #ffffff;
+      --muted: #a1a8a4;
+      --border: #192b23;
+      --accent-soft: #0e1d16;
+      --accent-border: #1d3a2d;
+      --surface-elev: #0c130f;
+      --grain-opacity: 0.05;
+      --ring: rgba(16, 185, 129, 0.34);
+      --shadow-sm: 0 8px 22px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.03);
+      --shadow-md: 0 18px 40px rgba(0, 0, 0, 0.64), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+      --shadow-lg: 0 28px 60px rgba(0, 0, 0, 0.75);
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      max-width: 100%;
+      overflow-x: clip;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: var(--bg);
+      background-image:
+        radial-gradient(ellipse 75% 45% at 14% 0%, rgba(16, 185, 129, 0.11), transparent 60%),
+        radial-gradient(ellipse 60% 40% at 88% 6%, rgba(5, 150, 105, 0.07), transparent 60%),
+        linear-gradient(180deg, var(--surface-elev) 0%, var(--bg) 380px, var(--bg) 100%);
+      color: var(--text);
+      min-height: 100dvh;
+      width: 100%;
+      max-width: 100%;
+      overflow-x: clip;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+
+    /* Subtle tactile micro-texture overlay */
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 90;
+      opacity: var(--grain-opacity);
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 160 160' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    }
+
+    :focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+
+    .dash-wrapper {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 20px clamp(18px, 2.6vw, 36px) 56px;
+    }
+
+    @media (min-width: 1680px) {
+      .dash-wrapper {
+        max-width: 1600px;
+      }
+    }
+
+    .flash-banner {
+      padding: 12px 18px;
+      border-radius: 16px;
+      background: linear-gradient(90deg, var(--accent-soft), var(--card-solid));
+      border: 1px solid var(--accent-border);
+      border-left: 4px solid var(--accent);
+      color: var(--text);
+      font-size: 13.5px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    /* Welcome Top Bar */
+    .top-bar {
+      position: relative;
+      z-index: 50;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      background:
+        radial-gradient(circle at 8% 20%, rgba(16, 185, 129, 0.12), transparent 42%),
+        repeating-linear-gradient(
+          -45deg,
+          rgba(16, 185, 129, 0.035) 0px,
+          rgba(16, 185, 129, 0.035) 2px,
+          transparent 2px,
+          transparent 10px
+        ),
+        linear-gradient(125deg, var(--accent-soft) 0%, var(--card) 52%, var(--surface-elev) 100%);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1.5px solid var(--accent-border);
+      border-radius: 26px;
+      padding: 16px 24px;
+      box-shadow: var(--shadow-md);
+      margin-bottom: 22px;
+      overflow: visible;
+      transition: border-color 0.25s var(--ease-ui), box-shadow 0.25s var(--ease-ui), transform 0.25s var(--ease-ui);
+    }
+
+    .top-bar:hover {
+      border-color: var(--accent);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .top-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      min-width: 0;
+      flex: 1;
+    }
+
+    .menu-btn {
+      width: 48px;
+      height: 48px;
+      border-radius: 16px;
+      border: 1px solid var(--accent-border);
+      background: linear-gradient(180deg, var(--card-solid), var(--surface-elev));
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      cursor: pointer;
+      flex-shrink: 0;
+      box-shadow: var(--shadow-sm);
+      transition: transform 0.14s var(--ease-drawer), border-color 0.16s var(--ease-ui), box-shadow 0.16s var(--ease-ui);
+    }
+
+    .menu-btn:hover {
+      transform: translateY(-1.5px);
+      border-color: var(--accent);
+      box-shadow: var(--shadow-md);
+    }
+
+    .menu-btn:active {
+      transform: scale(0.95);
+    }
+
+    .menu-btn span {
+      width: 20px;
+      height: 2.4px;
+      border-radius: 99px;
+      background: var(--accent);
+      display: block;
+      transition: width 0.16s var(--ease-drawer), transform 0.16s var(--ease-drawer);
+    }
+
+    .menu-btn:hover span:nth-child(2) {
+      width: 14px;
+    }
+
+    .brand-center-mobile {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-size: 17px;
+      font-weight: 900;
+      letter-spacing: 0.07em;
+      color: var(--text);
+      padding: 6px 15px;
+      border-radius: 999px;
+      background:
+        repeating-linear-gradient(
+          -45deg,
+          rgba(16, 185, 129, 0.05) 0px,
+          rgba(16, 185, 129, 0.05) 2px,
+          transparent 2px,
+          transparent 8px
+        ),
+        linear-gradient(135deg, var(--card-solid), var(--accent-soft));
+      border: 1px solid var(--accent-border);
+      box-shadow: var(--shadow-sm);
+      white-space: nowrap;
+    }
+
+    .brand-center-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 0 3px var(--ring);
+      display: inline-block;
+    }
+
+    .welcome-block {
+      min-width: 0;
+    }
+
+    .welcome-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 10.5px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--accent);
+      background: var(--card-solid);
+      border: 1px solid var(--accent-border);
+      padding: 4px 12px;
+      border-radius: 999px;
+      margin-bottom: 6px;
+      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+    }
+
+    .welcome-name {
+      font-size: clamp(21px, 2.1vw, 27px);
+      font-weight: 900;
+      letter-spacing: -0.025em;
+      color: var(--text);
+      line-height: 1.2;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .welcome-sub {
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 3px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .top-right {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      flex-shrink: 0;
+    }
+
+    .icon-btn {
+      position: relative;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: 1px solid var(--accent-border);
+      background: linear-gradient(180deg, var(--card-solid), var(--surface-elev));
+      color: var(--text);
+      font-size: 18px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: var(--shadow-sm);
+      transition: transform 0.22s var(--ease-ui), border-color 0.22s var(--ease-ui), box-shadow 0.22s var(--ease-ui);
+    }
+
+    .icon-btn:hover {
+      transform: translateY(-1.5px);
+      border-color: var(--accent);
+      box-shadow: var(--shadow-md);
+    }
+
+    .notif-badge-dot {
+      position: absolute;
+      top: -3px;
+      right: -3px;
+      min-width: 19px;
+      height: 19px;
+      padding: 0 5px;
+      border-radius: 999px;
+      background: #ef4444;
+      color: #ffffff;
+      font-size: 10.5px;
+      font-weight: 800;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid var(--card-solid);
+      box-shadow: 0 3px 8px rgba(239, 68, 68, 0.35);
+    }
+
+    .avatar-link img {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2.5px solid var(--accent);
+      display: block;
+      box-shadow: var(--shadow-sm);
+      transition: transform 0.22s var(--ease-ui), box-shadow 0.22s var(--ease-ui);
+    }
+
+    .avatar-link:hover img {
+      transform: scale(1.05);
+      box-shadow: 0 0 0 3px var(--ring);
+    }
+
+    .notif-popover {
+      display: none;
+      position: absolute;
+      top: 56px;
+      right: 0;
+      width: 350px;
+      max-width: calc(100vw - 28px);
+      max-height: 68vh;
+      overflow-y: auto;
+      background: var(--card-solid);
+      border: 1.5px solid var(--accent-border);
+      border-radius: 20px;
+      padding: 15px;
+      box-shadow: var(--shadow-lg);
+      z-index: 95;
+    }
+
+    .notif-popover.open {
+      display: block;
+      animation: popFade 0.16s var(--ease-drawer);
+    }
+
+    @keyframes popFade {
+      from {
+        opacity: 0;
+        transform: translate3d(0, -5px, 0) scale(0.99);
+      }
+      to {
+        opacity: 1;
+        transform: translate3d(0, 0, 0) scale(1);
+      }
+    }
+
+    .notif-item {
+      padding: 10px 12px;
+      border-radius: 13px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      margin-bottom: 8px;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .notif-meta {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    /* Ultra-Low-Latency GPU Side Panel */
+    .drawer-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.48);
+      z-index: 100;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.15s linear;
+      will-change: opacity;
+      contain: strict;
+    }
+
+    .drawer-backdrop.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .side-drawer {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 308px;
+      max-width: 86vw;
+      height: 100dvh;
+      background: linear-gradient(180deg, var(--card-solid) 0%, var(--surface-elev) 100%);
+      border-right: 1.5px solid var(--accent-border);
+      box-shadow: 12px 0 32px rgba(15, 23, 42, 0.22);
+      padding: 18px 14px 36px;
+      overflow-y: auto;
+      overflow-x: hidden;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior: contain;
+      scroll-behavior: auto;
+      touch-action: pan-y;
+      z-index: 110;
+      transform: translate3d(-100%, 0, 0);
+      transition: transform 0.17s var(--ease-drawer);
+      will-change: transform;
+      backface-visibility: hidden;
+      contain: layout style;
+    }
+
+    .side-drawer.open {
+      transform: translate3d(0, 0, 0);
+    }
+
+    .drawer-profile {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 12px;
+      border-radius: 17px;
+      background: var(--accent-soft);
+      border: 1px solid var(--accent-border);
+      margin-bottom: 14px;
+    }
+
+    .drawer-label {
+      font-size: 10.5px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      margin: 12px 6px 6px;
+    }
+
+    .drawer-link {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      text-decoration: none;
+      color: var(--text);
+      font-size: 13.5px;
+      font-weight: 700;
+      padding: 10.5px 12px;
+      border-radius: 12px;
+      border: 1px solid transparent;
+      margin-bottom: 4px;
+      transition: background-color 0.1s linear, color 0.1s linear, border-color 0.1s linear;
+    }
+
+    .drawer-link:hover,
+    .drawer-link:active {
+      background: var(--accent-soft);
+      border-color: var(--accent-border);
+      color: var(--accent);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
+
+    /* Hero Banner */
+    .hero-card {
+      position: relative;
+      z-index: 10;
+      background:
+        radial-gradient(circle at 86% 24%, rgba(16, 185, 129, 0.15), transparent 44%),
+        repeating-linear-gradient(
+          135deg,
+          rgba(16, 185, 129, 0.032) 0px,
+          rgba(16, 185, 129, 0.032) 2px,
+          transparent 2px,
+          transparent 12px
+        ),
+        linear-gradient(132deg, var(--card) 0%, var(--accent-soft) 100%);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1.5px solid var(--accent-border);
+      border-radius: 28px;
+      padding: clamp(24px, 3vw, 38px) clamp(22px, 3.2vw, 40px);
+      min-height: clamp(220px, 24vw, 275px);
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 24px;
+      margin-bottom: 22px;
+      background-size: cover;
+      background-position: center;
+      box-shadow: var(--shadow-md);
+      overflow: hidden;
+      transition: transform 0.28s var(--ease-ui), box-shadow 0.28s var(--ease-ui), border-color 0.28s var(--ease-ui);
+    }
+
+    .hero-card:hover {
+      border-color: var(--accent);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .hero-card.has-bg::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(15, 23, 42, 0.12) 14%, rgba(15, 23, 42, 0.72) 100%);
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 2;
+      max-width: 860px;
+    }
+
+    .hero-card.has-bg .hero-title {
+      color: #ffffff;
+    }
+
+    .hero-card.has-bg .hero-sub {
+      color: #f1f5f9;
+    }
+
+    .hero-badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.07em;
+      padding: 4.5px 13px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+      color: #ffffff;
+      margin-bottom: 11px;
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+    }
+
+    .hero-title {
+      font-size: clamp(23px, 2.5vw, 34px);
+      font-weight: 900;
+      letter-spacing: -0.025em;
+      line-height: 1.18;
+      margin-bottom: 9px;
+    }
+
+    .hero-sub {
+      font-size: clamp(13.5px, 1.1vw, 14.5px);
+      color: var(--muted);
+      line-height: 1.58;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 11px;
+      margin-top: 18px;
+    }
+
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 11px 19px;
+      border-radius: 13px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+      color: #ffffff;
+      text-decoration: none;
+      font-size: 13.5px;
+      font-weight: 700;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 8px 20px rgba(16, 185, 129, 0.26), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+      transition: transform 0.22s var(--ease-ui), box-shadow 0.22s var(--ease-ui), filter 0.22s var(--ease-ui);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-1.5px);
+      box-shadow: 0 12px 24px rgba(16, 185, 129, 0.34);
+      filter: brightness(1.03);
+    }
+
+    .btn-primary:active {
+      transform: scale(0.97);
+    }
+
+    .btn-glass {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 10.5px 16px;
+      border-radius: 13px;
+      background: var(--card-solid);
+      color: var(--text);
+      border: 1px solid var(--accent-border);
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: var(--shadow-sm);
+      transition: transform 0.2s var(--ease-ui), border-color 0.2s var(--ease-ui), box-shadow 0.2s var(--ease-ui);
+    }
+
+    .btn-glass:hover {
+      transform: translateY(-1.5px);
+      border-color: var(--accent);
+      box-shadow: var(--shadow-md);
+    }
+
+    .studio-panel {
+      display: none;
+      background: var(--card-solid);
+      border: 1.5px solid var(--accent-border);
+      border-radius: 24px;
+      padding: 20px;
+      margin-bottom: 22px;
+      box-shadow: var(--shadow-md);
+    }
+
+    .studio-panel.open {
+      display: block;
+      animation: popFade 0.16s var(--ease-drawer);
+    }
+
+    .studio-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(195px, 1fr));
+      gap: 11px;
+      margin-top: 11px;
+    }
+
+    .studio-input {
+      width: 100%;
+      padding: 9.5px 13px;
+      border-radius: 11px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--text);
+      font-size: 13px;
+      transition: border-color 0.2s var(--ease-ui), box-shadow 0.2s var(--ease-ui);
+    }
+
+    .studio-input:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--ring);
+    }
+
+    /* Stats Cards */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px;
+      margin-bottom: 24px;
+    }
+
+    .stat-card {
+      position: relative;
+      background:
+        radial-gradient(circle at 92% 15%, rgba(16, 185, 129, 0.1), transparent 45%),
+        repeating-linear-gradient(
+          -45deg,
+          rgba(16, 185, 129, 0.025) 0px,
+          rgba(16, 185, 129, 0.025) 2px,
+          transparent 2px,
+          transparent 10px
+        ),
+        linear-gradient(155deg, var(--card) 0%, var(--surface-elev) 100%);
+      border: 1px solid var(--accent-border);
+      border-radius: 22px;
+      padding: 19px 22px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+      transition: transform 0.24s var(--ease-ui), box-shadow 0.24s var(--ease-ui), border-color 0.24s var(--ease-ui);
+    }
+
+    .stat-card:hover {
+      transform: translateY(-3px);
+      border-color: var(--accent);
+      box-shadow: var(--shadow-md);
+    }
+
+    .stat-num {
+      font-size: clamp(25px, 2.2vw, 31px);
+      font-weight: 900;
+      color: var(--accent);
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+    }
+
+    .stat-label {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--muted);
+      margin-top: 5px;
+    }
+
+    .stat-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 16px;
+      background: var(--accent-soft);
+      border: 1px solid var(--accent-border);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      flex-shrink: 0;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 13px;
+    }
+
+    .section-title {
+      font-size: 17.5px;
+      font-weight: 800;
+      letter-spacing: -0.015em;
+    }
+
+    .slide-controls {
+      display: flex;
+      gap: 8px;
+    }
+
+    .slide-btn {
+      width: 37px;
+      height: 37px;
+      border-radius: 12px;
+      border: 1px solid var(--accent-border);
+      background: var(--card-solid);
+      color: var(--text);
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: var(--shadow-sm);
+      transition: transform 0.2s var(--ease-ui), border-color 0.2s var(--ease-ui), color 0.2s var(--ease-ui), box-shadow 0.2s var(--ease-ui);
+    }
+
+    .slide-btn:hover {
+      transform: translateY(-1px);
+      border-color: var(--accent);
+      color: var(--accent);
+      box-shadow: var(--shadow-md);
+    }
+
+    .course-slider {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: nowrap;
+      gap: 16px;
+      width: 100%;
+      max-width: 100%;
+      overflow-x: auto;
+      overflow-y: hidden;
+      scroll-snap-type: x proximity;
+      scroll-behavior: smooth;
+      touch-action: pan-x pan-y;
+      padding: 4px 2px 14px;
+      margin-bottom: 22px;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior-x: contain;
+    }
+
+    .course-slider::-webkit-scrollbar {
+      height: 6px;
+    }
+
+    .course-slider::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .course-slider::-webkit-scrollbar-thumb {
+      background: var(--accent-border);
+      border-radius: 99px;
+    }
+
+    .course-slider::-webkit-scrollbar-thumb:hover {
+      background: var(--accent);
+    }
+
+    .course-slide {
+      position: relative;
+      flex: 0 0 clamp(272px, 24vw, 320px);
+      min-height: 204px;
+      scroll-snap-align: start;
+      background:
+        radial-gradient(circle at 88% 18%, rgba(16, 185, 129, 0.12), transparent 46%),
+        repeating-linear-gradient(
+          -45deg,
+          rgba(16, 185, 129, 0.025) 0px,
+          rgba(16, 185, 129, 0.025) 2px,
+          transparent 2px,
+          transparent 10px
+        ),
+        linear-gradient(155deg, var(--card) 0%, var(--accent-soft) 100%);
+      border: 1px solid var(--accent-border);
+      border-radius: 23px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      background-size: cover;
+      background-position: center;
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+      transition: transform 0.25s var(--ease-ui), box-shadow 0.25s var(--ease-ui), border-color 0.25s var(--ease-ui);
+    }
+
+    .course-slide:hover {
+      transform: translateY(-3.5px);
+      border-color: var(--accent);
+      box-shadow: var(--shadow-md);
+    }
+
+    .course-slide.has-bg::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(15, 23, 42, 0.08) 22%, rgba(15, 23, 42, 0.74) 100%);
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .course-slide > * {
+      position: relative;
+      z-index: 2;
+    }
+
+    .course-slide.has-bg .course-title,
+    .course-slide.has-bg .course-sub {
+      color: #ffffff;
+    }
+
+    .course-badge {
+      align-self: flex-start;
+      font-size: 10.5px;
+      font-weight: 800;
+      letter-spacing: 0.03em;
+      padding: 4.5px 11px;
+      border-radius: 999px;
+      background: var(--card-solid);
+      color: var(--accent);
+      border: 1px solid var(--accent-border);
+      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
+    }
+
+    .course-title {
+      font-size: 17.5px;
+      font-weight: 800;
+      margin-bottom: 5px;
+      letter-spacing: -0.015em;
+    }
+
+    .course-sub {
+      font-size: 12.5px;
+      color: var(--muted);
+      margin-bottom: 13px;
+      line-height: 1.45;
+    }
+
+    .course-open {
+      display: inline-block;
+      text-decoration: none;
+      font-size: 12.5px;
+      font-weight: 700;
+      padding: 8px 15px;
+      border-radius: 11px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+      color: #ffffff;
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.24);
+      transition: transform 0.2s var(--ease-ui), box-shadow 0.2s var(--ease-ui);
+    }
+
+    .course-open:hover {
+      transform: translateX(3px);
+      box-shadow: 0 6px 16px rgba(16, 185, 129, 0.32);
+    }
+
+    .portal-strip {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(185px, 1fr));
+      gap: 11px;
+      margin-bottom: 24px;
+    }
+
+    .portal-chip {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      text-decoration: none;
+      color: var(--text);
+      background: linear-gradient(180deg, var(--card-solid), var(--surface-elev));
+      border: 1px solid var(--border);
+      padding: 12px 15px;
+      border-radius: 16px;
+      font-size: 13px;
+      font-weight: 700;
+      box-shadow: var(--shadow-sm);
+      transition: transform 0.2s var(--ease-ui), border-color 0.2s var(--ease-ui), background 0.2s var(--ease-ui), color 0.2s var(--ease-ui), box-shadow 0.2s var(--ease-ui);
+    }
+
+    .portal-chip:hover {
+      transform: translateY(-2px);
+      border-color: var(--accent);
+      background: var(--accent-soft);
+      color: var(--accent);
+      box-shadow: var(--shadow-md);
+    }
+
+    /* Direct Message Box */
+    .msg-card {
+      position: relative;
+      background:
+        radial-gradient(circle at 95% 0%, rgba(16, 185, 129, 0.08), transparent 40%),
+        linear-gradient(180deg, var(--card) 0%, var(--surface-elev) 100%);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1.5px solid var(--accent-border);
+      border-radius: 26px;
+      padding: 22px 24px;
+      box-shadow: var(--shadow-md);
+      overflow: hidden;
+    }
+
+    .msg-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      padding-bottom: 13px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .msg-title-group {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      flex-wrap: wrap;
+    }
+
+    .msg-mode-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 10.5px;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      padding: 3.5px 10.5px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      border: 1px solid var(--accent-border);
+    }
+
+    .msg-inbox-link {
+      font-size: 12.5px;
+      font-weight: 700;
+      color: var(--accent);
+      text-decoration: none;
+      padding: 5.5px 12px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      border: 1px solid var(--accent-border);
+      transition: transform 0.2s var(--ease-ui), border-color 0.2s var(--ease-ui);
+    }
+
+    .msg-inbox-link:hover {
+      transform: translateY(-1px);
+      border-color: var(--accent);
+    }
+
+    .msg-thread {
+      margin-top: 15px;
+      display: grid;
+      gap: 11px;
+    }
+
+    .msg-empty {
+      padding: 18px;
+      border-radius: 15px;
+      background: var(--bg);
+      border: 1px dashed var(--accent-border);
+      text-align: center;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .msg-bubble-item {
+      padding: 13px 15px;
+      border-radius: 17px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      transition: border-color 0.2s var(--ease-ui), transform 0.2s var(--ease-ui);
+    }
+
+    .msg-bubble-item:hover {
+      border-color: var(--accent-border);
+    }
+
+    .msg-bubble-item.is-admin-post {
+      background: linear-gradient(135deg, var(--accent-soft) 0%, var(--card-solid) 100%);
+      border: 1.5px solid var(--accent);
+    }
+
+    .msg-user-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+
+    .msg-user-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    .msg-user-avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: 900;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .msg-user-name {
+      font-size: 13.5px;
+      font-weight: 800;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .msg-time {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--muted);
+      flex-shrink: 0;
+    }
+
+    .msg-body-text {
+      font-size: 13.5px;
+      font-weight: 600;
+      line-height: 1.5;
+      color: var(--text);
+      padding-left: 36px;
+    }
+
+    .admin-reply-highlight {
+      margin-top: 10px;
+      margin-left: 36px;
+      padding: 11px 14px;
+      border-radius: 14px;
+      background: var(--accent-soft);
+      border: 1.5px solid var(--accent);
+      border-left: 4px solid var(--accent);
+    }
+
+    .admin-reply-head {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-bottom: 4px;
+    }
+
+    .admin-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: var(--accent);
+      color: #ffffff;
+      font-size: 10.5px;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      padding: 2.5px 9px;
+      border-radius: 999px;
+    }
+
+    .admin-reply-text {
+      display: block;
+      font-size: 13.5px;
+      font-weight: 700;
+      line-height: 1.48;
+      color: var(--text);
+    }
+
+    .msg-form {
+      display: flex;
+      gap: 10px;
+      margin-top: 15px;
+      padding-top: 13px;
+      border-top: 1px solid var(--border);
+    }
+
+    .msg-input {
+      flex: 1;
+      min-width: 0;
+      padding: 12px 15px;
+      border-radius: 13px;
+      border: 1px solid var(--accent-border);
+      background: var(--bg);
+      color: var(--text);
+      font-size: 13.5px;
+      transition: border-color 0.2s var(--ease-ui), box-shadow 0.2s var(--ease-ui);
+    }
+
+    .msg-input:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--ring);
+    }
+
+    /* Clean & Centered Mobile Layout */
+    @media (max-width: 768px) {
+      .dash-wrapper {
+        padding: 12px 14px 36px;
+      }
+      .top-bar {
+        display: grid;
+        grid-template-columns: auto 1fr auto;
+        align-items: center;
+        padding: 12px 14px;
+        border-radius: 22px;
+        gap: 8px;
+        margin-bottom: 16px;
+      }
+      .top-left {
+        flex: initial;
+        gap: 0;
+      }
+      .menu-btn {
+        width: 40px;
+        height: 40px;
+        border-radius: 13px;
+      }
+      .welcome-block {
+        display: none;
+      }
+      .brand-center-mobile {
+        display: inline-flex;
+        justify-self: center;
+        margin: 0 auto;
+      }
+      .top-right {
+        gap: 7px;
+      }
+      .icon-btn,
+      .avatar-link img {
+        width: 38px;
+        height: 38px;
+      }
+      .hero-card {
+        padding: 22px 18px;
+        border-radius: 22px;
+        min-height: 196px;
+        text-align: center;
+        justify-content: center;
+        align-items: center;
+      }
+      .hero-content {
+        max-width: 100%;
+      }
+      .hero-actions {
+        justify-content: center;
+      }
+      .hero-title {
+        font-size: 21px;
+      }
+      .stats-grid {
+        grid-template-columns: 1fr;
+        gap: 11px;
+      }
+      .stat-card {
+        padding: 15px 17px;
+        border-radius: 18px;
+      }
+      .course-slider {
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
+        overflow-x: auto !important;
+        overflow-y: hidden !important;
+        scroll-snap-type: x mandatory;
+        -webkit-overflow-scrolling: touch;
+        touch-action: pan-x pan-y;
+        gap: 12px;
+        padding: 4px 2px 12px;
+      }
+      .course-slide {
+        flex: 0 0 82vw;
+        max-width: 82vw;
+        min-height: 180px;
+        scroll-snap-align: start;
+      }
+      .portal-strip {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      .msg-card {
+        padding: 17px 16px;
+        border-radius: 20px;
+      }
+      .msg-body-text,
+      .admin-reply-highlight {
+        margin-left: 0;
+        padding-left: 0;
+      }
+      .admin-reply-highlight {
+        padding: 10px 12px;
+      }
+      .msg-form {
+        flex-direction: column;
+      }
+      .msg-form .btn-primary {
+        justify-content: center;
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body
+  data-user-name="{{ user['name'] if user and user['name'] else 'Student' }}"
+  data-is-admin="{{ '1' if user and user['role'] == 'admin' else '0' }}"
+  data-csrf-token="{{ csrf_token }}"
+  data-mark-read-url="{{ url_for('mark_notifications_read') }}"
+  data-dashboard-url="{{ url_for('dashboard') }}"
+>
+  {% set has_banner_img = site_banner and site_banner.banner_image %}
+  {% set recent_notifs = get_recent_notifications(user, 8) %}
+  {% set unread_count = get_unread_notif_count(user) %}
+
+  <div id="drawerBackdrop" class="drawer-backdrop" onclick="toggleDrawer(false)"></div>
+  <aside id="sideDrawer" class="side-drawer" aria-hidden="true" aria-label="Primary Navigation">
+    <div class="drawer-profile">
+      <div style="display:flex;align-items:center;gap:10px;min-width:0;">
+        <img src="{{ user['profile_pic'] if user and user['profile_pic'] else 'https://api.dicebear.com/7.x/avataaars/svg?seed=Edupath' }}" alt="Avatar" style="width:44px;height:44px;border-radius:50%;object-fit:cover;border:2px solid var(--accent);flex-shrink:0;" />
+        <div style="min-width:0;">
+          <div style="font-size:14px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ user['name'] if user else 'Student' }}</div>
+          <div style="font-size:11.5px;font-weight:700;color:var(--accent);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ 'Admin • Head Educator' if user and user['role'] == 'admin' else user['student_class'] }}</div>
+        </div>
+      </div>
+      <button type="button" onclick="toggleDrawer(false)" aria-label="Close Menu" style="border:1px solid var(--border);background:var(--card-solid);color:var(--text);border-radius:8px;padding:4px 8px;cursor:pointer;">✕</button>
+    </div>
+
+    <div class="drawer-label">Classes &amp; Boards</div>
+    <a href="{{ url_for('dashboard') }}" class="drawer-link"><span>🏠 Dashboard</span><span>→</span></a>
+    <a href="{{ url_for('class10') }}" class="drawer-link"><span>📗 Class 10 Board</span><span>→</span></a>
+    <a href="{{ url_for('class11') }}" class="drawer-link"><span>📘 Class 11 Streams</span><span>→</span></a>
+    <a href="{{ url_for('class12') }}" class="drawer-link"><span>📕 Class 12 Streams</span><span>→</span></a>
+    <a href="{{ url_for('state_boards') }}" class="drawer-link"><span>🏛️ Bihar &amp; State Boards</span><span>→</span></a>
+
+    <div class="drawer-label">Exams, Mock Test &amp; Date Sheet</div>
+    <a href="{{ url_for('mock_test_portal') }}" class="drawer-link"><span>📝 Mock Test Portal</span><span>→</span></a>
+    <a href="{{ url_for('jee') }}" class="drawer-link"><span>🎯 JEE Preparation</span><span>→</span></a>
+    <a href="{{ url_for('neet') }}" class="drawer-link"><span>🩺 NEET Preparation</span><span>→</span></a>
+    <a href="{{ url_for('cbse') }}" class="drawer-link"><span>📅 CBSE Date Sheet &amp; SQP</span><span>→</span></a>
+
+    <div class="drawer-label">Study Vault &amp; Inbox</div>
+    <a href="{{ url_for('videos') }}" class="drawer-link"><span>🎬 Video Lectures</span><span>→</span></a>
+    <a href="{{ url_for('notes') }}" class="drawer-link"><span>📚 PDF Notes Vault</span><span>→</span></a>
+    <a href="{{ url_for('ai_doubt') }}" class="drawer-link"><span>✉️ Direct Messages</span><span>→</span></a>
+
+    {% if user and user['role'] == 'admin' %}
+      <div class="drawer-label">Admin Control</div>
+      <a href="{{ url_for('admin_panel') }}" class="drawer-link"><span>🛡️ Admin Panel</span><span>→</span></a>
+    {% endif %}
+
+    <div class="drawer-label">Account</div>
+    <a href="{{ url_for('settings') }}" class="drawer-link"><span>⚙️ Profile &amp; Settings</span><span>→</span></a>
+    <a href="{{ url_for('logout') }}" class="drawer-link" style="color:#ef4444;"><span>🚪 Logout</span><span>→</span></a>
+  </aside>
+
+  <div class="dash-wrapper">
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        {% for msg in messages %}
+          <div class="flash-banner">{{ msg }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <header class="top-bar">
+      <div class="top-left">
+        <button type="button" class="menu-btn" onclick="toggleDrawer(true)" aria-label="Open Menu">
+          <span></span><span></span><span></span>
+        </button>
+        <div class="welcome-block">
+          <div class="welcome-pill">✦ EDUPATH • {{ 'ADMIN PORTAL' if user and user['role'] == 'admin' else user['student_class'] }}</div>
+          <div class="welcome-name">Welcome Back, {{ user['name'] if user else 'Student' }}</div>
+          <div class="welcome-sub">{{ user['bio'] if user and user['bio'] else 'Focused study, clear concepts aur daily practice' }}</div>
+        </div>
+      </div>
+
+      <div class="brand-center-mobile">
+        <span class="brand-center-dot"></span>
+        <span>EDUPATH</span>
+      </div>
+
+      <div class="top-right">
+        <button type="button" class="icon-btn" onclick="toggleNotifs(event)" aria-label="Notifications">
+          🔔
+          {% if unread_count > 0 %}
+            <span id="notifRedBadge" class="notif-badge-dot">{{ unread_count }}</span>
+          {% endif %}
+        </button>
+        <a href="{{ url_for('settings') }}" class="avatar-link" title="Profile &amp; Settings">
+          <img src="{{ user['profile_pic'] if user and user['profile_pic'] else 'https://api.dicebear.com/7.x/avataaars/svg?seed=Edupath' }}" alt="Profile" />
+        </a>
+
+        <div id="notifPopover" class="notif-popover" onclick="event.stopPropagation()">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--border);">
+            <strong style="font-size:14px;">🔔 Notifications</strong>
+            <button type="button" onclick="toggleNotifs(event)" aria-label="Close Notifications" style="border:none;background:none;color:var(--muted);cursor:pointer;font-size:15px;font-weight:800;">✕</button>
+          </div>
+          {% if recent_notifs %}
+            {% for n in recent_notifs %}
+              <div class="notif-item">
+                <div style="font-weight:600;">{{ n['message'] }}</div>
+                <div class="notif-meta">{{ n['created_by'] }} • {{ n['created_at'] }}</div>
+              </div>
+            {% endfor %}
+          {% else %}
+            <div class="notif-meta">Abhi koi naya notification nahi hai.</div>
+          {% endif %}
+        </div>
+      </div>
+    </header>
+
+    <section class="hero-card {% if has_banner_img %}has-bg{% endif %}"
+      {% if has_banner_img %}
+        style="background-image: url('{{ clean_url_for_css(site_banner.banner_image) }}');"
+      {% endif %}>
+      <div class="hero-content">
+        <span class="hero-badge">{{ site_banner.badge_text if site_banner and site_banner.badge_text else 'EDUPATH FLAGSHIP' }}</span>
+        <h1 class="hero-title">
+          {{ site_banner.title if site_banner and site_banner.title else 'EDUPATH Smart Learning Hub' }}
+        </h1>
+        <p class="hero-sub">
+          {{ site_banner.subtitle if site_banner and site_banner.subtitle else 'Courses slide karke apna portal kholein, chapter lectures aur PDF notes padhein, aur neeche course banner se mock test portal kholein.' }}
+        </p>
+        <div class="hero-actions">
+          <a href="{{ site_banner.cta_url if site_banner and site_banner.cta_url else '/class10' }}" class="btn-primary">
+            {{ site_banner.cta_label if site_banner and site_banner.cta_label else 'Start Learning' }} →
+          </a>
+          {% if user and user['role'] == 'admin' %}
+            <button type="button" class="btn-glass" onclick="toggleStudio()">🖼️ Banner &amp; Course Photo</button>
+          {% endif %}
+        </div>
+      </div>
+    </section>
+
+    {% if user and user['role'] == 'admin' %}
+      <section id="adminPhotoStudio" class="studio-panel">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+          <strong style="font-size:15px;">🖼️ Banner &amp; Course Photo Customizer</strong>
+          <button type="button" onclick="toggleStudio()" aria-label="Close Customizer" style="border:none;background:none;color:var(--muted);cursor:pointer;font-size:15px;font-weight:800;">✕</button>
+        </div>
+
+        <form action="{{ url_for('update_banner') }}" method="POST" enctype="multipart/form-data" style="margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid var(--border);">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+          <div style="font-size:12.5px;font-weight:700;color:var(--accent);">1. Dashboard Banner Update</div>
+          <div class="studio-grid">
+            <input type="text" name="badge_text" class="studio-input" value="{{ site_banner.badge_text if site_banner else '' }}" placeholder="Badge Text" />
+            <input type="text" name="title" class="studio-input" value="{{ site_banner.title if site_banner else '' }}" placeholder="Banner Title" />
+            <input type="text" name="subtitle" class="studio-input" value="{{ site_banner.subtitle if site_banner else '' }}" placeholder="Banner Subtitle" />
+            <input type="text" name="cta_label" class="studio-input" value="{{ site_banner.cta_label if site_banner else '' }}" placeholder="Button Label" />
+            <input type="text" name="cta_url" class="studio-input" value="{{ site_banner.cta_url if site_banner else '/class10' }}" placeholder="Button Link (/class10)" />
+            <input type="text" name="banner_image_url" class="studio-input" value="{{ site_banner.banner_image if site_banner else '' }}" placeholder="Photo URL (optional)" />
+          </div>
+          <div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;margin-top:10px;">
+            <label style="font-size:12.5px;">Banner Photo Upload: <input type="file" name="banner_file" accept="image/*" /></label>
+            <button type="submit" class="btn-primary">Save Banner</button>
+          </div>
+        </form>
+
+        <form action="{{ url_for('update_course_photo') }}" method="POST" enctype="multipart/form-data">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+          <div style="font-size:12.5px;font-weight:700;color:var(--accent);">2. Course Card Photo &amp; Details</div>
+          <div class="studio-grid">
+            <select name="course_key" class="studio-input">
+              {% for c in courses_list %}
+                <option value="{{ c.course_key }}">{{ c.title }}</option>
+              {% endfor %}
+            </select>
+            <input type="text" name="course_title" class="studio-input" placeholder="New Title (optional)" />
+            <input type="text" name="course_subtitle" class="studio-input" placeholder="New Subtitle (optional)" />
+            <input type="text" name="course_image_url" class="studio-input" placeholder="Photo URL (optional)" />
+            <input type="file" name="course_image_file" class="studio-input" accept="image/*" />
+          </div>
+          <div style="margin-top:10px;text-align:right;">
+            <button type="submit" class="btn-primary">Update Course Card</button>
+          </div>
+        </form>
+      </section>
+    {% endif %}
+
+    <section class="stats-grid">
+      <div class="stat-card">
+        <div>
+          <div class="stat-num">{{ v_count }}</div>
+          <div class="stat-label">Video Lectures</div>
+        </div>
+        <div class="stat-icon">🎬</div>
+      </div>
+      <div class="stat-card">
+        <div>
+          <div class="stat-num">{{ n_count }}</div>
+          <div class="stat-label">PDF Notes</div>
+        </div>
+        <div class="stat-icon">📚</div>
+      </div>
+      <div class="stat-card">
+        <div>
+          <div class="stat-num">{{ d_count }}</div>
+          <div class="stat-label">Direct Messages ({{ chat_visibility|upper }})</div>
+        </div>
+        <div class="stat-icon">✉️</div>
+      </div>
+    </section>
+
+    <div class="section-header">
+      <h2 class="section-title">Courses &amp; Exam Portals</h2>
+      <div class="slide-controls">
+        <button type="button" class="slide-btn" onclick="slideCourses(-1)" aria-label="Slide Left">←</button>
+        <button type="button" class="slide-btn" onclick="slideCourses(1)" aria-label="Slide Right">→</button>
+      </div>
+    </div>
+
+    <section id="courseSlider" class="course-slider">
+      {% set ns = namespace(has_neet=false) %}
+      {% for c in courses_list %}
+        {% set meta_blob = ((c.course_key or '') ~ ' ' ~ (c.title or '') ~ ' ' ~ (c.subtitle or '') ~ ' ' ~ (c.url or ''))|lower %}
+        {% if 'neet' in meta_blob %}
+          {% set ns.has_neet = true %}
+        {% endif %}
+        {% if c.course_key == 'mock_test' %}
+          {% set target_url = url_for('mock_test_portal') %}
+        {% elif 'neet' in meta_blob %}
+          {% set target_url = url_for('neet') %}
+        {% elif 'jee' in meta_blob %}
+          {% set target_url = url_for('jee') %}
+        {% else %}
+          {% set target_url = c.url %}
+        {% endif %}
+        <div class="course-slide {% if c.image_url %}has-bg{% endif %}"
+          {% if c.image_url %}
+            style="background-image: url('{{ clean_url_for_css(c.image_url) }}');"
+          {% endif %}>
+          <span class="course-badge">{{ c.badge }}</span>
+          <div>
+            <div class="course-title">{{ c.title }}</div>
+            <div class="course-sub">{{ c.subtitle }}</div>
+            <a href="{{ target_url }}" class="course-open">Open Portal →</a>
+          </div>
+        </div>
+      {% endfor %}
+      {% if not ns.has_neet %}
+        <div class="course-slide" data-course="neet">
+          <span class="course-badge">MEDICAL ENTRANCE</span>
+          <div>
+            <div class="course-title">NEET Preparation</div>
+            <div class="course-sub">Biology, Physics &amp; Chemistry chapters, notes aur practice</div>
+            <a href="{{ url_for('neet') }}" class="course-open">Open Portal →</a>
+          </div>
+        </div>
+      {% endif %}
+    </section>
+
+    <div class="section-header">
+      <h2 class="section-title">All Connected Portals</h2>
+    </div>
+    <section class="portal-strip">
+      <a href="{{ url_for('class10') }}" class="portal-chip"><span>📗 Class 10</span><span>→</span></a>
+      <a href="{{ url_for('class11') }}" class="portal-chip"><span>📘 Class 11</span><span>→</span></a>
+      <a href="{{ url_for('class12') }}" class="portal-chip"><span>📕 Class 12</span><span>→</span></a>
+      <a href="{{ url_for('mock_test_portal') }}" class="portal-chip"><span>📝 Mock Test</span><span>→</span></a>
+      <a href="{{ url_for('jee') }}" class="portal-chip"><span>🎯 JEE</span><span>→</span></a>
+      <a href="{{ url_for('neet') }}" class="portal-chip"><span>🩺 NEET</span><span>→</span></a>
+      <a href="{{ url_for('cbse') }}" class="portal-chip"><span>📅 Date Sheet &amp; SQP</span><span>→</span></a>
+      <a href="{{ url_for('state_boards') }}" class="portal-chip"><span>🏛️ State Boards</span><span>→</span></a>
+      <a href="{{ url_for('videos') }}" class="portal-chip"><span>🎬 Lectures</span><span>→</span></a>
+      <a href="{{ url_for('notes') }}" class="portal-chip"><span>📚 PDF Notes</span><span>→</span></a>
+      <a href="{{ url_for('ai_doubt') }}" class="portal-chip"><span>✉️ Messages</span><span>→</span></a>
+      {% if user and user['role'] == 'admin' %}
+        <a href="{{ url_for('admin_panel') }}" class="portal-chip"><span>🛡️ Admin Panel</span><span>→</span></a>
+      {% endif %}
+      <a href="{{ url_for('settings') }}" class="portal-chip"><span>⚙️ Settings</span><span>→</span></a>
+    </section>
+
+    <section class="msg-card">
+      <div class="msg-header">
+        <div class="msg-title-group">
+          <strong style="font-size:15.5px;">✉️ Direct Message Box</strong>
+          <span class="msg-mode-badge">{{ 'PUBLIC CHAT' if chat_visibility == 'public' else 'PRIVATE CHAT' }}</span>
+        </div>
+        <a href="{{ url_for('ai_doubt') }}" class="msg-inbox-link">Open Full Inbox →</a>
+      </div>
+
+      <div id="dashMsgThread" class="msg-thread">
+        {% if recent_doubts %}
+          {% for d in recent_doubts %}
+            {% set is_admin_sender = (d['role'] == 'admin') if d['role'] is defined else ('admin' in (d['user_name'] or '')|lower or 'imran' in (d['user_name'] or '')|lower) %}
+            <div class="msg-bubble-item {% if is_admin_sender %}is-admin-post{% endif %}">
+              <div class="msg-user-row">
+                <div class="msg-user-info">
+                  <span class="msg-user-avatar">{{ (d['user_name'][0] if d['user_name'] else 'U')|upper }}</span>
+                  <span class="msg-user-name">{{ d['user_name'] }}</span>
+                  {% if is_admin_sender %}
+                    <span class="admin-tag">✦ ADMIN</span>
+                  {% endif %}
+                </div>
+                <span class="msg-time">{{ d['created_at'] }}</span>
+              </div>
+              <div class="msg-body-text">{{ d['question'] }}</div>
+
+              {% if d['admin_reply'] %}
+                <div class="admin-reply-highlight">
+                  <div class="admin-reply-head">
+                    <span class="admin-tag">✦ ADMIN REPLY • {{ d['replied_by'] if d['replied_by'] else 'Syed Muhammad Imran' }}</span>
+                  </div>
+                  <span class="admin-reply-text">{{ d['admin_reply'] }}</span>
+                </div>
+              {% endif %}
+            </div>
+          {% endfor %}
+        {% else %}
+          <div class="msg-empty">Abhi koi message nahi hai. Neeche se apna doubt ya message bhejein.</div>
+        {% endif %}
+      </div>
+
+      <form id="dashDirectMsgForm" action="{{ url_for('ai_doubt') }}" method="POST" class="msg-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+        <input type="hidden" name="action_type" value="send_message" />
+        <input type="text" id="dashMsgInput" name="question" class="msg-input" placeholder="Apna doubt ya message yahan likhein..." required autocomplete="off" />
+        <button type="submit" id="dashMsgSubmit" class="btn-primary">Send</button>
+      </form>
+    </section>
+  </div>
+
+  <script>
+    let notifsMarkedRead = false;
+    let drawerRafId = null;
+
+    function getBodyMeta() {
+      const b = document.body;
+      return {
+        userName: b.getAttribute("data-user-name") || "Student",
+        isAdmin: b.getAttribute("data-is-admin") === "1",
+        csrfToken: b.getAttribute("data-csrf-token") || "",
+        markReadUrl: b.getAttribute("data-mark-read-url") || "",
+        dashboardUrl: b.getAttribute("data-dashboard-url") || ""
+      };
+    }
+
+    function toggleDrawer(open) {
+      const dr = document.getElementById("sideDrawer");
+      const bd = document.getElementById("drawerBackdrop");
+      if (!dr || !bd) return;
+      const shouldOpen = Boolean(open);
+      if (drawerRafId) {
+        cancelAnimationFrame(drawerRafId);
+        drawerRafId = null;
+      }
+      drawerRafId = requestAnimationFrame(function () {
+        if (shouldOpen) {
+          bd.classList.add("open");
+          dr.classList.add("open");
+          dr.setAttribute("aria-hidden", "false");
+        } else {
+          dr.classList.remove("open");
+          bd.classList.remove("open");
+          dr.setAttribute("aria-hidden", "true");
+        }
+        drawerRafId = null;
+      });
+    }
+
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape") {
+        toggleDrawer(false);
+        const pop = document.getElementById("notifPopover");
+        if (pop && pop.classList.contains("open")) {
+          pop.classList.remove("open");
+        }
+      }
+    });
+
+    function toggleNotifs(event) {
+      if (event) event.stopPropagation();
+      const el = document.getElementById("notifPopover");
+      if (!el) return;
+      const opening = !el.classList.contains("open");
+      el.classList.toggle("open");
+
+      const meta = getBodyMeta();
+      if (opening && !notifsMarkedRead && meta.markReadUrl) {
+        notifsMarkedRead = true;
+        const badge = document.getElementById("notifRedBadge");
+        if (badge) badge.style.display = "none";
+        fetch(meta.markReadUrl, {
+          method: "POST",
+          headers: { "X-CSRF-Token": meta.csrfToken }
+        }).catch(function () {});
+      }
+    }
+
+    document.addEventListener("click", function () {
+      const el = document.getElementById("notifPopover");
+      if (el && el.classList.contains("open")) {
+        el.classList.remove("open");
+      }
+    });
+
+    function toggleStudio() {
+      const el = document.getElementById("adminPhotoStudio");
+      if (el) el.classList.toggle("open");
+    }
+
+    function slideCourses(dir) {
+      const slider = document.getElementById("courseSlider");
+      if (!slider) return;
+      const step = Math.max(260, slider.clientWidth * 0.78);
+      slider.scrollBy({ left: dir * step, behavior: "smooth" });
+    }
+
+    (function () {
+      const msgForm = document.getElementById("dashDirectMsgForm");
+      const msgInput = document.getElementById("dashMsgInput");
+      const msgBtn = document.getElementById("dashMsgSubmit");
+      const threadEl = document.getElementById("dashMsgThread");
+      if (!msgForm || !msgInput) return;
+
+      const meta = getBodyMeta();
+
+      function escapeHtml(str) {
+        return String(str)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#39;");
+      }
+
+      function appendInstantBubble(text) {
+        if (!threadEl) return null;
+        const emptyNotice = threadEl.querySelector(".msg-empty");
+        if (emptyNotice) emptyNotice.remove();
+        const initial = (meta.userName.trim()[0] || "U").toUpperCase();
+        const item = document.createElement("div");
+        item.className = "msg-bubble-item" + (meta.isAdmin ? " is-admin-post" : "");
+        item.innerHTML =
+          '<div class="msg-user-row">' +
+            '<div class="msg-user-info">' +
+              '<span class="msg-user-avatar">' + escapeHtml(initial) + '</span>' +
+              '<span class="msg-user-name">' + escapeHtml(meta.userName) + '</span>' +
+              (meta.isAdmin ? '<span class="admin-tag">✦ ADMIN</span>' : "") +
+            '</div>' +
+            '<span class="msg-time">Just now</span>' +
+          '</div>' +
+          '<div class="msg-body-text">' + escapeHtml(text) + '</div>';
+        threadEl.prepend(item);
+        return item;
+      }
+
+      function sendInlineDashboardMessage() {
+        const text = msgInput.value.trim();
+        if (!text) {
+          msgInput.focus();
+          return;
+        }
+        if (msgBtn) {
+          msgBtn.disabled = true;
+          msgBtn.textContent = "Sending...";
+        }
+
+        const fd = new FormData(msgForm);
+        const params = new URLSearchParams();
+        fd.forEach(function (v, k) {
+          params.append(k, String(v));
+        });
+
+        const tempBubble = appendInstantBubble(text);
+        msgInput.value = "";
+
+        fetch(msgForm.action, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+            "X-Requested-With": "XMLHttpRequest"
+          },
+          body: params.toString(),
+          redirect: "follow"
+        })
+          .then(function () {
+            if (!meta.dashboardUrl) return null;
+            return fetch(meta.dashboardUrl, {
+              headers: { "X-Requested-With": "XMLHttpRequest" }
+            });
+          })
+          .then(function (resp) {
+            return resp && resp.ok ? resp.text() : null;
+          })
+          .then(function (dashHtml) {
+            if (!dashHtml || !threadEl) return;
+            const doc = new DOMParser().parseFromString(dashHtml, "text/html");
+            const freshThread = doc.getElementById("dashMsgThread");
+            if (freshThread && freshThread.innerHTML.trim()) {
+              threadEl.innerHTML = freshThread.innerHTML;
+            }
+          })
+          .catch(function () {
+            if (tempBubble) tempBubble.remove();
+            msgInput.value = text;
+          })
+          .finally(function () {
+            if (msgBtn) {
+              msgBtn.disabled = false;
+              msgBtn.textContent = "Send";
+            }
+          });
+      }
+
+      msgInput.addEventListener("keydown", function (e) {
+        if (e.key === "Enter" && !e.shiftKey) {
+          e.preventDefault();
+          e.stopPropagation();
+          sendInlineDashboardMessage();
+        }
+      });
+
+      msgForm.addEventListener("submit", function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        sendInlineDashboardMessage();
+      });
+    })();
+  </script>
+</body>
+</html>

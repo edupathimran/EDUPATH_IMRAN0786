@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+    .cbse-sub {
+        color: var(--muted);
+        margin-bottom: 24px;
+        line-height: 1.55;
+    }
+    .cbse-section-card {
+        margin-bottom: 30px;
+    }
+    .cbse-table-wrap {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    .cbse-table {
+        width: 100%;
+        min-width: 600px;
+        border-collapse: collapse;
+        text-align: left;
+    }
+    .cbse-table th,
+    .cbse-table td {
+        padding: 12px;
+    }
+    .cbse-sqp-card {
+        padding: 16px;
+        border-radius: 14px;
+        border: 1px solid var(--border);
+        background: var(--bg);
+    }
+    .cbse-sqp-btn {
+        width: 100%;
+        text-align: center;
+        padding: 8px;
+        font-size: 0.85rem;
+    }
+
+    @media (max-width: 860px) {
+        .cbse-sub {
+            margin-bottom: 16px;
+            font-size: 0.9rem;
+        }
+        .cbse-section-card {
+            margin-bottom: 16px;
+        }
+        .cbse-table {
+            min-width: 460px;
+            font-size: 0.82rem;
+        }
+        .cbse-table th,
+        .cbse-table td {
+            padding: 9px 8px;
+        }
+        .cbse-sqp-grid {
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 10px !important;
+        }
+        .cbse-sqp-card {
+            padding: 12px 13px;
+            border-radius: 12px;
+        }
+        .cbse-sqp-card h4 {
+            font-size: 0.96rem;
+        }
+        .cbse-sqp-btn {
+            display: block;
+            padding: 9px 10px;
+            font-size: 0.8rem;
+            border-radius: 10px;
+        }
+    }
+</style>
+
+<h1 style="margin-bottom: 8px;">📅 CBSE Official 2027 Date Sheet & SQPs</h1>
+<p class="cbse-sub">Class 10 aur Class 12 Board Examinations (Session 2026-27) ki official dates aur sample papers.</p>
+
+<div class="glass-card cbse-section-card">
+    <h3 style="margin-bottom: 16px; color: var(--accent);">📗 Class 10 Board Exam Date Sheet (2027)</h3>
+    <div class="cbse-table-wrap">
+        <table class="cbse-table">
+            <thead>
+                <tr style="border-bottom: 1px solid var(--border); color: var(--muted); font-size: 0.88rem;">
+                    <th>Date & Day</th>
+                    <th>Subject Name & Code</th>
+                    <th>Timing</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for d in datesheet_10 %}
+                <tr style="border-bottom: 1px solid var(--border);">
+                    <td style="font-weight: 700;">{{ d['date'] }} <span style="font-weight: 400; color: var(--muted); font-size: 0.85rem;">({{ d['day'] }})</span></td>
+                    <td style="font-weight: 600;">{{ d['subject'] }}</td>
+                    <td style="color: var(--accent); font-weight: 600;">{{ d['time'] }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="glass-card cbse-section-card">
+    <h3 style="margin-bottom: 16px; color: var(--accent);">📕 Class 12 Board Exam Date Sheet (2027)</h3>
+    <div class="cbse-table-wrap">
+        <table class="cbse-table">
+            <thead>
+                <tr style="border-bottom: 1px solid var(--border); color: var(--muted); font-size: 0.88rem;">
+                    <th>Date & Day</th>
+                    <th>Subject Name & Code</th>
+                    <th>Timing</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for d in datesheet_12 %}
+                <tr style="border-bottom: 1px solid var(--border);">
+                    <td style="font-weight: 700;">{{ d['date'] }} <span style="font-weight: 400; color: var(--muted); font-size: 0.85rem;">({{ d['day'] }})</span></td>
+                    <td style="font-weight: 600;">{{ d['subject'] }}</td>
+                    <td style="color: var(--accent); font-weight: 600;">{{ d['time'] }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="glass-card">
+    <h3 style="margin-bottom: 16px;">📄 Official Sample Question Papers (SQP) 2027</h3>
+    <div class="grid-2 cbse-sqp-grid">
+        {% for sp in sample_papers %}
+        <div class="cbse-sqp-card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; gap: 8px; flex-wrap: wrap;">
+                <span style="font-size: 0.75rem; font-weight: 800; padding: 3px 8px; border-radius: 6px; background: color-mix(in srgb, var(--accent) 15%, transparent); color: var(--accent);">{{ sp['tag'] }}</span>
+                <span style="font-size: 0.8rem; color: var(--muted);">Max Marks: {{ sp['marks'] }}</span>
+            </div>
+            <h4 style="margin-bottom: 6px;">{{ sp['subject'] }}</h4>
+            <p style="font-size: 0.82rem; color: var(--muted); margin-bottom: 12px;">Subject Code: {{ sp['code'] }} • Session {{ sp['year'] }}</p>
+            <a href="{{ url_for('notes') }}" class="btn-outline cbse-sqp-btn">📚 Download SQP from Notes Vault</a>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

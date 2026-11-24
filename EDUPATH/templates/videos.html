@@ -1,0 +1,1006 @@
+{% extends "base_2.html" %}
+{% block content %}
+<style>
+    .lec-header-card {
+        background: linear-gradient(135deg, var(--accent-soft), var(--card));
+        border: 1px solid var(--accent-border);
+        border-radius: 18px;
+        padding: 18px 22px;
+        margin-bottom: 18px;
+        box-shadow: 0 6px 20px rgba(15, 23, 42, 0.04);
+    }
+    .lec-filter-bar {
+        display: flex;
+        gap: 8px;
+        overflow-x: auto;
+        padding-bottom: 6px;
+        margin-bottom: 18px;
+        scrollbar-width: none;
+        -webkit-overflow-scrolling: touch;
+    }
+    .lec-filter-bar::-webkit-scrollbar { display: none; }
+    .lec-filter-bar .pill {
+        white-space: nowrap;
+        flex-shrink: 0;
+    }
+    .lec-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(min(100%, 330px), 1fr));
+        gap: 18px;
+        align-items: stretch;
+    }
+    .lec-card {
+        min-width: 0;
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        padding: 14px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        box-shadow: 0 6px 18px rgba(15, 23, 42, 0.04);
+        transition: transform 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease;
+    }
+    .lec-card:hover {
+        transform: translateY(-2px);
+        border-color: var(--accent-border);
+        box-shadow: 0 12px 26px rgba(15, 23, 42, 0.08);
+    }
+    /* Mobile horizontal strip header (hidden on PC/Desktop) */
+    .mob-strip-row {
+        display: none;
+    }
+    .mob-back-strip-btn {
+        display: none;
+    }
+    .lec-media-wrap {
+        position: relative;
+        width: 100%;
+        aspect-ratio: 16 / 9;
+        border-radius: 12px;
+        overflow: hidden;
+        background: #090d16;
+        margin-bottom: 10px;
+        border: 1px solid var(--border);
+    }
+    .lec-media-wrap video {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+    .lec-thumb-overlay {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        z-index: 2;
+        pointer-events: none;
+        transition: opacity 0.2s ease;
+    }
+    .lec-thumb-overlay.hidden {
+        opacity: 0;
+        pointer-events: none;
+    }
+    .yt-seek-zone {
+        position: absolute;
+        top: 0;
+        bottom: 48px;
+        width: 32%;
+        z-index: 3;
+        pointer-events: auto;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: transparent;
+    }
+    .yt-seek-zone.left { left: 0; }
+    .yt-seek-zone.right { right: 0; }
+    .yt-seek-badge {
+        padding: 6px 12px;
+        border-radius: 999px;
+        background: rgba(15, 23, 42, 0.82);
+        color: #ffffff;
+        font-size: 0.78rem;
+        font-weight: 800;
+        letter-spacing: 0.03em;
+        opacity: 0;
+        transform: scale(0.9);
+        transition: opacity 0.15s ease, transform 0.15s ease;
+        pointer-events: none;
+    }
+    .yt-seek-badge.show {
+        opacity: 1;
+        transform: scale(1);
+    }
+    /* YouTube-Style Top-Right Settings Gear & Menu */
+    .yt-gear-btn {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        z-index: 6;
+        width: 34px;
+        height: 34px;
+        border-radius: 999px;
+        border: 1px solid rgba(255, 255, 255, 0.22);
+        background: rgba(15, 23, 42, 0.76);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        color: #ffffff;
+        font-size: 0.95rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: transform 0.2s ease, background 0.15s ease;
+    }
+    .yt-gear-btn:hover {
+        background: rgba(15, 23, 42, 0.94);
+    }
+    .yt-gear-btn.open {
+        transform: rotate(45deg);
+        background: var(--accent);
+    }
+    .yt-cc-badge {
+        position: absolute;
+        top: 12px;
+        left: 10px;
+        z-index: 5;
+        padding: 3px 8px;
+        border-radius: 6px;
+        background: rgba(15, 23, 42, 0.78);
+        color: #ffffff;
+        font-size: 0.68rem;
+        font-weight: 800;
+        letter-spacing: 0.04em;
+        border: 1px solid rgba(255,255,255,0.2);
+        display: none;
+        pointer-events: none;
+    }
+    .yt-cc-badge.active {
+        display: inline-block;
+    }
+    .yt-caption-bar {
+        position: absolute;
+        left: 8%;
+        right: 8%;
+        bottom: 44px;
+        z-index: 4;
+        background: rgba(0, 0, 0, 0.78);
+        color: #ffffff;
+        font-size: 0.76rem;
+        font-weight: 600;
+        text-align: center;
+        padding: 4px 10px;
+        border-radius: 6px;
+        pointer-events: none;
+        display: none;
+    }
+    .yt-caption-bar.active {
+        display: block;
+    }
+    .yt-settings-popover {
+        position: absolute;
+        top: 50px;
+        right: 10px;
+        z-index: 7;
+        width: 230px;
+        max-width: calc(100% - 20px);
+        background: rgba(15, 23, 42, 0.95);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        color: #f8fafc;
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        border-radius: 14px;
+        padding: 10px;
+        box-shadow: 0 14px 32px rgba(0, 0, 0, 0.45);
+        display: none;
+    }
+    .yt-settings-popover.open {
+        display: block;
+    }
+    .yt-set-section {
+        padding: 6px 4px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .yt-set-section:last-child {
+        border-bottom: none;
+        padding-bottom: 2px;
+    }
+    .yt-set-label {
+        font-size: 0.68rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: #94a3b8;
+        margin-bottom: 5px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    .yt-chip-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+    }
+    .yt-chip {
+        padding: 4px 8px;
+        border-radius: 6px;
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        background: rgba(255, 255, 255, 0.08);
+        color: #f8fafc;
+        font-size: 0.7rem;
+        font-weight: 700;
+        cursor: pointer;
+    }
+    .yt-chip.active {
+        background: var(--accent);
+        border-color: var(--accent);
+        color: #ffffff;
+    }
+    .lec-quality-strip {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 6px;
+        padding: 6px 10px;
+        border-radius: 10px;
+        background: var(--bg);
+        border: 1px solid var(--border);
+        margin-bottom: 10px;
+    }
+    .vid-q-btn {
+        padding: 4px 8px;
+        border-radius: 7px;
+        border: 1px solid var(--border);
+        background: var(--card);
+        color: var(--text);
+        font-size: 0.7rem;
+        font-weight: 800;
+        cursor: pointer;
+    }
+    .vid-q-btn.active {
+        background: var(--accent);
+        color: #ffffff;
+        border-color: var(--accent);
+    }
+    .vid-mode-240p { filter: contrast(0.92) brightness(0.96); }
+    .vid-mode-360p { filter: contrast(0.95) brightness(0.97); }
+    .vid-mode-480p { filter: contrast(0.98) brightness(0.99); }
+    .vid-mode-720p { filter: contrast(1.04) brightness(1.02); }
+    .lec-badge-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 6px;
+        margin-bottom: 6px;
+    }
+    .lec-subj-tag {
+        font-size: 0.7rem;
+        font-weight: 800;
+        padding: 3px 9px;
+        border-radius: 999px;
+        background: var(--accent-soft);
+        border: 1px solid var(--accent-border);
+        color: var(--accent);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 72%;
+    }
+    .lec-date {
+        font-size: 0.72rem;
+        color: var(--muted);
+        white-space: nowrap;
+    }
+    .lec-title {
+        font-size: 1.02rem;
+        font-weight: 800;
+        line-height: 1.35;
+        margin-bottom: 4px;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    .lec-chapter {
+        font-size: 0.78rem;
+        color: var(--accent);
+        font-weight: 700;
+        margin-bottom: 8px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .lec-actions {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 6px;
+        padding-top: 8px;
+        border-top: 1px solid var(--border);
+    }
+    .lec-react-group {
+        display: flex;
+        gap: 5px;
+        flex-wrap: wrap;
+    }
+    .lec-react-group .react-btn {
+        padding: 5px 10px;
+        font-size: 0.76rem;
+        transition: transform 0.1s ease;
+    }
+    .lec-react-group .react-btn:active {
+        transform: scale(0.93);
+    }
+    .lec-comments-details {
+        margin-top: 10px;
+        border-top: 1px dashed var(--border);
+        padding-top: 8px;
+    }
+    .lec-comments-summary {
+        list-style: none;
+        cursor: pointer;
+        font-size: 0.8rem;
+        font-weight: 800;
+        color: var(--text);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 4px 2px;
+    }
+    .lec-comments-summary::-webkit-details-marker { display: none; }
+    .lec-comments-list {
+        max-height: 210px;
+        overflow-y: auto;
+        margin-top: 8px;
+        padding-right: 2px;
+    }
+    .admin-reply-highlight {
+        margin-top: 6px;
+        padding: 7px 10px;
+        border-radius: 9px;
+        background: var(--accent-soft);
+        border-left: 3px solid var(--accent);
+    }
+    .admin-name-chip {
+        display: inline-block;
+        background: var(--accent);
+        color: #ffffff;
+        font-size: 0.68rem;
+        font-weight: 800;
+        padding: 1px 8px;
+        border-radius: 999px;
+    }
+
+    /* ============================================================
+       PHONE VIEW ONLY (<= 768px):
+       1. Slim Horizontal Video Strip with Thumbnail on Left
+       2. Tap Strip -> Opens Full Video Player + YouTube Gear + Comments
+       ============================================================ */
+    @media (max-width: 768px) {
+        .lec-header-card {
+            padding: 12px 14px;
+            border-radius: 14px;
+            margin-bottom: 12px;
+        }
+        .lec-header-card h1 { font-size: 1.2rem; }
+        .lec-header-card p { font-size: 0.8rem; }
+        .lec-filter-bar { margin-bottom: 12px; }
+
+        .lec-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 9px;
+        }
+        /* Hide duplicate injected speed bar on mobile since YouTube gear handles Speed + Quality + CC cleanly */
+        .ep-single-speed-bar,
+        .lec-quality-strip {
+            display: none !important;
+        }
+
+        /* Collapsed state on mobile: sleek horizontal strip with thumbnail */
+        .lec-card {
+            padding: 8px 10px;
+            border-radius: 13px;
+            box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+        }
+        .lec-card:hover {
+            transform: none;
+        }
+        .lec-card:not(.mob-expanded) .lec-full-body {
+            display: none !important;
+        }
+        .lec-card:not(.mob-expanded) .mob-strip-row {
+            display: flex !important;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            width: 100%;
+            min-width: 0;
+        }
+        .mob-strip-thumb {
+            position: relative;
+            width: 112px;
+            min-width: 112px;
+            height: 64px;
+            border-radius: 9px;
+            overflow: hidden;
+            background: #0f172a;
+            border: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+        .mob-strip-thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+        .mob-strip-fallback {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+            color: #10b981;
+            font-size: 1.3rem;
+        }
+        .mob-strip-play-pill {
+            position: absolute;
+            bottom: 4px;
+            right: 4px;
+            padding: 2px 6px;
+            border-radius: 5px;
+            background: rgba(15, 23, 42, 0.85);
+            color: #ffffff;
+            font-size: 0.62rem;
+            font-weight: 800;
+        }
+        .mob-strip-info {
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+        .mob-strip-title {
+            font-size: 0.88rem;
+            font-weight: 800;
+            line-height: 1.25;
+            color: var(--text);
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .mob-strip-meta {
+            font-size: 0.7rem;
+            color: var(--muted);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .mob-strip-arrow {
+            font-size: 0.78rem;
+            font-weight: 800;
+            color: var(--accent);
+            background: var(--accent-soft);
+            padding: 5px 8px;
+            border-radius: 8px;
+            flex-shrink: 0;
+        }
+
+        /* Expanded state on mobile: shows full player, settings gear, reactions & comments */
+        .lec-card.mob-expanded {
+            padding: 12px;
+            border: 1.5px solid var(--accent);
+            box-shadow: 0 10px 28px rgba(15, 23, 42, 0.12);
+        }
+        .lec-card.mob-expanded .mob-strip-row {
+            display: none !important;
+        }
+        .lec-card.mob-expanded .mob-back-strip-btn {
+            display: inline-flex !important;
+            align-items: center;
+            gap: 5px;
+            margin-bottom: 9px;
+            padding: 5px 11px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--bg);
+            color: var(--text);
+            font-size: 0.75rem;
+            font-weight: 800;
+            cursor: pointer;
+        }
+        .lec-card.mob-expanded .lec-comments-details input[type="text"] {
+            font-size: 16px;
+        }
+    }
+</style>
+
+<div class="lec-header-card">
+    <h1 style="font-size: 1.65rem; margin-bottom: 4px;">🎬 EDUPATH Video Lectures</h1>
+    <p style="color: var(--muted); font-size: 0.88rem; margin: 0;">
+        Har lecture ek clean card mein — 240p se 720p quality switch karein, captions/speed adjust karein aur comments dekhein.
+    </p>
+</div>
+
+<div class="lec-filter-bar">
+    {% set subj_list = ['All', 'Physics', 'Chemistry', 'Mathematics', 'Biology', 'Science (086)', 'Mathematics (041 / 241)', 'Social Science (087)', 'English (184 / 101)', 'Hindi (002 / 085)'] %}
+    {% for s in subj_list %}
+        {% set is_curr = 'active' if active_subj == s else '' %}
+        <a href="{{ url_for('videos', subject=s) }}" class="pill {{ is_curr }}">{{ s }}</a>
+    {% endfor %}
+</div>
+
+{% if videos %}
+<div class="lec-grid" id="lecGridContainer">
+    {% for v in videos %}
+        {% set qmap = v.quality_files if v.quality_files is mapping else {} %}
+        {% set base_vid_url = url_for('serve_file', filename=v.video_file) if v.video_file else '' %}
+        {% set q240_url = url_for('serve_file', filename=qmap['240p']) if qmap.get('240p') else base_vid_url %}
+        {% set q360_url = url_for('serve_file', filename=qmap['360p']) if qmap.get('360p') else base_vid_url %}
+        {% set q480_url = url_for('serve_file', filename=qmap['480p']) if qmap.get('480p') else base_vid_url %}
+        {% set q720_url = url_for('serve_file', filename=qmap['720p']) if qmap.get('720p') else base_vid_url %}
+        {% set vid_comments = v.comments if v.comments else [] %}
+        {% set vid_reactions = v.reactions if v.reactions is mapping else {} %}
+        {% set user_reacts = v.user_reactions if v.user_reactions else [] %}
+        {% set thumb_url = url_for('serve_file', filename=v.thumbnail_file) if v.thumbnail_file else '' %}
+
+        <article class="lec-card" id="lecCard_{{ v.id }}" data-vid-card="{{ v.id }}">
+            <!-- PHONE VIEW SLIM HORIZONTAL STRIP (Desktop par hidden rahega) -->
+            <div class="mob-strip-row js-open-mob-strip" data-vid="{{ v.id }}">
+                <div class="mob-strip-thumb">
+                    {% if thumb_url %}
+                        <img src="{{ thumb_url }}" alt="{{ v.title }}" loading="lazy">
+                    {% else %}
+                        <div class="mob-strip-fallback">▶</div>
+                    {% endif %}
+                    <span class="mob-strip-play-pill">▶ Watch</span>
+                </div>
+                <div class="mob-strip-info">
+                    <div class="mob-strip-title">{{ v.title }}</div>
+                    <div class="mob-strip-meta">
+                        {{ v.subject }}{% if v.chapter_name %} • {{ v.chapter_name }}{% endif %} • 💬 {{ vid_comments|length }}
+                    </div>
+                </div>
+                <span class="mob-strip-arrow">Open</span>
+            </div>
+
+            <!-- FULL VIDEO & COMMENTS VIEW (Desktop par hamesha open, Phone par strip click karne par open) -->
+            <div class="lec-full-body">
+                <button type="button" class="mob-back-strip-btn js-close-mob-strip" data-vid="{{ v.id }}">
+                    ← Back to Lecture List
+                </button>
+
+                <div>
+                    <div class="lec-media-wrap">
+                        {% if thumb_url %}
+                        <img src="{{ thumb_url }}" alt="{{ v.title }}" class="lec-thumb-overlay js-thumb-overlay" data-vid="{{ v.id }}" loading="eager">
+                        {% endif %}
+
+                        <span class="yt-cc-badge js-cc-badge" data-vid="{{ v.id }}">CC ON</span>
+                        <div class="yt-caption-bar js-caption-bar" data-vid="{{ v.id }}">
+                            {{ v.title }}{% if v.chapter_name %} — {{ v.chapter_name }}{% endif %}
+                        </div>
+
+                        <!-- YouTube Style Settings Gear Button -->
+                        <button type="button" class="yt-gear-btn js-yt-gear-btn" data-vid="{{ v.id }}" title="Video Settings (Quality, Speed, Captions)" aria-label="Video Settings">
+                            ⚙️
+                        </button>
+
+                        <!-- YouTube Style Settings Popover -->
+                        <div class="yt-settings-popover js-yt-settings-popover" id="ytSettings_{{ v.id }}">
+                            <div class="yt-set-section">
+                                <div class="yt-set-label">
+                                    <span>Quality</span>
+                                    <span class="js-cur-q-label" data-vid="{{ v.id }}" style="color:#10b981;">720p</span>
+                                </div>
+                                <div class="yt-chip-row">
+                                    <button type="button" class="yt-chip js-yt-q-chip" data-vid="{{ v.id }}" data-q="240p">240p</button>
+                                    <button type="button" class="yt-chip js-yt-q-chip" data-vid="{{ v.id }}" data-q="360p">360p</button>
+                                    <button type="button" class="yt-chip js-yt-q-chip" data-vid="{{ v.id }}" data-q="480p">480p</button>
+                                    <button type="button" class="yt-chip js-yt-q-chip active" data-vid="{{ v.id }}" data-q="720p">720p</button>
+                                </div>
+                            </div>
+                            <div class="yt-set-section">
+                                <div class="yt-set-label">
+                                    <span>Playback Speed</span>
+                                    <span class="js-cur-sp-label" data-vid="{{ v.id }}" style="color:#10b981;">1x</span>
+                                </div>
+                                <div class="yt-chip-row">
+                                    <button type="button" class="yt-chip js-yt-sp-chip" data-vid="{{ v.id }}" data-sp="0.75">0.75x</button>
+                                    <button type="button" class="yt-chip js-yt-sp-chip active" data-vid="{{ v.id }}" data-sp="1">1x</button>
+                                    <button type="button" class="yt-chip js-yt-sp-chip" data-vid="{{ v.id }}" data-sp="1.25">1.25x</button>
+                                    <button type="button" class="yt-chip js-yt-sp-chip" data-vid="{{ v.id }}" data-sp="1.5">1.5x</button>
+                                    <button type="button" class="yt-chip js-yt-sp-chip" data-vid="{{ v.id }}" data-sp="2">2x</button>
+                                </div>
+                            </div>
+                            <div class="yt-set-section">
+                                <div class="yt-set-label">
+                                    <span>Captions (CC)</span>
+                                    <span class="js-cur-cc-label" data-vid="{{ v.id }}" style="color:#94a3b8;">Off</span>
+                                </div>
+                                <div class="yt-chip-row">
+                                    <button type="button" class="yt-chip js-yt-cc-chip active" data-vid="{{ v.id }}" data-cc="off">Off</button>
+                                    <button type="button" class="yt-chip js-yt-cc-chip" data-vid="{{ v.id }}" data-cc="on">On (Title/Topic)</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="yt-seek-zone left js-yt-seek" data-vid="{{ v.id }}" data-delta="-10" title="Double tap: 10s peeche">
+                            <span class="yt-seek-badge js-seek-badge">-10s</span>
+                        </div>
+                        <div class="yt-seek-zone right js-yt-seek" data-vid="{{ v.id }}" data-delta="10" title="Double tap: 10s aage">
+                            <span class="yt-seek-badge js-seek-badge">+10s</span>
+                        </div>
+
+                        <video id="videoPlayer_{{ v.id }}"
+                               class="vid-mode-720p js-lec-video"
+                               data-vid="{{ v.id }}"
+                               controls
+                               playsinline
+                               webkit-playsinline
+                               preload="metadata"
+                               data-base-src="{{ base_vid_url }}"
+                               data-240p-src="{{ q240_url }}"
+                               data-360p-src="{{ q360_url }}"
+                               data-480p-src="{{ q480_url }}"
+                               data-720p-src="{{ q720_url }}"
+                               {% if thumb_url %}poster="{{ thumb_url }}"{% endif %}>
+                            {% if base_vid_url %}
+                            <source src="{{ base_vid_url }}" type="video/mp4">
+                            {% endif %}
+                        </video>
+                    </div>
+
+                    <div class="lec-quality-strip">
+                        <span style="font-size: 0.72rem; font-weight: 700; color: var(--muted);">Quality</span>
+                        <div style="display: flex; gap: 4px; flex-wrap: wrap;">
+                            <button type="button" class="vid-q-btn" data-vid="{{ v.id }}" data-q="240p">240p</button>
+                            <button type="button" class="vid-q-btn" data-vid="{{ v.id }}" data-q="360p">360p</button>
+                            <button type="button" class="vid-q-btn" data-vid="{{ v.id }}" data-q="480p">480p</button>
+                            <button type="button" class="vid-q-btn active" data-vid="{{ v.id }}" data-q="720p">720p</button>
+                        </div>
+                    </div>
+
+                    <div class="lec-badge-row">
+                        <span class="lec-subj-tag">{{ v.subject }}{% if v.portal_type %} • {{ v.portal_type }}{% endif %}</span>
+                        <span class="lec-date">{{ v.created_at }}</span>
+                    </div>
+
+                    <h3 class="lec-title" title="{{ v.title }}">{{ v.title }}</h3>
+                    {% if v.chapter_name %}
+                        <div class="lec-chapter">📖 {{ v.chapter_name }}</div>
+                    {% endif %}
+                </div>
+
+                <div>
+                    <div class="lec-actions">
+                        <div class="lec-react-group">
+                            {% set emojis = ["👍", "❤️", "🔥", "💡"] %}
+                            {% for emo in emojis %}
+                                {% set r_cnt = vid_reactions.get(emo, 0) %}
+                                {% set r_act = 'active' if emo in user_reacts else '' %}
+                                <form method="POST" action="{{ url_for('react_video', vid_id=v.id) }}" class="js-vid-react-form" style="display: inline; margin: 0;">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                                    <input type="hidden" name="reaction" value="{{ emo }}">
+                                    <button type="submit" class="react-btn {{ r_act }}">
+                                        <span>{{ emo }}</span><span class="vid-react-cnt">{{ r_cnt }}</span>
+                                    </button>
+                                </form>
+                            {% endfor %}
+                        </div>
+                        {% if v.video_file %}
+                        <a href="{{ url_for('download_file', filename=v.video_file) }}" class="btn-outline" style="padding: 5px 10px; font-size: 0.74rem; border-radius: 8px;">⬇ Save</a>
+                        {% endif %}
+                    </div>
+
+                    <details class="lec-comments-details" id="commentsBox_{{ v.id }}">
+                        <summary class="lec-comments-summary">
+                            <span>💬 Comments ({{ vid_comments|length }})</span>
+                            <span style="font-size: 0.72rem; color: var(--accent);">Open ▾</span>
+                        </summary>
+
+                        <div style="margin-top: 8px;">
+                            <form method="POST" action="{{ url_for('comment_video', vid_id=v.id) }}" style="display: flex; gap: 6px; margin-bottom: 8px;">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                                <input type="text" name="comment" required placeholder="Comment likhein..." style="margin: 0; padding: 7px 10px; font-size: 0.82rem; border-radius: 9px; min-width: 0; flex: 1;">
+                                <button type="submit" class="btn" style="padding: 7px 12px; font-size: 0.78rem; border-radius: 9px; width: auto; white-space: nowrap;">Post</button>
+                            </form>
+
+                            <div class="lec-comments-list">
+                                {% for c in vid_comments %}
+                                <div style="padding: 8px 10px; border-radius: 10px; background: var(--bg); border: 1px solid var(--border); margin-bottom: 6px;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; gap: 6px;">
+                                        <strong style="font-size: 0.78rem;">{{ c.user_name }}</strong>
+                                        <span style="font-size: 0.68rem; color: var(--muted);">{{ c.created_at }}</span>
+                                    </div>
+                                    <div style="font-size: 0.82rem; margin-top: 3px; line-height: 1.4; word-break: break-word;">{{ c.comment }}</div>
+
+                                    {% if c.admin_reply %}
+                                    <div class="admin-reply-highlight">
+                                        <span class="admin-name-chip">{{ c.replied_by if c.replied_by else 'Admin' }}</span>
+                                        <div style="font-size: 0.78rem; font-weight: 600; margin-top: 3px;">{{ c.admin_reply }}</div>
+                                    </div>
+                                    {% endif %}
+
+                                    {% if user and user.role == 'admin' and c.id %}
+                                    <form method="POST" action="{{ url_for('reply_comment', comment_id=c.id) }}" style="display: flex; gap: 5px; margin-top: 6px;">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                                        <input type="text" name="admin_reply" value="{{ c.admin_reply or '' }}" placeholder="Admin reply..." required style="margin: 0; padding: 5px 8px; font-size: 0.76rem; border-radius: 7px; min-width: 0; flex: 1;">
+                                        <button type="submit" class="btn-outline" style="padding: 5px 9px; font-size: 0.72rem; border-radius: 7px; width: auto; white-space: nowrap;">Reply</button>
+                                    </form>
+                                    {% endif %}
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </details>
+                </div>
+            </div>
+        </article>
+    {% endfor %}
+</div>
+{% else %}
+<div class="glass-card" style="text-align: center; padding: 36px 18px;">
+    <p style="color: var(--muted);">Abhi koi video lecture available nahi hai.</p>
+</div>
+{% endif %}
+
+<script>
+(function () {
+    function setVideoQuality(vidId, quality) {
+        var el = document.getElementById("videoPlayer_" + vidId);
+        if (!el) return;
+
+        el.classList.remove("vid-mode-240p", "vid-mode-360p", "vid-mode-480p", "vid-mode-720p");
+        el.classList.add("vid-mode-" + quality);
+
+        var baseSrc = el.getAttribute("data-base-src");
+        var qSrc = el.getAttribute("data-" + quality + "-src") || baseSrc;
+        var curTime = el.currentTime || 0;
+        var curRate = el.playbackRate || 1;
+        var wasPlaying = !el.paused;
+
+        if (qSrc && el.getAttribute("src") !== qSrc) {
+            var srcNode = el.querySelector("source");
+            if (srcNode) srcNode.setAttribute("src", qSrc);
+            el.setAttribute("src", qSrc);
+            el.load();
+            el.addEventListener("loadedmetadata", function onLoaded() {
+                el.removeEventListener("loadedmetadata", onLoaded);
+                el.playbackRate = curRate;
+                if (curTime > 0 && Number.isFinite(el.duration)) {
+                    try { el.currentTime = Math.min(curTime, el.duration); } catch (err) {}
+                }
+                if (wasPlaying) {
+                    el.play().catch(function () {});
+                }
+            });
+        }
+
+        document.querySelectorAll('.vid-q-btn[data-vid="' + vidId + '"], .js-yt-q-chip[data-vid="' + vidId + '"]').forEach(function (b) {
+            b.classList.toggle("active", b.getAttribute("data-q") === quality);
+        });
+        var qLbl = document.querySelector('.js-cur-q-label[data-vid="' + vidId + '"]');
+        if (qLbl) qLbl.textContent = quality;
+    }
+
+    function setVideoSpeed(vidId, speedVal) {
+        var el = document.getElementById("videoPlayer_" + vidId);
+        if (!el) return;
+        var sp = parseFloat(speedVal) || 1;
+        el.playbackRate = sp;
+        document.querySelectorAll('.js-yt-sp-chip[data-vid="' + vidId + '"]').forEach(function (b) {
+            b.classList.toggle("active", parseFloat(b.getAttribute("data-sp")) === sp);
+        });
+        var spLbl = document.querySelector('.js-cur-sp-label[data-vid="' + vidId + '"]');
+        if (spLbl) spLbl.textContent = sp + "x";
+    }
+
+    function setVideoCaptions(vidId, mode) {
+        var isOn = (mode === "on");
+        var badge = document.querySelector('.js-cc-badge[data-vid="' + vidId + '"]');
+        var bar = document.querySelector('.js-caption-bar[data-vid="' + vidId + '"]');
+        var lbl = document.querySelector('.js-cur-cc-label[data-vid="' + vidId + '"]');
+        if (badge) badge.classList.toggle("active", isOn);
+        if (bar) bar.classList.toggle("active", isOn);
+        if (lbl) {
+            lbl.textContent = isOn ? "On" : "Off";
+            lbl.style.color = isOn ? "#10b981" : "#94a3b8";
+        }
+        document.querySelectorAll('.js-yt-cc-chip[data-vid="' + vidId + '"]').forEach(function (b) {
+            b.classList.toggle("active", b.getAttribute("data-cc") === mode);
+        });
+    }
+
+    // Hide thumbnail overlay cleanly when video starts playing
+    document.querySelectorAll(".js-lec-video").forEach(function (vidEl) {
+        var vidId = vidEl.getAttribute("data-vid");
+        var overlay = document.querySelector('.js-thumb-overlay[data-vid="' + vidId + '"]');
+        if (!overlay) return;
+        vidEl.addEventListener("play", function () {
+            overlay.classList.add("hidden");
+        });
+        vidEl.addEventListener("playing", function () {
+            overlay.classList.add("hidden");
+        });
+        vidEl.addEventListener("seeking", function () {
+            if (vidEl.currentTime > 0) overlay.classList.add("hidden");
+        });
+    });
+
+    // Global click delegation for Mobile Strips, YouTube Gear, Quality, Speed, Captions
+    document.addEventListener("click", function (e) {
+        // 1. Open mobile horizontal strip -> shows full video + comments
+        var openStrip = e.target.closest(".js-open-mob-strip");
+        if (openStrip) {
+            var vidId = openStrip.getAttribute("data-vid");
+            document.querySelectorAll(".lec-card.mob-expanded").forEach(function (otherCard) {
+                if (otherCard.getAttribute("data-vid-card") !== vidId) {
+                    var otherVid = otherCard.querySelector("video");
+                    if (otherVid && !otherVid.paused) otherVid.pause();
+                    otherCard.classList.remove("mob-expanded");
+                }
+            });
+            var card = document.getElementById("lecCard_" + vidId);
+            if (card) {
+                card.classList.add("mob-expanded");
+                var commDetails = document.getElementById("commentsBox_" + vidId);
+                if (commDetails) commDetails.setAttribute("open", "open");
+                card.scrollIntoView({ behavior: "smooth", block: "start" });
+            }
+            return;
+        }
+
+        // 2. Close mobile expanded player -> back to slim horizontal strip list
+        var closeStrip = e.target.closest(".js-close-mob-strip");
+        if (closeStrip) {
+            var vidId = closeStrip.getAttribute("data-vid");
+            var card = document.getElementById("lecCard_" + vidId);
+            if (card) {
+                var vEl = card.querySelector("video");
+                if (vEl && !vEl.paused) vEl.pause();
+                card.classList.remove("mob-expanded");
+            }
+            return;
+        }
+
+        // 3. Toggle YouTube Settings Gear Popover
+        var gearBtn = e.target.closest(".js-yt-gear-btn");
+        if (gearBtn) {
+            e.preventDefault();
+            e.stopPropagation();
+            var vidId = gearBtn.getAttribute("data-vid");
+            var pop = document.getElementById("ytSettings_" + vidId);
+            document.querySelectorAll(".yt-settings-popover.open").forEach(function (p) {
+                if (p !== pop) p.classList.remove("open");
+            });
+            document.querySelectorAll(".js-yt-gear-btn.open").forEach(function (g) {
+                if (g !== gearBtn) g.classList.remove("open");
+            });
+            if (pop) {
+                var willOpen = !pop.classList.contains("open");
+                pop.classList.toggle("open", willOpen);
+                gearBtn.classList.toggle("open", willOpen);
+            }
+            return;
+        }
+
+        // 4. Quality chip / button
+        var qBtn = e.target.closest(".vid-q-btn, .js-yt-q-chip");
+        if (qBtn) {
+            e.preventDefault();
+            e.stopPropagation();
+            setVideoQuality(qBtn.getAttribute("data-vid"), qBtn.getAttribute("data-q"));
+            return;
+        }
+
+        // 5. Speed chip
+        var spBtn = e.target.closest(".js-yt-sp-chip");
+        if (spBtn) {
+            e.preventDefault();
+            e.stopPropagation();
+            setVideoSpeed(spBtn.getAttribute("data-vid"), spBtn.getAttribute("data-sp"));
+            return;
+        }
+
+        // 6. Captions chip
+        var ccBtn = e.target.closest(".js-yt-cc-chip");
+        if (ccBtn) {
+            e.preventDefault();
+            e.stopPropagation();
+            setVideoCaptions(ccBtn.getAttribute("data-vid"), ccBtn.getAttribute("data-cc"));
+            return;
+        }
+
+        // Close open settings popover if clicked outside
+        if (!e.target.closest(".yt-settings-popover")) {
+            document.querySelectorAll(".yt-settings-popover.open").forEach(function (p) {
+                p.classList.remove("open");
+            });
+            document.querySelectorAll(".js-yt-gear-btn.open").forEach(function (g) {
+                g.classList.remove("open");
+            });
+        }
+    });
+
+    // Double-tap left/right seek zones
+    var lastTapMap = {};
+    document.querySelectorAll(".js-yt-seek").forEach(function (zone) {
+        zone.addEventListener("click", function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            var vidId = zone.getAttribute("data-vid");
+            var delta = parseFloat(zone.getAttribute("data-delta") || "0");
+            var key = vidId + "_" + delta;
+            var now = Date.now();
+            var prev = lastTapMap[key] || 0;
+            lastTapMap[key] = now;
+
+            if (now - prev > 360) return;
+
+            var videoEl = document.getElementById("videoPlayer_" + vidId);
+            if (!videoEl) return;
+
+            var overlay = document.querySelector('.js-thumb-overlay[data-vid="' + vidId + '"]');
+            if (overlay) overlay.classList.add("hidden");
+
+            var duration = Number.isFinite(videoEl.duration) ? videoEl.duration : Infinity;
+            videoEl.currentTime = Math.max(0, Math.min(duration, (videoEl.currentTime || 0) + delta));
+
+            var badge = zone.querySelector(".js-seek-badge");
+            if (badge) {
+                badge.classList.add("show");
+                clearTimeout(badge._hideTimer);
+                badge._hideTimer = setTimeout(function () {
+                    badge.classList.remove("show");
+                }, 550);
+            }
+        });
+    });
+
+    // Smooth AJAX reactions
+    document.querySelectorAll(".js-vid-react-form").forEach(function (form) {
+        form.addEventListener("submit", function (e) {
+            e.preventDefault();
+            var btn = form.querySelector(".react-btn");
+            var cntEl = form.querySelector(".vid-react-cnt");
+            var csrfInp = form.querySelector('input[name="csrf_token"]');
+            var reactInp = form.querySelector('input[name="reaction"]');
+            if (!btn || !cntEl) return;
+
+            var wasActive = btn.classList.contains("active");
+            var cur = parseInt(cntEl.textContent || "0", 10) || 0;
+            btn.classList.toggle("active", !wasActive);
+            cntEl.textContent = String(Math.max(0, wasActive ? cur - 1 : cur + 1));
+
+            var csrfVal = csrfInp ? csrfInp.value : "";
+            var bodyData = new URLSearchParams();
+            if (csrfVal) bodyData.append("csrf_token", csrfVal);
+            if (reactInp) bodyData.append("reaction", reactInp.value);
+
+            var headers = { "Content-Type": "application/x-www-form-urlencoded" };
+            if (csrfVal) headers["X-CSRF-Token"] = csrfVal;
+
+            fetch(form.action, {
+                method: "POST",
+                headers: headers,
+                body: bodyData.toString()
+            }).catch(function () {
+                btn.classList.toggle("active", wasActive);
+                cntEl.textContent = String(cur);
+            });
+        });
+    });
+})();
+</script>
+{% endblock %}

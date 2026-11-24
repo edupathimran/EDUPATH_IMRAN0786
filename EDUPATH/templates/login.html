@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <title>EDUPATH | Student & Educator Login</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', system-ui, sans-serif; -webkit-tap-highlight-color: transparent; }
+        body {
+            background: #eef7f2;
+            color: #0f172a;
+            min-height: 100dvh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            position: relative;
+            overflow-x: hidden;
+            background-image:
+                radial-gradient(circle at 12% 18%, rgba(16, 185, 129, 0.16), transparent 40%),
+                radial-gradient(circle at 88% 82%, rgba(5, 150, 105, 0.12), transparent 42%),
+                radial-gradient(circle at 50% 0%, rgba(52, 211, 153, 0.10), transparent 45%);
+        }
+
+        .auth-wrapper {
+            width: 100%;
+            max-width: 420px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .auth-card {
+            background: rgba(255, 255, 255, 0.96);
+            backdrop-filter: blur(18px);
+            border: 1.5px solid rgba(16, 185, 129, 0.24);
+            border-radius: 24px;
+            padding: 28px 24px 24px;
+            box-shadow:
+                0 22px 46px -12px rgba(15, 23, 42, 0.12),
+                0 0 0 1px rgba(255, 255, 255, 0.85) inset;
+        }
+
+        .brand-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .logo-badge {
+            width: 52px;
+            height: 52px;
+            border-radius: 16px;
+            margin: 0 auto 12px;
+            background: linear-gradient(135deg, #064e3b 0%, #059669 65%, #10b981 100%);
+            border: 2px solid rgba(16, 185, 129, 0.85);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 12px 24px -6px rgba(16, 185, 129, 0.38);
+        }
+
+        .brand-title {
+            font-size: 1.52rem;
+            font-weight: 800;
+            letter-spacing: 1.4px;
+            background: linear-gradient(135deg, #064e3b 20%, #059669 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .brand-sub {
+            font-size: 0.84rem;
+            color: #64748b;
+            margin-top: 4px;
+            font-weight: 500;
+        }
+
+        .tabs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+            background: #e6f4ed;
+            padding: 5px;
+            border-radius: 14px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(16, 185, 129, 0.18);
+        }
+
+        .tab-btn {
+            padding: 10px 12px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 0.88rem;
+            cursor: pointer;
+            background: transparent;
+            color: #475569;
+            transition: all 0.2s ease;
+        }
+
+        .tab-btn.active {
+            background: #ffffff;
+            color: #059669;
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
+        }
+
+        .field-group {
+            margin-bottom: 14px;
+        }
+
+        label {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: #334155;
+            margin-bottom: 5px;
+            letter-spacing: 0.2px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px 14px;
+            border-radius: 12px;
+            border: 1.5px solid #cbd5e1;
+            background: #f8fafc;
+            color: #0f172a;
+            outline: none;
+            font-size: 16px;
+            font-weight: 500;
+            transition: all 0.18s ease;
+        }
+
+        input::placeholder {
+            color: #94a3b8;
+            font-weight: 400;
+        }
+
+        input:focus, select:focus {
+            border-color: #10b981;
+            background: #ffffff;
+            box-shadow: 0 0 0 3.5px rgba(16, 185, 129, 0.16);
+        }
+
+        .password-wrap {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .password-wrap input {
+            padding-right: 46px;
+        }
+
+        .pwd-toggle-btn {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 34px;
+            height: 34px;
+            border: none;
+            border-radius: 9px;
+            background: transparent;
+            color: #475569;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.15s ease, color 0.15s ease;
+        }
+
+        .pwd-toggle-btn:hover,
+        .pwd-toggle-btn:active {
+            background: rgba(16, 185, 129, 0.14);
+            color: #059669;
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 13px 18px;
+            margin-top: 6px;
+            border: none;
+            border-radius: 13px;
+            background: linear-gradient(135deg, #10b981 0%, #047857 100%);
+            color: #ffffff;
+            font-weight: 800;
+            font-size: 0.95rem;
+            letter-spacing: 0.3px;
+            cursor: pointer;
+            box-shadow: 0 10px 20px -5px rgba(16, 185, 129, 0.42);
+            transition: all 0.2s ease;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-1px);
+            filter: brightness(1.03);
+        }
+
+        .btn-submit:active {
+            transform: scale(0.98);
+        }
+
+        .flash {
+            padding: 11px 13px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #dc2626;
+            font-size: 0.84rem;
+            font-weight: 700;
+            text-align: center;
+        }
+
+        .footer-nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 18px;
+            padding-top: 14px;
+            border-top: 1px solid rgba(15, 23, 42, 0.08);
+            font-size: 0.8rem;
+            color: #64748b;
+        }
+
+        .back-link {
+            color: #475569;
+            text-decoration: none;
+            font-weight: 700;
+        }
+
+        .back-link:hover {
+            color: #059669;
+        }
+
+        .batch-tag {
+            font-weight: 700;
+            color: #047857;
+            background: rgba(16, 185, 129, 0.12);
+            padding: 4px 10px;
+            border-radius: 99px;
+            font-size: 0.72rem;
+        }
+
+        .hidden { display: none; }
+
+        @media (max-width: 480px) {
+            body { padding: 12px; align-items: center; }
+            .auth-card { padding: 22px 17px 20px; border-radius: 20px; }
+            .brand-title { font-size: 1.38rem; }
+            .logo-badge { width: 46px; height: 46px; border-radius: 14px; }
+            .field-group { margin-bottom: 12px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-wrapper">
+        <div class="auth-card">
+            <div class="brand-header">
+                <div class="logo-badge">
+                    <svg width="24" height="24" viewBox="0 0 100 100" fill="none">
+                        <polygon points="50,12 92,35 50,58 8,35" fill="#FFFFFF"/>
+                        <path d="M20 46V72C20 72 35 65 50 78C65 65 80 72 80 72V46" stroke="#A7F3D0" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+                <div class="brand-title">EDUPATH</div>
+                <div class="brand-sub">Sign in to continue your CBSE 2027 preparation</div>
+            </div>
+
+            {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                    {% for msg in messages %}<div class="flash">{{ msg }}</div>{% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <div class="tabs">
+                <button type="button" class="tab-btn active" id="tab-login" onclick="switchTab('login')">Sign In</button>
+                <button type="button" class="tab-btn" id="tab-register" onclick="switchTab('register')">New Student</button>
+            </div>
+
+            <!-- Login Form -->
+            <form method="POST" id="form-login">
+                <input type="hidden" name="action" value="login">
+
+                <div class="field-group">
+                    <label for="login-email">Email Address</label>
+                    <input id="login-email" type="email" name="email" autocomplete="email" required placeholder="name@example.com">
+                </div>
+
+                <div class="field-group">
+                    <label for="login-password">Password</label>
+                    <div class="password-wrap">
+                        <input id="login-password" type="password" name="password" autocomplete="current-password" required placeholder="••••••••">
+                        <button type="button" class="pwd-toggle-btn" onclick="togglePwd('login-password', this)" aria-label="Show or Hide Password" title="Show / Hide Password">
+                            <svg class="icon-eye" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                <circle cx="12" cy="12" r="3"></circle>
+                            </svg>
+                            <svg class="icon-eye-off hidden" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                                <line x1="1" y1="1" x2="23" y2="23"></line>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-submit">Sign In to EDUPATH →</button>
+            </form>
+
+            <!-- Register Form -->
+            <form method="POST" id="form-register" class="hidden">
+                <input type="hidden" name="action" value="register">
+
+                <div class="field-group">
+                    <label for="reg-name">Full Name</label>
+                    <input id="reg-name" type="text" name="name" autocomplete="name" required placeholder="Enter your full name">
+                </div>
+
+                <div class="field-group">
+                    <label for="reg-class">Class / Board</label>
+                    <select id="reg-class" name="student_class">
+                        <option value="Class 10 CBSE">Class 10 CBSE</option>
+                        <option value="Class 11 CBSE">Class 11 CBSE</option>
+                        <option value="Class 12 CBSE">Class 12 CBSE</option>
+                        <option value="Bihar Board (BSEB)">Bihar Board (BSEB)</option>
+                        <option value="JEE / NEET Foundation">JEE / NEET Foundation</option>
+                    </select>
+                </div>
+
+                <div class="field-group">
+                    <label for="reg-email">Email Address</label>
+                    <input id="reg-email" type="email" name="email" autocomplete="email" required placeholder="name@example.com">
+                </div>
+
+                <div class="field-group">
+                    <label for="reg-password">Create Password</label>
+                    <div class="password-wrap">
+                        <input id="reg-password" type="password" name="password" autocomplete="new-password" required placeholder="Minimum 6 characters">
+                        <button type="button" class="pwd-toggle-btn" onclick="togglePwd('reg-password', this)" aria-label="Show or Hide Password" title="Show / Hide Password">
+                            <svg class="icon-eye" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                <circle cx="12" cy="12" r="3"></circle>
+                            </svg>
+                            <svg class="icon-eye-off hidden" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                                <line x1="1" y1="1" x2="23" y2="23"></line>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-submit">Create Student Account →</button>
+            </form>
+
+            <div class="footer-nav">
+                <a href="{{ url_for('home') }}" class="back-link">← Back to Home</a>
+                <span class="batch-tag">CBSE 2026-27</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function switchTab(mode) {
+            const loginForm = document.getElementById('form-login');
+            const regForm = document.getElementById('form-register');
+            const tabLogin = document.getElementById('tab-login');
+            const tabReg = document.getElementById('tab-register');
+
+            if (mode === 'login') {
+                loginForm.classList.remove('hidden');
+                regForm.classList.add('hidden');
+                tabLogin.classList.add('active');
+                tabReg.classList.remove('active');
+            } else {
+                regForm.classList.remove('hidden');
+                loginForm.classList.add('hidden');
+                tabReg.classList.add('active');
+                tabLogin.classList.remove('active');
+            }
+        }
+
+        function togglePwd(inputId, btn) {
+            const input = document.getElementById(inputId);
+            if (!input) return;
+            const eye = btn.querySelector('.icon-eye');
+            const eyeOff = btn.querySelector('.icon-eye-off');
+            if (input.type === 'password') {
+                input.type = 'text';
+                if (eye) eye.classList.add('hidden');
+                if (eyeOff) eyeOff.classList.remove('hidden');
+            } else {
+                input.type = 'password';
+                if (eye) eye.classList.remove('hidden');
+                if (eyeOff) eyeOff.classList.add('hidden');
+            }
+        }
+    </script>
+</body>
+</html>

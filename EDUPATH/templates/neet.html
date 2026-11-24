@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+    .neet-strip-link {
+        text-decoration: none;
+        color: inherit;
+        display: block;
+    }
+    .neet-strip-meta {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-width: 0;
+        flex: 1;
+    }
+    .neet-strip-icon {
+        font-size: 1.8rem;
+        margin-bottom: 10px;
+        flex-shrink: 0;
+        line-height: 1;
+    }
+    .neet-strip-title {
+        font-size: 1.35rem;
+        margin-bottom: 8px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .neet-strip-desc {
+        color: var(--muted);
+        font-size: 0.9rem;
+        line-height: 1.6;
+    }
+    .neet-strip-cta {
+        width: 100%;
+        flex-shrink: 0;
+    }
+
+    @media (max-width: 860px) {
+        .neet-courses-grid {
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 10px !important;
+        }
+        .neet-course-card {
+            margin-bottom: 0 !important;
+            padding: 11px 13px !important;
+            border-radius: 14px !important;
+            border-top: none !important;
+            border-left: 4px solid var(--accent) !important;
+            flex-direction: row !important;
+            align-items: center !important;
+            justify-content: space-between !important;
+            gap: 10px !important;
+            min-height: 54px;
+        }
+        .neet-strip-icon {
+            font-size: 1.25rem;
+            margin-bottom: 0;
+        }
+        .neet-strip-title {
+            font-size: 0.98rem;
+            margin-bottom: 0;
+            font-weight: 700;
+        }
+        .neet-strip-desc {
+            display: none;
+        }
+        .neet-strip-cta {
+            width: auto !important;
+            padding: 8px 12px !important;
+            font-size: 0.8rem !important;
+            border-radius: 10px !important;
+            white-space: nowrap;
+        }
+    }
+</style>
+
+<div class="glass-card" style="border-left: 6px solid var(--accent);">
+    <span style="font-size: 0.75rem; font-weight: 800; padding: 4px 12px; border-radius: 99px; background: color-mix(in srgb, var(--accent) 14%, transparent); color: var(--accent);">
+        MEDICAL ENTRANCE • NEET
+    </span>
+    <h1 style="font-size: 1.95rem; margin-top: 10px; margin-bottom: 6px;">🩺 NEET Subject Portals</h1>
+    <p style="color: var(--muted); font-size: 0.96rem; line-height: 1.6;">
+        Har subject ka alag portal chunein — <strong>Biology</strong>, <strong>Physics</strong>, ya <strong>Chemistry</strong>.
+    </p>
+</div>
+
+<div class="grid-3 neet-courses-grid">
+    {% for key, s in neet_syllabus.items() %}
+    <div class="glass-card neet-course-card" style="border-top: 5px solid var(--accent); display: flex; flex-direction: column; justify-content: space-between; gap: 16px;">
+        <a href="{{ url_for('neet_subject', subj_key=key) }}" class="neet-strip-link neet-strip-meta">
+            <div class="neet-strip-icon">{{ s['icon'] }}</div>
+            <div style="min-width: 0;">
+                <h2 class="neet-strip-title">NEET {{ s['label'] }}</h2>
+                <p class="neet-strip-desc">{{ s['explanation'] }}</p>
+            </div>
+        </a>
+        <a href="{{ url_for('neet_subject', subj_key=key) }}" class="btn neet-strip-cta">
+            Open {{ s['label'] }} Portal →
+        </a>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

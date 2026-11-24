@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+    .unit-card { background: var(--card); border: 1px solid var(--border); border-radius: 18px; padding: 20px; box-shadow: 0 8px 20px rgba(0,0,0,0.03); }
+    .unit-title { font-size: 1.08rem; font-weight: 800; color: var(--accent); margin-bottom: 6px; }
+    .unit-detail { font-size: 0.88rem; color: var(--muted); line-height: 1.55; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
+    .ch-links { display: flex; flex-direction: column; gap: 8px; }
+    .ch-link-btn {
+        display: flex; justify-content: space-between; align-items: center; gap: 8px;
+        padding: 10px 13px; border-radius: 11px; background: var(--bg); border: 1px solid var(--border);
+        color: var(--text); text-decoration: none; font-size: 0.89rem; font-weight: 600; transition: 0.18s;
+    }
+    .ch-link-btn:hover { border-color: var(--accent); color: var(--accent); }
+</style>
+
+<div class="glass-card" style="border-left: 6px solid var(--accent);">
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 10px;">
+        <span style="font-size: 0.75rem; font-weight: 800; padding: 4px 12px; border-radius: 99px; background: color-mix(in srgb, var(--accent) 14%, transparent); color: var(--accent);">
+            {{ exam_name }} • {{ subj_obj['label'] }} Portal
+        </span>
+        <a href="{{ back_url }}" class="btn-outline" style="padding: 7px 14px; font-size: 0.84rem;">← Back to {{ exam_name }} Subjects</a>
+    </div>
+    <h1 style="font-size: 1.85rem; margin-bottom: 6px;">{{ subj_obj['icon'] }} {{ exam_name }} {{ subj_obj['label'] }}</h1>
+    <p style="color: var(--muted); font-size: 0.95rem; line-height: 1.6;">{{ subj_obj['explanation'] }}</p>
+</div>
+
+<div class="grid-2">
+    {% for u in subj_obj['units'] %}
+    <div class="unit-card">
+        <div class="unit-title">{{ u['title'] }}</div>
+        <p class="unit-detail">{{ u['detail'] }}</p>
+        <div class="ch-links">
+            {% for ch in u['chapters'] %}
+            <a href="{{ url_for('chapter_portal', portal_type=exam_name, slug=slugify(ch), title=ch, subject=subj_obj['label']) }}" class="ch-link-btn">
+                <span>{{ ch }}</span>
+                <span style="font-size: 0.78rem; color: var(--accent); font-weight: 800;">Portal →</span>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

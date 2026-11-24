@@ -1,0 +1,497 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+    .ctrl-row {
+        display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;
+        padding: 13px 15px; border-radius: 13px; background: var(--bg); border: 1px solid var(--border);
+        margin-bottom: 10px;
+    }
+    .student-actions {
+        display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+    }
+    .dm-box {
+        width: 100%; margin-top: 8px; padding-top: 10px;
+        border-top: 1px dashed var(--border); display: none;
+    }
+    .dm-box.open { display: block; }
+
+    .ep-side-upload-panel {
+        position: fixed;
+        top: 84px;
+        right: 18px;
+        width: 330px;
+        max-width: calc(100vw - 24px);
+        background: var(--card, #ffffff);
+        color: var(--text, #0f172a);
+        border: 1.5px solid var(--accent, #10b981);
+        border-radius: 16px;
+        box-shadow: 0 18px 42px rgba(15, 23, 42, 0.22);
+        z-index: 1400;
+        overflow: hidden;
+        display: none;
+    }
+    .ep-side-upload-panel.visible {
+        display: block;
+    }
+    .ep-side-upload-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        padding: 11px 14px;
+        background: linear-gradient(135deg, #059669, #10b981);
+        color: #ffffff;
+        font-weight: 800;
+        font-size: 0.86rem;
+    }
+    .ep-side-upload-body {
+        padding: 14px;
+    }
+    .ep-side-upload-panel.collapsed .ep-side-upload-body {
+        display: none;
+    }
+    .ep-progress-track {
+        width: 100%;
+        height: 11px;
+        border-radius: 999px;
+        background: rgba(16, 185, 129, 0.16);
+        overflow: hidden;
+        margin: 10px 0 8px;
+    }
+    .ep-progress-fill {
+        height: 100%;
+        width: 0%;
+        border-radius: 999px;
+        background: linear-gradient(90deg, #059669, #10b981);
+        transition: width 0.18s ease;
+    }
+    .ep-upload-meta {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.78rem;
+        color: var(--muted, #475569);
+        font-weight: 700;
+    }
+    .ep-upload-stage {
+        margin-top: 8px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: #059669;
+    }
+    .ep-panel-ctrl-btn {
+        background: rgba(255, 255, 255, 0.2);
+        color: #ffffff;
+        border: none;
+        border-radius: 7px;
+        padding: 3px 8px;
+        font-size: 0.74rem;
+        font-weight: 800;
+        cursor: pointer;
+    }
+    @media (max-width: 768px) {
+        .ep-side-upload-panel {
+            top: auto;
+            bottom: 14px;
+            right: 12px;
+            left: 12px;
+            width: auto;
+            max-width: none;
+        }
+    }
+</style>
+
+<aside id="epSideUploadPanel" class="ep-side-upload-panel" aria-live="polite">
+    <div class="ep-side-upload-head">
+        <span>Video Upload Progress</span>
+        <div style="display:flex; gap:6px;">
+            <button type="button" id="epToggleUploadPanelBtn" class="ep-panel-ctrl-btn">Minimize</button>
+            <button type="button" id="epCloseUploadPanelBtn" class="ep-panel-ctrl-btn">✕</button>
+        </div>
+    </div>
+    <div class="ep-side-upload-body">
+        <div id="epUploadTitleText" style="font-size:0.86rem; font-weight:800; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Preparing upload...</div>
+        <div id="epUploadFileText" style="font-size:0.74rem; color:var(--muted); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"></div>
+        <div class="ep-progress-track">
+            <div id="epUploadProgressBar" class="ep-progress-fill"></div>
+        </div>
+        <div class="ep-upload-meta">
+            <span id="epUploadPercentText">0%</span>
+            <span id="epUploadSizeText">0 MB / 0 MB</span>
+            <span id="epUploadSpeedText">0 MB/s</span>
+        </div>
+        <div id="epUploadStageText" class="ep-upload-stage">Waiting to start upload...</div>
+    </div>
+</aside>
+
+<div style="margin-bottom: 22px;">
+    <h1 style="font-size: 1.9rem; margin-bottom: 6px;">EDUPATH Admin Control Center</h1>
+    <p style="color: var(--muted); font-size: 0.94rem;">
+        Manage notifications, video lectures, PDF notes, chapter mapping, student access (Block/Unblock & Personal Messages), and comments.
+    </p>
+</div>
+
+<div class="glass-card" style="border-left: 5px solid var(--accent);">
+    <h3 style="margin-bottom: 12px;">Send Notification to Students</h3>
+    <form method="POST" action="{{ url_for('send_notification') }}">
+        <label style="font-size: 0.84rem; font-weight: 700;">Notification Message</label>
+        <textarea name="notification_message" rows="2" required placeholder="Type the announcement for all students..."></textarea>
+        <button type="submit" class="btn">Send Notification</button>
+    </form>
+
+    {% if all_notifs %}
+    <div style="margin-top: 16px;">
+        {% for n in all_notifs[:8] %}
+        <div class="ctrl-row">
+            <div>
+                <div style="font-weight: 600; font-size: 0.9rem;">{{ n['message'] }}</div>
+                <div style="font-size: 0.75rem; color: var(--muted);">{{ n['created_by'] }} • {{ n['created_at'] }}</div>
+            </div>
+            <a href="{{ url_for('delete_notification', notif_id=n['id']) }}" class="btn-outline" style="padding: 5px 10px; font-size: 0.76rem; border-color: #ef4444; color: #ef4444;">Delete</a>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+
+<div class="grid-2">
+    <div class="glass-card">
+        <h3 style="margin-bottom: 12px;">Upload Video Lecture + Thumbnail</h3>
+        <form id="epAdminVideoUploadForm" method="POST" enctype="multipart/form-data">
+            <input type="hidden" name="form_type" value="upload_video">
+
+            <label style="font-size: 0.84rem; font-weight: 700;">Lecture Title</label>
+            <input type="text" name="title" required placeholder="e.g., Rotational Motion One Shot">
+
+            <div class="grid-2" style="gap: 10px;">
+                <div>
+                    <label style="font-size: 0.84rem; font-weight: 700;">Section / Stream</label>
+                    <select name="portal_type">
+                        <option value="Class 10">Class 10</option>
+                        <option value="Class 11 Science">Class 11 Science</option>
+                        <option value="Class 11 Commerce">Class 11 Commerce</option>
+                        <option value="Class 11 Arts">Class 11 Arts</option>
+                        <option value="Class 12 Science">Class 12 Science</option>
+                        <option value="Class 12 Commerce">Class 12 Commerce</option>
+                        <option value="Class 12 Arts">Class 12 Arts</option>
+                        <option value="JEE">JEE</option>
+                        <option value="NEET">NEET</option>
+                        <option value="Bihar Board (BSEB)">Bihar Board (BSEB)</option>
+                        <option value="General">General</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="font-size: 0.84rem; font-weight: 700;">Subject</label>
+                    <input type="text" name="subject" required placeholder="e.g., Physics (Class 10) / Chemistry (Class 10)">
+                </div>
+            </div>
+
+            <label style="font-size: 0.84rem; font-weight: 700;">Chapter Name</label>
+            <input type="text" name="chapter_name" placeholder="Enter exact chapter name">
+
+            <label style="font-size: 0.84rem; font-weight: 700;">Video File (.mp4, .mov, .webm)</label>
+            <input type="file" name="video_file" accept="video/*" required>
+
+            <label style="font-size: 0.84rem; font-weight: 700;">Thumbnail Image (.jpg, .png, .webp)</label>
+            <input type="file" name="thumbnail_file" accept="image/*">
+
+            <button type="submit" id="epPublishVideoBtn" class="btn">Publish Lecture</button>
+        </form>
+    </div>
+
+    <div class="glass-card">
+        <h3 style="margin-bottom: 12px;">Upload PDF Note</h3>
+        <form method="POST" enctype="multipart/form-data">
+            <input type="hidden" name="form_type" value="upload_note">
+
+            <label style="font-size: 0.84rem; font-weight: 700;">PDF Note Title</label>
+            <input type="text" name="title" required placeholder="e.g., Chemical Reactions Notes PDF">
+
+            <div class="grid-2" style="gap: 10px;">
+                <div>
+                    <label style="font-size: 0.84rem; font-weight: 700;">Section / Stream</label>
+                    <select name="portal_type">
+                        <option value="Class 10">Class 10</option>
+                        <option value="Class 11 Science">Class 11 Science</option>
+                        <option value="Class 11 Commerce">Class 11 Commerce</option>
+                        <option value="Class 11 Arts">Class 11 Arts</option>
+                        <option value="Class 12 Science">Class 12 Science</option>
+                        <option value="Class 12 Commerce">Class 12 Commerce</option>
+                        <option value="Class 12 Arts">Class 12 Arts</option>
+                        <option value="JEE">JEE</option>
+                        <option value="NEET">NEET</option>
+                        <option value="Bihar Board (BSEB)">Bihar Board (BSEB)</option>
+                        <option value="General">General</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="font-size: 0.84rem; font-weight: 700;">Subject</label>
+                    <input type="text" name="subject" required placeholder="e.g., Chemistry (Class 10) / Physics (Class 10)">
+                </div>
+            </div>
+
+            <label style="font-size: 0.84rem; font-weight: 700;">Chapter Name</label>
+            <input type="text" name="chapter_name" placeholder="Enter exact chapter name">
+
+            <label style="font-size: 0.84rem; font-weight: 700;">PDF File (.pdf)</label>
+            <input type="file" name="pdf_file" accept="application/pdf" required>
+
+            <button type="submit" class="btn">Upload PDF Note</button>
+        </form>
+    </div>
+</div>
+
+<div class="glass-card">
+    <h3 style="margin-bottom: 14px;">Manage Lectures & Thumbnails ({{ videos|length }})</h3>
+    {% if videos %}
+        {% for v in videos %}
+        <div class="ctrl-row">
+            <div>
+                <div style="font-weight: 700;">{{ v['title'] }}</div>
+                <div style="font-size: 0.78rem; color: var(--muted);">
+                    {{ v['subject'] }} • {{ v['portal_type'] }}{% if v['chapter_name'] %} • Chapter: {{ v['chapter_name'] }}{% endif %}
+                </div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                <form method="POST" enctype="multipart/form-data" style="display: flex; align-items: center; gap: 6px; margin: 0;">
+                    <input type="hidden" name="form_type" value="update_thumbnail">
+                    <input type="hidden" name="vid_id" value="{{ v['id'] }}">
+                    <input type="file" name="new_thumbnail" accept="image/*" required style="margin: 0; padding: 6px; font-size: 0.78rem; width: auto;">
+                    <button type="submit" class="btn-outline" style="padding: 6px 11px; font-size: 0.78rem;">Update Thumb</button>
+                </form>
+                <a href="{{ url_for('delete_video', vid_id=v['id']) }}" class="btn-outline" style="padding: 6px 11px; font-size: 0.78rem; border-color: #ef4444; color: #ef4444;">Delete</a>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <p style="color: var(--muted); font-size: 0.88rem;">No videos uploaded yet.</p>
+    {% endif %}
+</div>
+
+<div class="glass-card">
+    <h3 style="margin-bottom: 14px;">Manage PDF Notes ({{ notes|length }})</h3>
+    {% if notes %}
+        {% for n in notes %}
+        <div class="ctrl-row">
+            <div>
+                <div style="font-weight: 700;">{{ n['title'] }}</div>
+                <div style="font-size: 0.78rem; color: var(--muted);">
+                    {{ n['subject'] }} • {{ n['portal_type'] }}{% if n['chapter_name'] %} • Chapter: {{ n['chapter_name'] }}{% endif %}
+                </div>
+            </div>
+            <div style="display: flex; gap: 8px;">
+                <a href="{{ url_for('serve_file', filename=n['filename']) }}" target="_blank" class="btn-outline" style="padding: 6px 11px; font-size: 0.78rem;">View</a>
+                <a href="{{ url_for('delete_note', note_id=n['id']) }}" class="btn-outline" style="padding: 6px 11px; font-size: 0.78rem; border-color: #ef4444; color: #ef4444;">Delete</a>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <p style="color: var(--muted); font-size: 0.88rem;">No PDF notes uploaded yet.</p>
+    {% endif %}
+</div>
+
+<div class="grid-2">
+    <div class="glass-card">
+        <h3 style="margin-bottom: 12px;">Student Messages Control ({{ all_doubts|length }})</h3>
+        {% if all_doubts %}
+            {% for d in all_doubts[:15] %}
+            <div class="ctrl-row">
+                <div style="max-width: 78%;">
+                    <div style="font-size: 0.76rem; color: var(--muted); font-weight: 700;">{{ d['user_name'] }} • {{ d['created_at'] }}</div>
+                    <div style="font-weight: 700; font-size: 0.88rem;">Message: {{ d['question'] }}</div>
+                </div>
+                <a href="{{ url_for('delete_doubt', doubt_id=d['id']) }}" class="btn-outline" style="padding: 5px 10px; font-size: 0.76rem; border-color: #ef4444; color: #ef4444;">Delete</a>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p style="color: var(--muted); font-size: 0.88rem;">No messages found.</p>
+        {% endif %}
+    </div>
+
+    <div class="glass-card">
+        <h3 style="margin-bottom: 12px;">Comments Control ({{ all_comments|length }})</h3>
+        {% if all_comments %}
+            {% for c in all_comments[:15] %}
+            <div class="ctrl-row">
+                <div style="max-width: 78%;">
+                    <div style="font-size: 0.76rem; color: var(--muted); font-weight: 700;">{{ c['user_name'] }} • {{ c['created_at'] }}</div>
+                    <div style="font-size: 0.88rem;">{{ c['comment'] }}</div>
+                    {% if c['admin_reply'] %}
+                        <div style="font-size: 0.8rem; color: var(--accent); margin-top: 3px;">EDUPATH: {{ c['admin_reply'] }}</div>
+                    {% endif %}
+                </div>
+                <a href="{{ url_for('delete_comment', comment_id=c['id']) }}" class="btn-outline" style="padding: 5px 10px; font-size: 0.76rem; border-color: #ef4444; color: #ef4444;">Delete</a>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p style="color: var(--muted); font-size: 0.88rem;">No comments found.</p>
+        {% endif %}
+    </div>
+</div>
+
+<div class="glass-card">
+    <h3 style="margin-bottom: 12px;">Registered Students ({{ students|length }})</h3>
+    {% if students %}
+        {% for u in students %}
+        {% set is_blocked = (u['is_blocked']|int == 1) if u['is_blocked'] is defined and u['is_blocked'] is not none else false %}
+        <div class="ctrl-row">
+            <div>
+                <div style="font-weight: 700;">
+                    {{ u['name'] }}
+                    {% if is_blocked %}
+                        <span style="margin-left: 6px; font-size: 0.72rem; padding: 2px 8px; border-radius: 999px; background: rgba(239,68,68,0.15); color: #ef4444; font-weight: 800;">BLOCKED</span>
+                    {% else %}
+                        <span style="margin-left: 6px; font-size: 0.72rem; padding: 2px 8px; border-radius: 999px; background: rgba(16,185,129,0.15); color: #10b981; font-weight: 800;">ACTIVE</span>
+                    {% endif %}
+                </div>
+                <div style="font-size: 0.78rem; color: var(--muted);">{{ u['email'] }} • {{ u['student_class'] }}</div>
+            </div>
+
+            <div class="student-actions">
+                <button type="button" class="btn-outline" style="padding: 6px 11px; font-size: 0.78rem;" data-student-id="{{ u['id'] }}" onclick="toggleStudentDm(this.dataset.studentId)">
+                    Personal Message
+                </button>
+
+                <form method="POST" action="{{ url_for('toggle_block_user', target_user_id=u['id']) }}" style="margin: 0;">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                    {% if is_blocked %}
+                        <button type="submit" class="btn-outline" style="padding: 6px 11px; font-size: 0.78rem; border-color: #10b981; color: #10b981;">
+                            Unblock
+                        </button>
+                    {% else %}
+                        <button type="submit" class="btn-outline" style="padding: 6px 11px; font-size: 0.78rem; border-color: #ef4444; color: #ef4444;">
+                            Block
+                        </button>
+                    {% endif %}
+                </form>
+            </div>
+
+            <div id="dmBox_{{ u['id'] }}" class="dm-box">
+                <form method="POST" action="{{ url_for('send_personal_message', target_user_id=u['id']) }}" style="margin: 0;">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                    <label style="font-size: 0.78rem; font-weight: 700;">Personal Message for {{ u['name'] }}</label>
+                    <textarea name="personal_message" rows="2" required placeholder="Write a direct personal message for {{ u['name'] }}..." style="margin-bottom: 8px;"></textarea>
+                    <button type="submit" class="btn" style="padding: 8px 14px; font-size: 0.82rem;">Send Personal Message</button>
+                </form>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <p style="color: var(--muted); font-size: 0.88rem;">No students registered yet.</p>
+    {% endif %}
+</div>
+
+<script>
+function toggleStudentDm(userId) {
+    var box = document.getElementById("dmBox_" + userId);
+    if (box) box.classList.toggle("open");
+}
+
+(function () {
+    var form = document.getElementById("epAdminVideoUploadForm");
+    var panel = document.getElementById("epSideUploadPanel");
+    var toggleBtn = document.getElementById("epToggleUploadPanelBtn");
+    var closeBtn = document.getElementById("epCloseUploadPanelBtn");
+    var titleEl = document.getElementById("epUploadTitleText");
+    var fileEl = document.getElementById("epUploadFileText");
+    var barEl = document.getElementById("epUploadProgressBar");
+    var pctEl = document.getElementById("epUploadPercentText");
+    var sizeEl = document.getElementById("epUploadSizeText");
+    var speedEl = document.getElementById("epUploadSpeedText");
+    var stageEl = document.getElementById("epUploadStageText");
+    var submitBtn = document.getElementById("epPublishVideoBtn");
+
+    if (toggleBtn && panel) {
+        toggleBtn.addEventListener("click", function () {
+            var isCollapsed = panel.classList.toggle("collapsed");
+            toggleBtn.textContent = isCollapsed ? "Expand" : "Minimize";
+        });
+    }
+    if (closeBtn && panel) {
+        closeBtn.addEventListener("click", function () {
+            panel.classList.remove("visible");
+        });
+    }
+
+    if (!form || !panel || typeof XMLHttpRequest === "undefined") return;
+
+    form.addEventListener("submit", function (e) {
+        var fileInput = form.querySelector('input[type="file"][name="video_file"]');
+        var titleInput = form.querySelector('input[name="title"]');
+        var file = fileInput && fileInput.files && fileInput.files[0];
+        if (!file) return;
+
+        e.preventDefault();
+        panel.classList.add("visible");
+        panel.classList.remove("collapsed");
+        if (toggleBtn) toggleBtn.textContent = "Minimize";
+
+        var lecTitle = (titleInput && titleInput.value.trim()) || file.name;
+        if (titleEl) titleEl.textContent = lecTitle;
+        if (fileEl) fileEl.textContent = file.name;
+        if (barEl) barEl.style.width = "0%";
+        if (pctEl) pctEl.textContent = "0%";
+        if (stageEl) {
+            stageEl.style.color = "#059669";
+            stageEl.textContent = "Uploading video file...";
+        }
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.textContent = "Uploading...";
+        }
+
+        var startTime = Date.now();
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", form.action || window.location.href, true);
+
+        xhr.upload.onprogress = function (evt) {
+            if (!evt.lengthComputable) return;
+            var pct = Math.min(100, Math.round((evt.loaded / evt.total) * 100));
+            var loadedMB = (evt.loaded / (1024 * 1024)).toFixed(1);
+            var totalMB = (evt.total / (1024 * 1024)).toFixed(1);
+            var elapsedSec = Math.max(0.2, (Date.now() - startTime) / 1000);
+            var speedMBs = ((evt.loaded / (1024 * 1024)) / elapsedSec).toFixed(2);
+
+            if (barEl) barEl.style.width = pct + "%";
+            if (pctEl) pctEl.textContent = pct + "%";
+            if (sizeEl) sizeEl.textContent = loadedMB + " / " + totalMB + " MB";
+            if (speedEl) speedEl.textContent = speedMBs + " MB/s";
+
+            if (pct >= 100 && stageEl) {
+                stageEl.textContent = "Processing & saving lecture on server...";
+            }
+        };
+
+        xhr.onload = function () {
+            if (xhr.status >= 200 && xhr.status < 400) {
+                if (barEl) barEl.style.width = "100%";
+                if (pctEl) pctEl.textContent = "100%";
+                if (stageEl) stageEl.textContent = "Upload complete! Refreshing...";
+                window.location.reload();
+            } else {
+                if (stageEl) {
+                    stageEl.style.color = "#dc2626";
+                    stageEl.textContent = "Upload failed (Status " + xhr.status + "). Please try again.";
+                }
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = "Publish Lecture";
+                }
+            }
+        };
+
+        xhr.onerror = function () {
+            if (stageEl) {
+                stageEl.style.color = "#dc2626";
+                stageEl.textContent = "Network error during upload. Please try again.";
+            }
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.textContent = "Publish Lecture";
+            }
+        };
+
+        xhr.send(new FormData(form));
+    });
+})();
+</script>
+{% endblock %}

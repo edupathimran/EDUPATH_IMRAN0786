@@ -1,0 +1,2574 @@
+{% extends "base_2.html" %}
+{% block content %}
+<style>
+    .mt-wrap,
+    .mt-wrap *,
+    .mt-wrap *::before,
+    .mt-wrap *::after {
+        box-sizing: border-box;
+    }
+    .mt-wrap {
+        max-width: 1320px;
+        margin: 0 auto;
+    }
+    .mt-hero {
+        background:
+            radial-gradient(circle at 90% 12%, rgba(16, 185, 129, 0.16), transparent 48%),
+            linear-gradient(135deg, color-mix(in srgb, var(--accent, #4f46e5) 14%, var(--card, #ffffff)), var(--card, #ffffff));
+        border: 1px solid color-mix(in srgb, var(--accent, #4f46e5) 30%, var(--border, #e2e8f0));
+        border-radius: 22px;
+        padding: 18px 22px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-bottom: 14px;
+        box-shadow: 0 12px 28px rgba(15, 23, 42, 0.05);
+    }
+
+    /* Step 1: Class / Stream Selection Gate */
+    .mt-class-gate {
+        background: linear-gradient(145deg, color-mix(in srgb, var(--accent, #4f46e5) 10%, var(--card, #ffffff)), var(--card, #ffffff));
+        border: 1.5px solid color-mix(in srgb, var(--accent, #4f46e5) 28%, var(--border, #e2e8f0));
+        border-radius: 20px;
+        padding: 16px 18px;
+        margin-bottom: 16px;
+        box-shadow: 0 8px 24px rgba(15, 23, 42, 0.04);
+    }
+    .mt-gate-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 12px;
+    }
+    .mt-stream-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(145px, 1fr));
+        gap: 9px;
+    }
+    .mt-stream-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 10px 12px;
+        border-radius: 13px;
+        border: 1.5px solid var(--border, #cbd5e1);
+        background: var(--bg, #f8fafc);
+        color: var(--text, #0f172a);
+        font-weight: 800;
+        font-size: 0.83rem;
+        text-decoration: none;
+        cursor: pointer;
+        transition: all 0.15s ease;
+    }
+    .mt-stream-btn:hover {
+        border-color: var(--accent, #4f46e5);
+        transform: translateY(-1px);
+    }
+    .mt-stream-btn.active {
+        background: var(--accent, #4f46e5);
+        color: #ffffff;
+        border-color: var(--accent, #4f46e5);
+        box-shadow: 0 6px 16px color-mix(in srgb, var(--accent, #4f46e5) 28%, transparent);
+    }
+
+    .mt-grid {
+        display: grid;
+        grid-template-columns: 340px minmax(0, 1fr);
+        gap: 18px;
+        align-items: start;
+    }
+    .mt-grid > div {
+        min-width: 0;
+    }
+    .mt-test-list {
+        max-height: 580px;
+        overflow-y: auto;
+        padding-right: 4px;
+    }
+    .mt-test-card {
+        display: block;
+        padding: 13px 14px;
+        border-radius: 15px;
+        border: 1px solid var(--border, #e2e8f0);
+        background: var(--bg, #f8fafc);
+        color: var(--text, #0f172a);
+        text-decoration: none;
+        margin-bottom: 10px;
+        transition: border-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+    }
+    .mt-test-card:hover {
+        border-color: var(--accent, #4f46e5);
+        transform: translateY(-1px);
+    }
+    .mt-test-card.active {
+        border: 2px solid var(--accent, #4f46e5);
+        background: var(--card, #ffffff);
+        box-shadow: 0 8px 20px color-mix(in srgb, var(--accent, #4f46e5) 15%, transparent);
+    }
+    .mt-test-card.attempted-lock {
+        border-color: rgba(16, 185, 129, 0.55);
+        background: rgba(16, 185, 129, 0.07);
+    }
+    .mt-card-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 8px;
+    }
+    .mt-att-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 2px 9px;
+        border-radius: 999px;
+        font-size: 0.7rem;
+        font-weight: 800;
+        background: rgba(16, 185, 129, 0.16);
+        color: #047857;
+        border: 1px solid rgba(16, 185, 129, 0.4);
+        white-space: nowrap;
+        flex-shrink: 0;
+    }
+    .mt-card-score-pill {
+        display: inline-block;
+        margin-top: 6px;
+        padding: 2px 8px;
+        border-radius: 7px;
+        font-size: 0.74rem;
+        font-weight: 800;
+        background: rgba(16, 185, 129, 0.12);
+        color: #047857;
+    }
+
+    /* Side Attempt Summary Card (Left Column) */
+    .mt-side-summary-card {
+        border: 1.5px solid rgba(16, 185, 129, 0.45);
+        background: linear-gradient(160deg, rgba(16, 185, 129, 0.08), var(--card, #ffffff));
+        margin-bottom: 14px;
+        display: none;
+    }
+    .mt-side-stats-2x2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        margin-top: 10px;
+    }
+    .mt-side-stat {
+        background: var(--bg, #f8fafc);
+        border: 1px solid var(--border, #e2e8f0);
+        border-radius: 11px;
+        padding: 8px 10px;
+    }
+    .mt-side-stat-lbl {
+        font-size: 0.67rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        color: var(--muted, #64748b);
+    }
+    .mt-side-stat-val {
+        font-size: 0.96rem;
+        font-weight: 900;
+        margin-top: 2px;
+    }
+
+    .mt-exam-bar {
+        position: sticky;
+        top: 64px;
+        z-index: 20;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 12px;
+        padding: 14px 18px;
+        border-radius: 18px;
+        background: var(--card, #ffffff);
+        border: 1.5px solid var(--accent, #4f46e5);
+        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.06);
+        margin-bottom: 14px;
+        max-width: 100%;
+    }
+    .mt-exam-bar-actions {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+        max-width: 100%;
+    }
+    .mt-mobile-back-btn {
+        display: none;
+    }
+    .mt-timer-pill {
+        padding: 8px 14px;
+        border-radius: 999px;
+        background: var(--accent, #4f46e5);
+        color: #ffffff;
+        font-weight: 900;
+        font-size: 0.9rem;
+        font-variant-numeric: tabular-nums;
+        white-space: nowrap;
+        max-width: 100%;
+    }
+    .mt-timer-pill.urgent {
+        background: #dc2626;
+    }
+    .mt-timer-pill.locked {
+        background: #059669;
+    }
+
+    /* Locked Review Banner */
+    .mt-locked-banner {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 10px;
+        padding: 13px 16px;
+        border-radius: 16px;
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.14), rgba(79, 70, 229, 0.08));
+        border: 1.5px solid rgba(16, 185, 129, 0.45);
+        margin-bottom: 14px;
+        max-width: 100%;
+    }
+    .mt-locked-banner > div {
+        min-width: 0;
+        flex: 1 1 200px;
+        overflow-wrap: anywhere;
+    }
+
+    /* Question Palette Pills in Locked Review Mode */
+    .mt-q-palette {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-bottom: 14px;
+        padding: 10px 12px;
+        border-radius: 14px;
+        background: var(--card, #ffffff);
+        border: 1px solid var(--border, #e2e8f0);
+        max-width: 100%;
+    }
+    .mt-pal-btn {
+        min-width: 34px;
+        height: 32px;
+        padding: 0 8px;
+        border-radius: 8px;
+        font-size: 0.76rem;
+        font-weight: 800;
+        border: 1.5px solid var(--border, #cbd5e1);
+        background: var(--bg, #f8fafc);
+        color: var(--text, #0f172a);
+        cursor: pointer;
+    }
+    .mt-pal-btn.pal-correct {
+        background: rgba(16, 185, 129, 0.16);
+        border-color: #10b981;
+        color: #065f46;
+    }
+    .mt-pal-btn.pal-wrong {
+        background: rgba(239, 68, 68, 0.16);
+        border-color: #ef4444;
+        color: #991b1b;
+    }
+    .mt-pal-btn.pal-skip {
+        background: rgba(245, 158, 11, 0.14);
+        border-color: #f59e0b;
+        color: #92400e;
+    }
+
+    .mt-step-box {
+        background: var(--card, #ffffff);
+        border: 1px solid var(--border, #e2e8f0);
+        border-radius: 20px;
+        padding: 20px;
+        margin-bottom: 14px;
+        box-shadow: 0 8px 22px rgba(15, 23, 42, 0.04);
+        max-width: 100%;
+    }
+    .mt-step-box.mt-hidden {
+        display: none;
+    }
+    .mt-step-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-bottom: 12px;
+    }
+    .mt-q-subtag {
+        display: inline-block;
+        font-size: 0.72rem;
+        font-weight: 800;
+        padding: 3px 10px;
+        border-radius: 999px;
+        background: color-mix(in srgb, var(--accent, #4f46e5) 12%, transparent);
+        color: var(--accent, #4f46e5);
+        margin-bottom: 8px;
+        max-width: 100%;
+        overflow-wrap: anywhere;
+    }
+    .mt-q-title {
+        font-weight: 800;
+        font-size: 1.02rem;
+        margin-bottom: 14px;
+        line-height: 1.48;
+        overflow-wrap: anywhere;
+    }
+    .mt-figure-box {
+        background: var(--bg, #f8fafc);
+        border: 1px solid var(--border, #e2e8f0);
+        border-radius: 14px;
+        padding: 12px;
+        margin-bottom: 14px;
+        text-align: center;
+        max-width: 100%;
+        overflow: hidden;
+    }
+    .mt-figure-box svg {
+        max-width: 100%;
+        width: auto;
+        height: auto;
+        display: inline-block;
+    }
+    .mt-figure-caption {
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: var(--muted, #64748b);
+        margin-top: 6px;
+        overflow-wrap: anywhere;
+    }
+
+    .mt-opt {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 11px 14px;
+        border: 1.5px solid var(--border, #e2e8f0);
+        border-radius: 13px;
+        background: var(--bg, #f8fafc);
+        margin-bottom: 9px;
+        cursor: pointer;
+        font-size: 0.92rem;
+        transition: border-color 0.14s ease, background 0.14s ease;
+        max-width: 100%;
+    }
+    .mt-opt:hover {
+        border-color: var(--accent, #4f46e5);
+        background: var(--card, #ffffff);
+    }
+    .mt-opt-left {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+    .mt-opt-left > span:last-child {
+        min-width: 0;
+        overflow-wrap: anywhere;
+    }
+    .mt-opt input[type="radio"] {
+        width: 18px;
+        height: 18px;
+        margin: 0;
+        flex-shrink: 0;
+        accent-color: var(--accent, #4f46e5);
+    }
+
+    /* Locked MCQ Option Highlighting: Green for Correct, Red for Wrong Selection */
+    .mt-opt.opt-locked {
+        cursor: default;
+        pointer-events: none;
+    }
+    .mt-opt.opt-correct-ans {
+        background: rgba(16, 185, 129, 0.16) !important;
+        border: 2px solid #10b981 !important;
+        color: #064e3b !important;
+        font-weight: 700;
+    }
+    .mt-opt.opt-wrong-ans {
+        background: rgba(239, 68, 68, 0.16) !important;
+        border: 2px solid #ef4444 !important;
+        color: #7f1d1d !important;
+        font-weight: 700;
+    }
+    .mt-opt-tag {
+        font-size: 0.7rem;
+        font-weight: 800;
+        padding: 2px 8px;
+        border-radius: 999px;
+        white-space: nowrap;
+        flex-shrink: 0;
+    }
+    .mt-opt-tag.tag-green {
+        background: #10b981;
+        color: #ffffff;
+    }
+    .mt-opt-tag.tag-red {
+        background: #ef4444;
+        color: #ffffff;
+    }
+
+    .mt-nav-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-top: 16px;
+        padding-top: 14px;
+        border-top: 1px solid var(--border, #e2e8f0);
+    }
+    .mt-nav-right-group {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-left: auto;
+    }
+    .mt-box-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        padding: 9px 15px;
+        border-radius: 10px;
+        font-size: 0.85rem;
+        font-weight: 800;
+        cursor: pointer;
+        transition: transform 0.13s ease, opacity 0.13s ease, box-shadow 0.13s ease;
+        max-width: 100%;
+    }
+    .mt-box-btn:hover { transform: translateY(-1px); }
+    .mt-box-prev {
+        background: var(--bg, #f1f5f9);
+        color: var(--text, #0f172a);
+        border: 1.5px solid var(--border, #cbd5e1);
+    }
+    .mt-box-next {
+        background: var(--accent, #4f46e5);
+        color: #ffffff;
+        border: 1.5px solid var(--accent, #4f46e5);
+        box-shadow: 0 5px 14px color-mix(in srgb, var(--accent, #4f46e5) 28%, transparent);
+    }
+    .mt-box-send {
+        background: linear-gradient(135deg, #10b981, #059669);
+        color: #ffffff;
+        border: 1.5px solid #047857;
+        box-shadow: 0 5px 14px rgba(5, 150, 105, 0.28);
+    }
+    .mt-box-danger {
+        background: rgba(239, 68, 68, 0.12);
+        color: #dc2626;
+        border: 1.5px solid rgba(239, 68, 68, 0.45);
+    }
+
+    .mt-hint-msg {
+        font-size: 0.82rem;
+        color: #ef4444;
+        font-weight: 700;
+        margin-top: 8px;
+        min-height: 20px;
+    }
+    .mt-row-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+    }
+    .mt-table-wrap {
+        width: 100%;
+        max-width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        border-radius: 12px;
+    }
+    .mt-table {
+        width: 100%;
+        min-width: 540px;
+        border-collapse: collapse;
+        font-size: 0.86rem;
+    }
+    .mt-table th, .mt-table td {
+        padding: 10px 10px;
+        text-align: left;
+        border-bottom: 1px solid var(--border, #e2e8f0);
+        white-space: nowrap;
+    }
+    .mt-table thead th {
+        background: color-mix(in srgb, var(--accent, #4f46e5) 10%, transparent);
+        font-size: 0.74rem;
+        text-transform: uppercase;
+        font-weight: 800;
+    }
+    .mt-table tr.mt-me-row {
+        background: rgba(16, 185, 129, 0.10);
+        font-weight: 700;
+    }
+    .mt-rank-medal {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 28px;
+        padding: 2px 7px;
+        border-radius: 999px;
+        font-weight: 900;
+        font-size: 0.76rem;
+        background: color-mix(in srgb, var(--accent, #4f46e5) 14%, transparent);
+        color: var(--accent, #4f46e5);
+    }
+    .mt-rank-medal.r1 { background: #fef3c7; color: #b45309; }
+    .mt-rank-medal.r2 { background: #e2e8f0; color: #334155; }
+    .mt-rank-medal.r3 { background: #ffedd5; color: #9a3412; }
+
+    .mt-neg-badge { color: #ef4444; }
+    .mt-noneg-badge { color: #10b981; }
+    .mt-st-correct { font-weight: 800; color: #10b981; }
+    .mt-st-wrong { font-weight: 800; color: #ef4444; }
+    .mt-st-skip { font-weight: 800; color: #d97706; }
+    .mt-clear-btn {
+        border: 1px solid var(--border, #e2e8f0);
+        background: var(--bg, #f8fafc);
+        color: var(--muted, #64748b);
+        border-radius: 8px;
+        padding: 4px 10px;
+        font-size: 0.74rem;
+        font-weight: 700;
+        cursor: pointer;
+    }
+    .mt-del-btn {
+        width: 100%;
+        color: #ef4444;
+        border-color: #ef4444;
+        cursor: pointer;
+    }
+    .mt-admin-status {
+        display: none;
+        font-size: 0.78rem;
+        font-weight: 700;
+        padding: 8px 10px;
+        border-radius: 10px;
+        margin-bottom: 8px;
+    }
+    .mt-review-item {
+        font-size: 0.84rem;
+        padding: 8px 10px;
+        border-radius: 10px;
+        background: var(--bg, #f8fafc);
+        border: 1px solid var(--border, #e2e8f0);
+        margin-bottom: 7px;
+    }
+    .mt-lb-admin-editor {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        flex-wrap: wrap;
+    }
+    .mt-lb-score-input {
+        width: 72px;
+        padding: 4px 7px;
+        border-radius: 7px;
+        border: 1px solid var(--border, #cbd5e1);
+        background: var(--bg, #f8fafc);
+        color: var(--text, #0f172a);
+        font-size: 0.78rem;
+        font-weight: 800;
+    }
+    .mt-lb-mini-btn {
+        padding: 4px 8px;
+        border-radius: 7px;
+        font-size: 0.72rem;
+        font-weight: 800;
+        cursor: pointer;
+        border: 1px solid var(--border, #cbd5e1);
+    }
+    .mt-lb-save-btn {
+        background: rgba(16, 185, 129, 0.14);
+        border-color: #10b981;
+        color: #047857;
+    }
+    .mt-lb-rem-btn {
+        background: rgba(239, 68, 68, 0.12);
+        border-color: #ef4444;
+        color: #dc2626;
+    }
+
+    .mt-wrap.mt-class-unselected .mt-grid {
+        display: none;
+    }
+
+    @media (max-width: 860px) {
+        .mt-wrap {
+            width: 100%;
+            max-width: 100%;
+            overflow-x: clip;
+        }
+        .mt-wrap .glass-card {
+            max-width: 100%;
+            min-width: 0;
+            padding: 13px 12px;
+        }
+        .mt-hero {
+            padding: 13px 14px;
+            border-radius: 16px;
+            margin-bottom: 10px;
+            max-width: 100%;
+        }
+        .mt-hero h1 { font-size: 1.22rem !important; }
+        .mt-class-gate {
+            padding: 12px 13px;
+            border-radius: 16px;
+            margin-bottom: 12px;
+            max-width: 100%;
+        }
+        .mt-stream-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 8px;
+        }
+        .mt-stream-btn {
+            padding: 9px 10px;
+            font-size: 0.8rem;
+            border-radius: 11px;
+            min-width: 0;
+            overflow-wrap: anywhere;
+        }
+        .mt-grid {
+            grid-template-columns: minmax(0, 1fr);
+            gap: 12px;
+            width: 100%;
+        }
+        .mt-test-list {
+            max-height: none;
+            padding-right: 0;
+        }
+        .mt-row-2 { grid-template-columns: minmax(0, 1fr); }
+
+        .mt-wrap.mt-phone-stage-select #mtLeftCol { display: block; }
+        .mt-wrap.mt-phone-stage-select #mtRightCol { display: none; }
+        .mt-wrap.mt-phone-stage-exam #mtLeftCol { display: none; }
+        .mt-wrap.mt-phone-stage-exam #mtRightCol { display: block; min-width: 0; max-width: 100%; }
+        .mt-wrap.mt-phone-stage-exam .mt-class-gate { display: none; }
+
+        .mt-mobile-back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 6px 10px;
+            border-radius: 9px;
+            border: 1px solid var(--border, #cbd5e1);
+            background: var(--bg, #f8fafc);
+            color: var(--text, #0f172a);
+            font-size: 0.76rem;
+            font-weight: 800;
+            cursor: pointer;
+            margin-bottom: 6px;
+        }
+        .mt-exam-bar {
+            top: 58px;
+            padding: 11px 12px;
+            border-radius: 14px;
+            gap: 8px;
+            max-width: 100%;
+        }
+        .mt-exam-bar > div:first-child {
+            flex: 1 1 100%;
+            min-width: 0;
+        }
+        #mtExamTitle {
+            font-size: 0.96rem !important;
+            overflow-wrap: anywhere;
+        }
+        #mtExamMeta {
+            overflow-wrap: anywhere;
+        }
+        .mt-exam-bar-actions {
+            width: 100%;
+            justify-content: space-between;
+        }
+        .mt-timer-pill {
+            padding: 6px 11px;
+            font-size: 0.78rem;
+        }
+        .mt-locked-banner {
+            padding: 11px 12px;
+            border-radius: 14px;
+            align-items: flex-start;
+        }
+        .mt-step-box {
+            padding: 13px 12px;
+            border-radius: 15px;
+            max-width: 100%;
+        }
+        .mt-q-title { font-size: 0.94rem; }
+        .mt-opt {
+            padding: 10px 11px;
+            font-size: 0.85rem;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+        .mt-opt-tag {
+            font-size: 0.66rem;
+            padding: 2px 7px;
+            max-width: 100%;
+        }
+        .mt-box-btn {
+            padding: 8px 12px;
+            font-size: 0.78rem;
+        }
+        .mt-nav-row {
+            gap: 8px;
+        }
+        .mt-nav-right-group {
+            gap: 8px;
+        }
+        .mt-q-palette {
+            padding: 8px;
+            gap: 5px;
+        }
+        .mt-pal-btn {
+            min-width: 30px;
+            height: 28px;
+            font-size: 0.72rem;
+            padding: 0 6px;
+        }
+        .mt-table {
+            min-width: 480px;
+            font-size: 0.78rem;
+        }
+        .mt-table th, .mt-table td {
+            padding: 8px 7px;
+        }
+    }
+</style>
+
+{% set cur_portal = active_portal if active_portal is defined and active_portal else "" %}
+{% set portal_choices = [
+    "Class 10",
+    "Class 11 Science",
+    "Class 11 Commerce",
+    "Class 11 Arts",
+    "Class 12",
+    "JEE Main + Adv",
+    "State Boards",
+    "JEE",
+    "NEET",
+    "General",
+    "All"
+] %}
+{% set cur_user = user if user is defined and user else {"role": "admin", "name": "Student"} %}
+{% set cur_tests = tests if tests is defined and tests else [] %}
+{% set cur_active_test = active_test if active_test is defined and active_test else none %}
+{% set cur_questions = questions if questions is defined and questions else [] %}
+{% set cur_attempts = my_attempts if my_attempts is defined and my_attempts else [] %}
+{% set cur_leaderboard = leaderboard if leaderboard is defined and leaderboard else [] %}
+{% set cur_result = result_data if result_data is defined and result_data else none %}
+{% set cur_csrf = csrf_token if csrf_token is defined and csrf_token else "" %}
+{% set has_server_active = 1 if (cur_active_test and cur_questions) else 0 %}
+
+<div class="mt-wrap {% if not cur_portal and not has_server_active and not cur_result %}mt-class-unselected{% endif %} {% if has_server_active == 1 or cur_result %}mt-phone-stage-exam{% else %}mt-phone-stage-select{% endif %}"
+     id="mtRootWrap"
+     data-initial-portal="{{ cur_portal }}"
+     data-user-name="{{ cur_user.name if cur_user and cur_user.name else 'Student' }}"
+     data-user-role="{{ cur_user.role if cur_user and cur_user.role else 'admin' }}">
+
+    <div class="mt-hero">
+        <div>
+            <h1 style="font-size: 1.75rem; margin-bottom: 4px;">EDUPATH CBT Mock Test Arena</h1>
+            <p style="color: var(--muted, #64748b); font-size: 0.88rem; margin: 0;">
+                Step 1: Select your Class / Stream → Step 2: Attempt the Mock Test (Single Attempt Lock) → Review Green/Red answers &amp; Leaderboard.
+            </p>
+        </div>
+        <span class="pill active" id="mtActiveCategoryBadge">
+            {% if cur_portal %}Class: {{ cur_portal }}{% else %}Select Class First{% endif %}
+        </span>
+    </div>
+
+    <!-- Step 1: Class / Stream Selection Gate -->
+    <div class="mt-class-gate" id="mtClassSelectBanner">
+        <div class="mt-gate-head">
+            <div>
+                <strong style="font-size: 0.96rem;">Step 1: Select Class / Stream / Board</strong>
+                <div style="font-size: 0.78rem; color: var(--muted, #64748b);">
+                    Select your class or stream first to unlock tests (or click <strong>All</strong> to view every test).
+                </div>
+            </div>
+            <span class="pill" id="mtGateStatusPill">{% if cur_portal %}{{ cur_portal }} Selected{% else %}Pending Selection{% endif %}</span>
+        </div>
+        <div class="mt-stream-grid" id="mtCategoryFilterBar">
+            {% for p in portal_choices %}
+                <a href="{% if url_for is defined %}{{ url_for('mock_test_portal', portal=p) }}{% else %}?portal={{ p|urlencode }}{% endif %}"
+                   class="mt-stream-btn mt-cat-pill{% if cur_portal|lower == p|lower %} active{% endif %}" data-portal="{{ p }}">
+                    {{ p }}
+                </a>
+            {% endfor %}
+        </div>
+    </div>
+
+    {% if cur_result %}
+    <div class="glass-card" id="mtServerResultCard" style="border: 2px solid var(--accent, #4f46e5); margin-bottom: 18px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+            <h2 style="font-size: 1.2rem; margin: 0;">Result: {{ cur_result.test_title }}</h2>
+            <span class="pill active">Attempted • Rank #{{ cur_result.rank }} • {{ cur_result.pct }}%</span>
+        </div>
+        <p style="font-weight: 800; font-size: 1rem; margin: 10px 0 6px;">
+            Net Score: {{ cur_result.score }} / {{ cur_result.max_marks }}
+        </p>
+        <p style="font-size: 0.86rem; color: var(--muted, #64748b); margin-bottom: 12px;">
+            Correct: <b>{{ cur_result.correct }}</b> (+{{ cur_result.positive_earned }}) |
+            Wrong: <b>{{ cur_result.wrong }}</b> (-{{ cur_result.negative_deducted }}) |
+            Skipped: <b>{{ cur_result.unattempted }}</b>
+        </p>
+        {% for item in cur_result.review %}
+        <div class="mt-review-item">
+            <strong>Q{{ loop.index }}.</strong> {{ item.question_text }} —
+            <span>Your Answer: <b>{{ item.chosen or "Skipped" }}</b></span> |
+            <span>Correct: <b>{{ item.correct_option }}</b></span> |
+            {% if item.status == "correct" %}
+                <span class="mt-st-correct">+{{ item.marks_delta }}</span>
+            {% elif item.status == "wrong" %}
+                <span class="mt-st-wrong">{{ item.marks_delta }}</span>
+            {% else %}
+                <span class="mt-st-skip">Skipped (0)</span>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="mt-grid">
+        <div id="mtLeftCol">
+            <!-- Side Scorecard Summary (Shows Marks, Correct, Wrong, Skipped on Side) -->
+            <div class="glass-card mt-side-summary-card" id="mtSideSummaryCard">
+                <div style="display:flex; justify-content:space-between; align-items:center; gap:6px;">
+                    <strong style="font-size:0.92rem; color:#047857;">Attempt Scorecard</strong>
+                    <span class="mt-att-badge">Attempted • Locked</span>
+                </div>
+                <div style="font-size:0.78rem; color:var(--muted, #64748b); margin-top:4px;" id="mtSideSummaryTitle"></div>
+                <div class="mt-side-stats-2x2">
+                    <div class="mt-side-stat">
+                        <div class="mt-side-stat-lbl">Marks</div>
+                        <div class="mt-side-stat-val" id="mtSideMarks">0 / 0</div>
+                    </div>
+                    <div class="mt-side-stat">
+                        <div class="mt-side-stat-lbl">Correct</div>
+                        <div class="mt-side-stat-val" style="color:#10b981;" id="mtSideCorrect">0</div>
+                    </div>
+                    <div class="mt-side-stat">
+                        <div class="mt-side-stat-lbl">Wrong</div>
+                        <div class="mt-side-stat-val" style="color:#ef4444;" id="mtSideWrong">0</div>
+                    </div>
+                    <div class="mt-side-stat">
+                        <div class="mt-side-stat-lbl">Skipped</div>
+                        <div class="mt-side-stat-val" style="color:#d97706;" id="mtSideSkipped">0</div>
+                    </div>
+                </div>
+                <div id="mtSideSkippedList" style="font-size:0.76rem; color:#92400e; margin-top:8px;"></div>
+            </div>
+
+            <div class="glass-card" style="margin-bottom: 14px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:10px;">
+                    <h3 style="font-size: 1rem; margin: 0;">
+                        Available Tests (<span id="mtVisibleTestCount">{{ cur_tests|length }}</span>)
+                    </h3>
+                    <button type="button" class="mt-clear-btn" id="mtChangeClassBtn">Change Class</button>
+                </div>
+                <div class="mt-test-list" id="mtTestListContainer">
+                    {% if cur_tests %}
+                        {% for t in cur_tests %}
+                        <a href="{% if url_for is defined %}{{ url_for('mock_test_portal', portal=cur_portal, test_id=t.id) }}{% else %}?portal={{ cur_portal|urlencode }}&amp;test_id={{ t.id }}{% endif %}"
+                           class="mt-test-card mt-server-test-card{% if cur_active_test and cur_active_test.id == t.id %} active{% endif %}"
+                           data-test-id="{{ t.id }}"
+                           data-portal="{{ t.portal_type }}"
+                           data-title="{{ t.title }}"
+                           data-subject="{{ t.subject }}"
+                           data-duration="{{ t.duration_minutes or 20 }}"
+                           data-pos="{{ t.marks_per_question if t.marks_per_question is defined else 1 }}"
+                           data-neg="{{ t.negative_marks if t.negative_marks is defined else 0 }}"
+                           data-qcount="{{ t.q_count if t.q_count is defined else 20 }}">
+                            <div class="mt-card-top">
+                                <div style="font-weight: 800; font-size: 0.94rem;">{{ t.title }}</div>
+                                <span class="mt-att-badge mt-server-att-badge" style="display:none;">Attempted</span>
+                            </div>
+                            <div style="font-size: 0.75rem; color: var(--muted, #64748b); margin-top: 4px;">
+                                {{ t.portal_type }} · {{ t.subject }} · {{ t.duration_minutes }}m · {{ t.q_count }} Qs ·
+                                {% if t.negative_marks and t.negative_marks > 0 %}
+                                    <strong class="mt-neg-badge">-{{ t.negative_marks }} Neg</strong>
+                                {% else %}
+                                    <strong class="mt-noneg-badge">No Neg</strong>
+                                {% endif %}
+                            </div>
+                            <div class="mt-card-score-pill mt-server-score-pill" style="display:none;"></div>
+                        </a>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+                <p style="color: var(--muted, #64748b); font-size: 0.86rem; margin: 0;" id="mtEmptyTestMsg" {% if cur_tests and cur_tests|length > 0 %}hidden{% endif %}>
+                    No mock tests available in this class or stream yet.
+                </p>
+            </div>
+
+            {% if cur_user and cur_user.role == "admin" %}
+            <div class="glass-card" style="margin-bottom: 14px;">
+                <h3 style="font-size: 1rem; margin-bottom: 10px;">Admin: Create New Mock Test</h3>
+                <div class="mt-admin-status" id="mtAdminStatusBox"></div>
+                <form method="POST" action="{% if url_for is defined %}{{ url_for('mock_test_portal') }}{% else %}/mock-tests{% endif %}" id="mtCreateTestForm">
+                    <input type="hidden" name="csrf_token" value="{{ cur_csrf }}">
+                    <input type="hidden" name="action" value="create_test">
+                    <input type="text" name="title" id="mtCreateTitle" placeholder="Test Title (e.g. JEE Main + Adv PYQ Set)" required>
+                    <div class="mt-row-2">
+                        <select name="portal_type" id="mtCreatePortal">
+                            {% for p in portal_choices %}
+                                {% if p != "All" %}
+                                <option value="{{ p }}">{{ p }}</option>
+                                {% endif %}
+                            {% endfor %}
+                        </select>
+                        <input type="number" name="duration_minutes" id="mtCreateDuration" min="1" max="300" value="45" required>
+                    </div>
+                    <input type="text" name="subject" id="mtCreateSubject" placeholder="Subject (e.g. PCM, Class 10 All)" required>
+                    <div class="mt-row-2">
+                        <input type="number" step="0.25" min="0.25" max="20" name="marks_per_question" id="mtCreatePos" value="4" placeholder="+Marks/Q">
+                        <input type="number" step="0.25" min="0" max="10" name="negative_marks" id="mtCreateNeg" value="1" placeholder="-Negative">
+                    </div>
+                    <button type="submit" class="btn" style="width: 100%;">Create Mock Test</button>
+                </form>
+            </div>
+
+            <div class="glass-card" style="margin-bottom: 14px;" id="mtAdminQuestionCard">
+                <h3 style="font-size: 1rem; margin-bottom: 6px;">Admin: Add MCQ, Leaderboard &amp; Delete</h3>
+                <div style="font-size: 0.75rem; color: var(--muted, #64748b); margin-bottom: 8px;">
+                    Selected Test: <strong id="mtSelectedTestName">{{ cur_active_test.title if cur_active_test else "None" }}</strong>
+                </div>
+                <form method="POST" action="{% if url_for is defined %}{{ url_for('mock_test_portal') }}{% else %}/mock-tests{% endif %}" id="mtAddQuestionForm">
+                    <input type="hidden" name="csrf_token" value="{{ cur_csrf }}">
+                    <input type="hidden" name="action" value="add_question">
+                    <input type="hidden" name="test_id" id="mtAddQTestId" value="{{ cur_active_test.id if cur_active_test else '' }}">
+                    <textarea name="question_text" id="mtQText" rows="2" placeholder="Enter question text..." required></textarea>
+                    <input type="text" name="option_a" id="mtOptA" placeholder="Option A" required>
+                    <input type="text" name="option_b" id="mtOptB" placeholder="Option B" required>
+                    <input type="text" name="option_c" id="mtOptC" placeholder="Option C" required>
+                    <input type="text" name="option_d" id="mtOptD" placeholder="Option D" required>
+                    <select name="correct_option" id="mtCorrectOpt">
+                        <option value="A">Correct Option: A</option>
+                        <option value="B">Correct Option: B</option>
+                        <option value="C">Correct Option: C</option>
+                        <option value="D">Correct Option: D</option>
+                    </select>
+                    <button type="submit" class="btn" style="width: 100%;">Add MCQ Question</button>
+                </form>
+
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:8px;">
+                    <button type="button" class="btn-outline" id="mtAdminDeleteLeaderboardBtn" style="font-size:0.76rem; padding:8px; color:#ef4444; border-color:#ef4444;">Del Leaderboard</button>
+                    <form method="POST" action="{% if url_for is defined %}{{ url_for('mock_test_portal') }}{% else %}/mock-tests{% endif %}" id="mtDeleteTestForm" style="margin:0;">
+                        <input type="hidden" name="csrf_token" value="{{ cur_csrf }}">
+                        <input type="hidden" name="action" value="delete_test">
+                        <input type="hidden" name="test_id" id="mtDelTestId" value="{{ cur_active_test.id if cur_active_test else '' }}">
+                        <button type="submit" class="btn-outline mt-del-btn" id="mtDeleteTestBtn" style="font-size:0.76rem; padding:8px;">Del Test</button>
+                    </form>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if cur_attempts %}
+            <div class="glass-card">
+                <h3 style="font-size: 1rem; margin-bottom: 8px;">My Recent Attempts</h3>
+                {% for a in cur_attempts %}
+                <div style="font-size: 0.82rem; padding: 7px 0; border-bottom: 1px solid var(--border, #e2e8f0);">
+                    <strong>{{ a.test_title or "Mock Test" }}</strong>:
+                    <b>{{ a.score }}/{{ a.max_marks or a.total_questions }}</b>
+                    <div style="color: var(--muted, #64748b); font-size: 0.74rem;">{{ a.submitted_at }}</div>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+
+        <div id="mtRightCol">
+            <div class="mt-exam-bar" id="mtExamBar" data-duration="{{ cur_active_test.duration_minutes if cur_active_test else 30 }}">
+                <div style="min-width: 0; flex: 1;">
+                    <button type="button" class="mt-mobile-back-btn" id="mtMobileBackBtn">← Back to Tests</button>
+                    <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                        <span style="font-weight: 900; font-size: 1.05rem;" id="mtExamTitle">
+                            {{ cur_active_test.title if cur_active_test else "Mock Test Arena" }}
+                        </span>
+                        <span class="mt-att-badge" id="mtBarAttemptedBadge" style="display:none;">Attempted • Locked</span>
+                    </div>
+                    <div style="font-size: 0.8rem; color: var(--muted, #64748b); margin-top: 2px;" id="mtExamMeta">
+                        {% if cur_active_test %}
+                            {{ cur_active_test.portal_type }} · {{ cur_active_test.subject }} ·
+                            <span id="mtStepCounter">Question 1 of {{ cur_questions|length }}</span> ·
+                            <span id="mtAnsweredCounter">0 / {{ cur_questions|length }} Answered</span>
+                        {% else %}
+                            Select a class/stream and click a mock test from the list to begin
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="mt-exam-bar-actions">
+                    <button type="button" class="mt-box-btn mt-box-send" id="mtTopSendTestBtn" style="display:none;">Send Test</button>
+                    <div id="mtCountdown" class="mt-timer-pill">--:--</div>
+                </div>
+            </div>
+
+            <div id="mtActiveQuestionsContainer">
+                <form id="mtMcqForm" method="POST" action="{% if cur_active_test and url_for is defined %}{{ url_for('submit_mock_test', test_id=cur_active_test.id) }}{% else %}/mock-tests{% endif %}">
+                    <input type="hidden" name="csrf_token" value="{{ cur_csrf }}">
+
+                    {% if cur_active_test and cur_questions %}
+                        {% for q in cur_questions %}
+                        <div class="mt-step-box mt-q-step{% if not loop.first %} mt-hidden{% endif %}" data-step-index="{{ loop.index0 }}">
+                            <div class="mt-step-top">
+                                <span class="pill active">Question {{ loop.index }} / {{ cur_questions|length }}</span>
+                                <button type="button" class="mt-clear-btn" data-qname="q_{{ q.id }}">Clear Option</button>
+                            </div>
+
+                            <div class="mt-q-title">{{ q.question_text }}</div>
+
+                            <label class="mt-opt">
+                                <span class="mt-opt-left">
+                                    <input type="radio" class="mt-radio-opt" name="q_{{ q.id }}" value="A">
+                                    <span><strong>A.</strong> {{ q.option_a }}</span>
+                                </span>
+                            </label>
+                            <label class="mt-opt">
+                                <span class="mt-opt-left">
+                                    <input type="radio" class="mt-radio-opt" name="q_{{ q.id }}" value="B">
+                                    <span><strong>B.</strong> {{ q.option_b }}</span>
+                                </span>
+                            </label>
+                            <label class="mt-opt">
+                                <span class="mt-opt-left">
+                                    <input type="radio" class="mt-radio-opt" name="q_{{ q.id }}" value="C">
+                                    <span><strong>C.</strong> {{ q.option_c }}</span>
+                                </span>
+                            </label>
+                            <label class="mt-opt">
+                                <span class="mt-opt-left">
+                                    <input type="radio" class="mt-radio-opt" name="q_{{ q.id }}" value="D">
+                                    <span><strong>D.</strong> {{ q.option_d }}</span>
+                                </span>
+                            </label>
+
+                            <div class="mt-hint-msg" id="mtHint_{{ loop.index0 }}"></div>
+
+                            <div class="mt-nav-row">
+                                {% if not loop.first %}
+                                    <button type="button" class="mt-box-btn mt-box-prev mt-prev-btn">← Previous</button>
+                                {% else %}
+                                    <span></span>
+                                {% endif %}
+
+                                <div class="mt-nav-right-group">
+                                    {% if not loop.last %}
+                                        <button type="button" class="mt-box-btn mt-box-next mt-next-btn">Next →</button>
+                                    {% else %}
+                                        <button type="submit" class="mt-box-btn mt-box-send mt-send-btn">Send Test</button>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% endif %}
+                </form>
+            </div>
+
+            <!-- Dedicated Leaderboard Card -->
+            <div class="glass-card" id="mtDynamicLeaderboardCard" style="margin-top: 16px; display:none;">
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:10px;">
+                    <h3 style="font-size: 1.05rem; margin: 0;" id="mtDynamicLeaderboardTitle">
+                        Test Leaderboard
+                    </h3>
+                    <div style="display:inline-flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                        {% if cur_user and cur_user.role == "admin" %}
+                        <button type="button" class="mt-box-btn mt-box-danger" id="mtCardDeleteLbBtn" style="padding:5px 10px; font-size:0.75rem;">
+                            Delete Leaderboard
+                        </button>
+                        {% endif %}
+                        <span class="mt-att-badge">Live Ranking</span>
+                    </div>
+                </div>
+                <div id="mtDynamicLeaderboardBody"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+(function () {
+    var CUSTOM_TESTS_KEY = "edupath_v6_custom_tests";
+    var DELETED_IDS_KEY = "edupath_v6_deleted_ids";
+    var LB_STORE_KEY = "edupath_v6_subject_lb";
+    var ATT_MAP_KEY = "edupath_v6_attempt_records";
+
+    /* 12 Distinct Physics/Maths/Chemistry Vector Figures for 35 Figure-Based PYQs */
+    var FIG_INCLINE_PULLEY =
+        '<svg width="290" height="126" viewBox="0 0 290 126" xmlns="http://www.w3.org/2000/svg">' +
+        '<polygon points="20,106 165,106 165,30" fill="rgba(79,70,229,0.10)" stroke="#4f46e5" stroke-width="2"/>' +
+        '<circle cx="165" cy="22" r="10" fill="#ffffff" stroke="#0f172a" stroke-width="2.2"/>' +
+        '<line x1="165" y1="12" x2="92" y2="67" stroke="#0f172a" stroke-width="2"/>' +
+        '<rect x="74" y="52" width="24" height="20" rx="3" transform="rotate(-37 86 62)" fill="#10b981" stroke="#047857" stroke-width="1.8"/>' +
+        '<line x1="175" y1="22" x2="175" y2="72" stroke="#0f172a" stroke-width="2"/>' +
+        '<rect x="163" y="72" width="24" height="22" rx="3" fill="#f59e0b" stroke="#b45309" stroke-width="1.8"/>' +
+        '<text x="72" y="95" font-size="11" font-weight="700" fill="#0f172a">m1 = 4 kg</text>' +
+        '<text x="194" y="88" font-size="11" font-weight="700" fill="#0f172a">m2 = 6 kg</text>' +
+        '<text x="115" y="120" font-size="11" font-weight="700" fill="#4f46e5">θ = 37° (μ = 0)</text>' +
+        '</svg>';
+
+    var FIG_WHEATSTONE =
+        '<svg width="300" height="124" viewBox="0 0 300 124" xmlns="http://www.w3.org/2000/svg">' +
+        '<polygon points="150,12 235,60 150,108 65,60" fill="none" stroke="#0f172a" stroke-width="2"/>' +
+        '<line x1="150" y1="12" x2="150" y2="108" stroke="#10b981" stroke-width="2" stroke-dasharray="4,3"/>' +
+        '<circle cx="150" cy="60" r="12" fill="#ffffff" stroke="#10b981" stroke-width="2"/>' +
+        '<text x="146" y="64" font-size="11" font-weight="800" fill="#047857">G</text>' +
+        '<text x="86" y="32" font-size="11" font-weight="700" fill="#0f172a">P = 6 Ω</text>' +
+        '<text x="192" y="32" font-size="11" font-weight="700" fill="#0f172a">Q = 12 Ω</text>' +
+        '<text x="80" y="94" font-size="11" font-weight="700" fill="#0f172a">R = 4 Ω</text>' +
+        '<text x="192" y="94" font-size="11" font-weight="700" fill="#0f172a">S = 8 Ω</text>' +
+        '</svg>';
+
+    var FIG_PARABOLA_AREA =
+        '<svg width="280" height="120" viewBox="0 0 280 120" xmlns="http://www.w3.org/2000/svg">' +
+        '<line x1="30" y1="102" x2="255" y2="102" stroke="#64748b" stroke-width="1.5"/>' +
+        '<line x1="140" y1="12" x2="140" y2="112" stroke="#64748b" stroke-width="1.5"/>' +
+        '<path d="M 65 22 Q 140 182 215 22" fill="rgba(79,70,229,0.14)" stroke="#4f46e5" stroke-width="2.2"/>' +
+        '<line x1="55" y1="46" x2="225" y2="46" stroke="#dc2626" stroke-width="1.8"/>' +
+        '<text x="148" y="30" font-size="11" font-weight="700" fill="#4f46e5">x² = 4y</text>' +
+        '<text x="166" y="42" font-size="11" font-weight="700" fill="#dc2626">y = 4</text>' +
+        '</svg>';
+
+    var FIG_COUPLED_ROD =
+        '<svg width="310" height="130" viewBox="0 0 310 130" xmlns="http://www.w3.org/2000/svg">' +
+        '<line x1="25" y1="110" x2="285" y2="110" stroke="#0f172a" stroke-width="2.5"/>' +
+        '<line x1="65" y1="110" x2="65" y2="94" stroke="#4f46e5" stroke-width="2"/>' +
+        '<circle cx="65" cy="90" r="5" fill="#4f46e5"/>' +
+        '<line x1="55" y1="94" x2="235" y2="30" stroke="#0f172a" stroke-width="3.2"/>' +
+        '<circle cx="145" cy="62" r="5" fill="#10b981"/>' +
+        '<text x="42" y="82" font-size="11" font-weight="700" fill="#0f172a">v_A = 6 m/s (↑)</text>' +
+        '<text x="165" y="24" font-size="11" font-weight="700" fill="#dc2626">θ = 30°</text>' +
+        '<text x="152" y="104" font-size="11" font-weight="700" fill="#047857">L = 4 m</text>' +
+        '</svg>';
+
+    var FIG_CAPACITOR_BRIDGE =
+        '<svg width="310" height="128" viewBox="0 0 310 128" xmlns="http://www.w3.org/2000/svg">' +
+        '<rect x="65" y="20" width="180" height="84" rx="6" fill="none" stroke="#0f172a" stroke-width="2"/>' +
+        '<line x1="155" y1="20" x2="155" y2="104" stroke="#4f46e5" stroke-width="2"/>' +
+        '<line x1="149" y1="52" x2="161" y2="52" stroke="#4f46e5" stroke-width="2.4"/>' +
+        '<line x1="149" y1="70" x2="161" y2="70" stroke="#4f46e5" stroke-width="2.4"/>' +
+        '<text x="94" y="13" font-size="10" font-weight="700" fill="#0f172a">2 μF</text>' +
+        '<text x="184" y="13" font-size="10" font-weight="700" fill="#0f172a">6 μF</text>' +
+        '<text x="94" y="122" font-size="10" font-weight="700" fill="#0f172a">4 μF</text>' +
+        '<text x="184" y="122" font-size="10" font-weight="700" fill="#0f172a">12 μF</text>' +
+        '<text x="166" y="64" font-size="10" font-weight="800" fill="#4f46e5">3 μF</text>' +
+        '</svg>';
+
+    var FIG_EXP_CURVE =
+        '<svg width="300" height="122" viewBox="0 0 300 122" xmlns="http://www.w3.org/2000/svg">' +
+        '<line x1="35" y1="100" x2="275" y2="100" stroke="#64748b" stroke-width="1.5"/>' +
+        '<line x1="65" y1="14" x2="65" y2="112" stroke="#64748b" stroke-width="1.5"/>' +
+        '<path d="M 65 100 Q 145 94 225 22" fill="rgba(16,185,129,0.16)" stroke="#059669" stroke-width="2.2"/>' +
+        '<line x1="225" y1="22" x2="225" y2="100" stroke="#dc2626" stroke-width="1.6" stroke-dasharray="4,3"/>' +
+        '<text x="145" y="40" font-size="11" font-weight="700" fill="#047857">y = e^x - 1</text>' +
+        '<text x="210" y="114" font-size="11" font-weight="700" fill="#dc2626">x = ln 2</text>' +
+        '</svg>';
+
+    var FIG_PV_CYCLE =
+        '<svg width="290" height="126" viewBox="0 0 290 126" xmlns="http://www.w3.org/2000/svg">' +
+        '<line x1="45" y1="104" x2="255" y2="104" stroke="#64748b" stroke-width="1.8"/>' +
+        '<line x1="45" y1="16" x2="45" y2="104" stroke="#64748b" stroke-width="1.8"/>' +
+        '<rect x="85" y="34" width="120" height="46" fill="rgba(79,70,229,0.14)" stroke="#4f46e5" stroke-width="2.2"/>' +
+        '<text x="24" y="24" font-size="11" font-weight="800" fill="#0f172a">P</text>' +
+        '<text x="246" y="118" font-size="11" font-weight="800" fill="#0f172a">V</text>' +
+        '<text x="52" y="38" font-size="10" font-weight="700" fill="#0f172a">3P0</text>' +
+        '<text x="52" y="82" font-size="10" font-weight="700" fill="#0f172a">P0</text>' +
+        '<text x="80" y="117" font-size="10" font-weight="700" fill="#0f172a">V0</text>' +
+        '<text x="196" y="117" font-size="10" font-weight="700" fill="#0f172a">4V0</text>' +
+        '</svg>';
+
+    var FIG_MAG_LOOP =
+        '<svg width="290" height="124" viewBox="0 0 290 124" xmlns="http://www.w3.org/2000/svg">' +
+        '<line x1="55" y1="14" x2="55" y2="112" stroke="#dc2626" stroke-width="2.6"/>' +
+        '<rect x="105" y="32" width="110" height="60" fill="rgba(16,185,129,0.12)" stroke="#059669" stroke-width="2"/>' +
+        '<text x="22" y="30" font-size="11" font-weight="800" fill="#dc2626">I1=10A</text>' +
+        '<text x="142" y="66" font-size="11" font-weight="800" fill="#047857">I2 = 5 A</text>' +
+        '<text x="68" y="106" font-size="10" font-weight="700" fill="#0f172a">d = 2 cm, w = 8 cm, L = 15 cm</text>' +
+        '</svg>';
+
+    var FIG_PRISM_RAY =
+        '<svg width="290" height="124" viewBox="0 0 290 124" xmlns="http://www.w3.org/2000/svg">' +
+        '<polygon points="145,18 85,104 205,104" fill="rgba(79,70,229,0.12)" stroke="#4f46e5" stroke-width="2.2"/>' +
+        '<line x1="40" y1="68" x2="115" y2="60" stroke="#dc2626" stroke-width="2"/>' +
+        '<line x1="115" y1="60" x2="175" y2="60" stroke="#059669" stroke-width="2"/>' +
+        '<line x1="175" y1="60" x2="250" y2="68" stroke="#dc2626" stroke-width="2"/>' +
+        '<text x="136" y="42" font-size="11" font-weight="800" fill="#4f46e5">A=60°</text>' +
+        '<text x="132" y="84" font-size="11" font-weight="700" fill="#0f172a">μ = √2</text>' +
+        '</svg>';
+
+    var FIG_SPRING_BLOCK =
+        '<svg width="300" height="114" viewBox="0 0 300 114" xmlns="http://www.w3.org/2000/svg">' +
+        '<line x1="25" y1="88" x2="275" y2="88" stroke="#0f172a" stroke-width="2.5"/>' +
+        '<line x1="35" y1="30" x2="35" y2="88" stroke="#0f172a" stroke-width="3"/>' +
+        '<polyline points="35,64 52,54 68,74 84,54 100,74 116,54 132,64" fill="none" stroke="#4f46e5" stroke-width="2.2"/>' +
+        '<rect x="132" y="44" width="44" height="44" rx="4" fill="#10b981" stroke="#047857" stroke-width="2"/>' +
+        '<text x="142" y="70" font-size="11" font-weight="800" fill="#ffffff">M=2kg</text>' +
+        '<text x="64" y="42" font-size="11" font-weight="700" fill="#4f46e5">k = 200 N/m</text>' +
+        '</svg>';
+
+    var FIG_CIRCLE_CHORD =
+        '<svg width="280" height="124" viewBox="0 0 280 124" xmlns="http://www.w3.org/2000/svg">' +
+        '<circle cx="140" cy="62" r="44" fill="rgba(79,70,229,0.08)" stroke="#4f46e5" stroke-width="2"/>' +
+        '<line x1="98" y1="44" x2="182" y2="44" stroke="#dc2626" stroke-width="2.2"/>' +
+        '<circle cx="140" cy="62" r="2.5" fill="#0f172a"/>' +
+        '<line x1="140" y1="62" x2="140" y2="44" stroke="#059669" stroke-width="1.8" stroke-dasharray="3,2"/>' +
+        '<text x="146" y="57" font-size="10" font-weight="700" fill="#047857">d = 3</text>' +
+        '<text x="115" y="96" font-size="10" font-weight="700" fill="#4f46e5">x² + y² = 25</text>' +
+        '</svg>';
+
+    var FIG_CELL_POTENTIAL =
+        '<svg width="300" height="114" viewBox="0 0 300 114" xmlns="http://www.w3.org/2000/svg">' +
+        '<rect x="40" y="34" width="75" height="58" rx="5" fill="rgba(79,70,229,0.12)" stroke="#4f46e5" stroke-width="2"/>' +
+        '<rect x="185" y="34" width="75" height="58" rx="5" fill="rgba(16,185,129,0.12)" stroke="#059669" stroke-width="2"/>' +
+        '<path d="M 95 45 L 95 20 L 205 20 L 205 45" fill="none" stroke="#d97706" stroke-width="5"/>' +
+        '<text x="52" y="68" font-size="10" font-weight="800" fill="#4f46e5">Zn | Zn²⁺</text>' +
+        '<text x="195" y="68" font-size="10" font-weight="800" fill="#047857">Cu²⁺ | Cu</text>' +
+        '<text x="122" y="15" font-size="10" font-weight="800" fill="#b45309">Salt Bridge</text>' +
+        '</svg>';
+
+    /* 35 Figure-Based JEE Main + Advanced Tough PYQs */
+    var JEE_35_FIGURE_PYQS = [
+        { tag: "JEE Adv Figure PYQ #01 · Rigid Body", q: "In Fig. 1, rod AB of length L = 4 m slides with end A moving vertically upwards at v_A = 6 m/s at θ = 30°. Find angular velocity ω of the rod.", figureSvg: FIG_COUPLED_ROD, figureCaption: "Fig. 1: Constrained rod sliding against vertical wall", a: "1.50 rad/s", b: "3.00 rad/s", c: "2.25 rad/s", d: "1.73 rad/s", ans: "B" },
+        { tag: "JEE Adv Figure PYQ #02 · Electrostatics", q: "In Fig. 2, outer capacitors are 2 μF, 6 μF, 4 μF, 12 μF and diagonal capacitor is 3 μF with 20 V applied across left-right nodes. Charge on 3 μF capacitor is:", figureSvg: FIG_CAPACITOR_BRIDGE, figureCaption: "Fig. 2: Bridge capacitor network", a: "60 μC", b: "15 μC", c: "0 μC", d: "30 μC", ans: "C" },
+        { tag: "JEE Adv Figure PYQ #03 · Integral Calculus", q: "In Fig. 3, find the area bounded by y = e^x - 1, the x-axis, and x = ln 2.", figureSvg: FIG_EXP_CURVE, figureCaption: "Fig. 3: Exponential curve region", a: "1 - ln 2", b: "ln 2 - 1/2", c: "2 - ln 2", d: "1 + ln 2", ans: "A" },
+        { tag: "JEE Main+Adv Figure PYQ #04 · Laws of Motion", q: "In Fig. 4 (sin 37° = 0.6, g = 10 m/s²), m1 = 4 kg on smooth 37° incline is tied to hanging m2 = 6 kg. Tension T in string is:", figureSvg: FIG_INCLINE_PULLEY, figureCaption: "Fig. 4: Pulley-incline system", a: "36.0 N", b: "28.8 N", c: "42.4 N", d: "24.0 N", ans: "B" },
+        { tag: "JEE Main+Adv Figure PYQ #05 · Current Electricity", q: "In Fig. 5, P = 6 Ω, Q = 12 Ω, R = 4 Ω, S = 8 Ω connected to 12 V battery. Current through galvanometer G is:", figureSvg: FIG_WHEATSTONE, figureCaption: "Fig. 5: Four-resistor bridge", a: "1.20 A", b: "0.50 A", c: "0 A", d: "0.75 A", ans: "C" },
+        { tag: "JEE Main+Adv Figure PYQ #06 · Area Under Curves", q: "In Fig. 6, area enclosed between parabola x² = 4y and horizontal line y = 4 is:", figureSvg: FIG_PARABOLA_AREA, figureCaption: "Fig. 6: Parabolic segment", a: "32/3 sq. units", b: "64/3 sq. units", c: "16/3 sq. units", d: "128/3 sq. units", ans: "B" },
+        { tag: "JEE Adv Figure PYQ #07 · Thermodynamics", q: "In Fig. 7, an ideal gas undergoes clockwise rectangular cyclic process between P0, 3P0 and V0, 4V0. Net work done per cycle is:", figureSvg: FIG_PV_CYCLE, figureCaption: "Fig. 7: Cyclic P-V diagram", a: "6 P0 V0", b: "3 P0 V0", c: "12 P0 V0", d: "4 P0 V0", ans: "A" },
+        { tag: "JEE Adv Figure PYQ #08 · Magnetism", q: "In Fig. 8, long straight wire carries I1 = 10 A near rectangular loop (I2 = 5 A, L = 15 cm, w = 8 cm, nearest distance d = 2 cm). Net magnetic force on loop is:", figureSvg: FIG_MAG_LOOP, figureCaption: "Fig. 8: Current-carrying loop near infinite wire", a: "1.2 × 10^-5 N (attractive)", b: "2.4 × 10^-5 N (repulsive)", c: "Zero", d: "6.0 × 10^-6 N (attractive)", ans: "A" },
+        { tag: "JEE Main+Adv Figure PYQ #09 · Ray Optics", q: "In Fig. 9, equilateral prism (A = 60°, μ = √2) is set at minimum deviation. Angle of minimum deviation δ_m is:", figureSvg: FIG_PRISM_RAY, figureCaption: "Fig. 9: Symmetric refraction through prism", a: "30°", b: "45°", c: "60°", d: "15°", ans: "A" },
+        { tag: "JEE Main+Adv Figure PYQ #10 · SHM", q: "In Fig. 10, block M = 2 kg is attached to ideal spring k = 200 N/m on smooth floor. Time period of small oscillations is:", figureSvg: FIG_SPRING_BLOCK, figureCaption: "Fig. 10: Horizontal spring-mass oscillator", a: "π / 5 s", b: "2π / 5 s", c: "π / 10 s", d: "5π s", ans: "A" },
+        { tag: "JEE Main+Adv Figure PYQ #11 · Coordinate Geometry", q: "In Fig. 11, chord of circle x² + y² = 25 is at perpendicular distance d = 3 from origin. Length of the chord is:", figureSvg: FIG_CIRCLE_CHORD, figureCaption: "Fig. 11: Circle and chord geometry", a: "8 units", b: "6 units", c: "10 units", d: "4 units", ans: "A" },
+        { tag: "JEE Main+Adv Figure PYQ #12 · Electrochemistry", q: "In Fig. 12, standard Daniell cell has E°(Zn²⁺/Zn) = -0.76 V and E°(Cu²⁺/Cu) = +0.34 V. Standard cell EMF E°_cell is:", figureSvg: FIG_CELL_POTENTIAL, figureCaption: "Fig. 12: Galvanic cell with salt bridge", a: "1.10 V", b: "0.42 V", c: "-1.10 V", d: "0.76 V", ans: "A" },
+        { tag: "JEE Adv Figure PYQ #13 · Electrostatics", q: "In Fig. 2, if 20 V is applied across left and right terminals of the bridge (2 μF, 6 μF upper; 4 μF, 12 μF lower), equivalent capacitance C_eq is:", figureSvg: FIG_CAPACITOR_BRIDGE, figureCaption: "Fig. 13: Balanced capacitor bridge", a: "4.5 μF", b: "6.0 μF", c: "3.0 μF", d: "9.0 μF", ans: "A" },
+        { tag: "JEE Adv Figure PYQ #14 · Mechanics", q: "In Fig. 4 (sin 37° = 0.6, g = 10 m/s²), find acceleration of the 6 kg hanging block when released from rest:", figureSvg: FIG_INCLINE_PULLEY, figureCaption: "Fig. 14: Coupled block acceleration", a: "3.6 m/s²", b: "2.4 m/s²", c: "4.0 m/s²", d: "5.0 m/s²", ans: "A" },
+        { tag: "JEE Adv Figure PYQ #15 · Current Electricity", q: "In Fig. 5, with P = 6 Ω, Q = 12 Ω, R = 4 Ω, S = 8 Ω and 12 V across left-right junctions, total current from battery is:", figureSvg: FIG_WHEATSTONE, figureCaption: "Fig. 15: Equivalent bridge resistance", a: "1.67 A", b: "2.00 A", c: "1.00 A", d: "3.00 A", ans: "A" },
+        { tag: "JEE Adv Figure PYQ #16 · Thermodynamics", q: "In Fig. 7, if internal energy at initial state (P0, V0) is U0 and gas is monoatomic, internal energy at (3P0, 4V0) is:", figureSvg: FIG_PV_CYCLE, figureCaption: "Fig. 16: State variables on P-V plane", a: "12 U0", b: "6 U0", c: "4 U0", d: "3 U0", ans: "A" },
+        { tag: "JEE Adv Figure PYQ #17 · Ray Optics", q: "In Fig. 9, for prism A = 60° and μ = √2 at minimum deviation, angle of incidence i on the first face equals:", figureSvg: FIG_PRISM_RAY, figureCaption: "Fig. 17: Angle of incidence at minimum deviation", a: "45°", b: "30°", c: "60°", d: "90°", ans: "A" },
+        { tag: "JEE Adv Figure PYQ #18 · SHM Energy", q: "In Fig. 10 (M = 2 kg, k = 200 N/m), if amplitude of oscillation is A = 0.1 m, maximum speed of block is:", figureSvg: FIG_SPRING_BLOCK, figureCaption: "Fig. 18: Maximum velocity in SHM", a: "1.0 m/s", b: "2.0 m/s", c: "0.5 m/s", d: "10.0 m/s", ans: "A" },
+        { tag: "JEE Adv Figure PYQ #19 · Kinematics", q: "In Fig. 1, if end A moves upwards at v_A = 6 m/s when θ = 30°, find horizontal speed v_B of lower end B:", figureSvg: FIG_COUPLED_ROD, figureCaption: "Fig. 19: Velocity constraint of rigid rod", a: "2√3 m/s", b: "6√3 m/s", c: "3 m/s", d: "6 m/s", ans: "A" },
+        { tag: "JEE Adv Figure PYQ #20 · Calculus", q: "In Fig. 6, if horizontal line is changed from y = 4 to y = 1 inside parabola x² = 4y, new bounded area is:", figureSvg: FIG_PARABOLA_AREA, figureCaption: "Fig. 20: Scaling of parabolic area", a: "8/3 sq. units", b: "4/3 sq. units", c: "16/3 sq. units", d: "2/3 sq. units", ans: "A" },
+        { tag: "JEE Adv Figure PYQ #21 · Electrochemistry", q: "In Fig. 12, if [Zn²⁺] = 1.0 M and [Cu²⁺] = 0.01 M at 298 K (E°_cell = 1.10 V), cell potential E_cell is approximately:", figureSvg: FIG_CELL_POTENTIAL, figureCaption: "Fig. 21: Nernst equation application", a: "1.04 V", b: "1.16 V", c: "1.10 V", d: "0.98 V", ans: "A" },
+        { tag: "JEE Adv Figure PYQ #22 · Circle & Tangents", q: "In Fig. 11, area of triangle formed by origin and endpoints of chord of length 8 in circle x² + y² = 25 is:", figureSvg: FIG_CIRCLE_CHORD, figureCaption: "Fig. 22: Triangle area inside circle", a: "12 sq. units", b: "24 sq. units", c: "15 sq. units", d: "20 sq. units", ans: "A" },
+        { tag: "JEE Adv Figure PYQ #23 · Magnetism", q: "In Fig. 8, magnetic flux through the rectangular loop due to long wire carrying I1 = 10 A is proportional to:", figureSvg: FIG_MAG_LOOP, figureCaption: "Fig. 23: Magnetic flux integration", a: "ln(5)", b: "ln(4)", c: "4", d: "1/5", ans: "A" },
+        { tag: "JEE Adv Figure PYQ #24 · Definite Integral", q: "In Fig. 3, value of ∫_0^{ln 2} (e^x - 1) dx equals:", figureSvg: FIG_EXP_CURVE, figureCaption: "Fig. 24: Exact definite integral", a: "1 - ln 2", b: "2 - ln 2", c: "ln 2", d: "1/2", ans: "A" },
+        { tag: "JEE Adv Figure PYQ #25 · Mechanics", q: "In Fig. 4, if m1 = 4 kg and m2 = 6 kg move by 1 m from rest (g = 10 m/s², sin 37° = 0.6), total kinetic energy gained is:", figureSvg: FIG_INCLINE_PULLEY, figureCaption: "Fig. 25: Work-energy theorem on incline", a: "36 J", b: "60 J", c: "24 J", d: "48 J", ans: "A" },
+        { tag: "JEE Adv Figure PYQ #26 · Electrostatics", q: "In Fig. 2, total electrostatic energy stored in the bridge capacitor network at 20 V (C_eq = 4.5 μF) is:", figureSvg: FIG_CAPACITOR_BRIDGE, figureCaption: "Fig. 26: Stored electrostatic energy", a: "900 μJ", b: "450 μJ", c: "1800 μJ", d: "300 μJ", ans: "A" },
+        { tag: "JEE Adv Figure PYQ #27 · Current Electricity", q: "In Fig. 5, total power dissipated in the balanced bridge across 12 V source (R_eq = 7.2 Ω) is:", figureSvg: FIG_WHEATSTONE, figureCaption: "Fig. 27: Power dissipation in bridge", a: "20 W", b: "15 W", c: "24 W", d: "12 W", ans: "A" },
+        { tag: "JEE Adv Figure PYQ #28 · Thermodynamics", q: "In Fig. 7, heat absorbed during isobaric expansion from (3P0, V0) to (3P0, 4V0) for monoatomic ideal gas is:", figureSvg: FIG_PV_CYCLE, figureCaption: "Fig. 28: Isobaric heat transfer", a: "22.5 P0 V0", b: "9.0 P0 V0", c: "13.5 P0 V0", d: "18.0 P0 V0", ans: "A" },
+        { tag: "JEE Adv Figure PYQ #29 · Optics", q: "In Fig. 9, refractive index of prism of angle A = 60° for which critical angle equals A/2 is:", figureSvg: FIG_PRISM_RAY, figureCaption: "Fig. 29: Limiting refraction in prism", a: "2.0", b: "√2", c: "√3", d: "1.5", ans: "A" },
+        { tag: "JEE Adv Figure PYQ #30 · Oscillations", q: "In Fig. 10, if spring k = 200 N/m is cut into two equal halves and both are connected in parallel to M = 2 kg, new angular frequency ω is:", figureSvg: FIG_SPRING_BLOCK, figureCaption: "Fig. 30: Parallel spring combination", a: "20 rad/s", b: "10 rad/s", c: "14.14 rad/s", d: "5 rad/s", ans: "A" },
+        { tag: "JEE Adv Figure PYQ #31 · Rigid Body", q: "In Fig. 1, speed of midpoint of rod AB (L = 4 m) when v_A = 6 m/s and θ = 30° is:", figureSvg: FIG_COUPLED_ROD, figureCaption: "Fig. 31: Midpoint kinematics of sliding rod", a: "6 m/s", b: "3 m/s", c: "3√3 m/s", d: "4.5 m/s", ans: "A" },
+        { tag: "JEE Adv Figure PYQ #32 · Electrochemistry", q: "In Fig. 12, standard Gibbs free energy change ΔG° for Daniell cell (n = 2, E° = 1.10 V) is:", figureSvg: FIG_CELL_POTENTIAL, figureCaption: "Fig. 32: Thermodynamics of galvanic cell", a: "-2.20 F", b: "-1.10 F", c: "+2.20 F", d: "-0.55 F", ans: "A" },
+        { tag: "JEE Adv Figure PYQ #33 · Coordinate Geometry", q: "In Fig. 11, equation of locus of midpoints of all chords of length 8 of circle x² + y² = 25 is:", figureSvg: FIG_CIRCLE_CHORD, figureCaption: "Fig. 33: Locus of chord midpoints", a: "x² + y² = 9", b: "x² + y² = 16", c: "x² + y² = 4", d: "x² + y² = 12", ans: "A" },
+        { tag: "JEE Adv Figure PYQ #34 · Calculus", q: "In Fig. 6, volume generated by revolving region between x² = 4y and y = 4 about y-axis is:", figureSvg: FIG_PARABOLA_AREA, figureCaption: "Fig. 34: Volume of revolution", a: "32π cubic units", b: "16π cubic units", c: "64π cubic units", d: "8π cubic units", ans: "A" },
+        { tag: "JEE Adv Figure PYQ #35 · Electromagnetism", q: "In Fig. 8, direction of net magnetic force on the rectangular loop carrying clockwise current I2 near upward current I1 is:", figureSvg: FIG_MAG_LOOP, figureCaption: "Fig. 35: Force direction on current loop", a: "Towards the straight wire (Left)", b: "Away from the straight wire (Right)", c: "Upwards", d: "Out of the page", ans: "A" }
+    ];
+
+    var JEE_COMBINED_MAIN_ADV = [
+        { tag: "JEE Main + Adv · Physics (Figure)", q: "In Fig. 1 (sin 37° = 0.6, g = 10 m/s²), m1 = 4 kg on smooth 37° incline and m2 = 6 kg hanging vertically. Tension T is:", figureSvg: FIG_INCLINE_PULLEY, figureCaption: "Fig. 1: Connected masses on inclined plane", a: "36.0 N", b: "28.8 N", c: "42.4 N", d: "24.0 N", ans: "B" },
+        { tag: "JEE Main + Adv · Physics (Figure)", q: "In Fig. 2 (P = 6 Ω, Q = 12 Ω, R = 4 Ω, S = 8 Ω), current through galvanometer G is:", figureSvg: FIG_WHEATSTONE, figureCaption: "Fig. 2: Four-arm resistance bridge", a: "1.20 A", b: "0.50 A", c: "0 A", d: "0.75 A", ans: "C" },
+        { tag: "JEE Main + Adv · Maths (Figure)", q: "In Fig. 3, area bounded by y = 4 and parabola x² = 4y is:", figureSvg: FIG_PARABOLA_AREA, figureCaption: "Fig. 3: Region between x² = 4y and y = 4", a: "32/3 sq. units", b: "64/3 sq. units", c: "16/3 sq. units", d: "128/3 sq. units", ans: "B" },
+        { tag: "JEE Main + Adv · Physics PYQ", q: "A solid sphere rolls without slipping down an incline. Fraction of total kinetic energy that is rotational is:", a: "2/7", b: "1/5", c: "2/5", d: "5/7", ans: "A" },
+        { tag: "JEE Main + Adv · Chemistry PYQ", q: "Spin-only magnetic moment of [Fe(CN)6]^4- (low spin d6) is:", a: "4.90 BM", b: "2.83 BM", c: "0.00 BM", d: "5.92 BM", ans: "C" },
+        { tag: "JEE Main + Adv · Maths PYQ", q: "Number of real solutions of sin(x) = x / 10 for x ∈ [-2π, 2π] is:", a: "3", b: "5", c: "7", d: "1", ans: "C" }
+    ];
+
+    var CLASS10_TOUGHEST_COMBINED = [
+        { tag: "Class 10 Toughest Combined · Science (Optics)", q: "A point object is placed 20 cm in front of a convex mirror of focal length 15 cm. A plane mirror is placed at distance d behind the convex mirror so that the two images coincide. Find d:", a: "26.4 cm", b: "18.5 cm", c: "32.0 cm", d: "15.0 cm", ans: "A" },
+        { tag: "Class 10 Toughest Combined · Science (Electricity)", q: "6 Ω and 12 Ω resistors in parallel are connected in series with 4 Ω across a 12 V battery. Current drawn is:", a: "1.50 A", b: "1.20 A", c: "2.00 A", d: "0.75 A", ans: "A" },
+        { tag: "Class 10 Toughest Combined · Mathematics", q: "If α and β are zeroes of 2x^2 - 7x + 3, find (1/α + 1/β - 2αβ):", a: "-2/3", b: "4/3", c: "7/3", d: "1/3", ans: "A" },
+        { tag: "Class 10 Toughest Combined · Mathematics", q: "In right triangle ABC right-angled at B, if tan A = 1/√3, find (sin A cos C + cos A sin C):", a: "1", b: "√3/2", c: "1/2", d: "0", ans: "A" },
+        { tag: "Class 10 Toughest Combined · Social Science", q: "Which pair is correctly matched in Indian History?", a: "Poona Pact (1932) — Gandhiji and Dr. B.R. Ambedkar", b: "Rowlatt Act (1929) — Simon Commission", c: "Champaran (1922) — Non-Cooperation end", d: "Lahore Session (1927) — Purna Swaraj", ans: "A" },
+        { tag: "Class 10 Toughest Combined · English", q: "Identify the grammatically correct formal sentence:", a: "Neither the teacher nor the students were present in the hall.", b: "Each of the boys have submitted their work.", c: "One of my friend live in Patna.", d: "The sceneries of Kashmir is charming.", ans: "A" }
+    ];
+
+    var CLASS10_COMBINED_FULL = [
+        { tag: "Class 10 Combined · Science", q: "A convex lens of focal length 15 cm forms a real image at 30 cm. Object distance is:", a: "15 cm", b: "30 cm", c: "20 cm", d: "45 cm", ans: "B" },
+        { tag: "Class 10 Combined · Mathematics", q: "If nth term of AP is (3n + 2), sum of first 10 terms is:", a: "185", b: "190", c: "175", d: "200", ans: "A" },
+        { tag: "Class 10 Combined · Social Science", q: "Which movement launched in 1930 began with the Dandi March?", a: "Non-Cooperation", b: "Civil Disobedience", c: "Quit India", d: "Khilafat", ans: "B" },
+        { tag: "Class 10 Combined · English", q: "Indirect speech: He said, 'I am preparing for my board exams.'", a: "He said that he was preparing for his board exams.", b: "He said that he is preparing for my board exams.", c: "He told that he had prepared.", d: "He asked that he was preparing.", ans: "A" }
+    ];
+
+    var CLASS11_SCIENCE_COMBINED = [
+        { tag: "Class 11 Science · Physics", q: "Particle moves in circle of radius 5 m with speed 10 m/s. Centripetal acceleration is:", a: "10 m/s²", b: "20 m/s²", c: "50 m/s²", d: "2 m/s²", ans: "B" },
+        { tag: "Class 11 Science · Chemistry", q: "Which quantum number set (n, l, m_l, m_s) is NOT permissible?", a: "(3, 2, -1, +1/2)", b: "(2, 1, 0, -1/2)", c: "(2, 2, 0, +1/2)", d: "(4, 0, 0, +1/2)", ans: "C" },
+        { tag: "Class 11 Science · Mathematics", q: "If sin A = 3/5 and cos B = 12/13 (acute), find sin(A + B):", a: "56/65", b: "63/65", c: "33/65", d: "16/65", ans: "B" },
+        { tag: "Class 11 Science · Biology", q: "DNA replication occurs in which phase of cell cycle?", a: "G1 phase", b: "S phase", c: "G2 phase", d: "M phase", ans: "B" }
+    ];
+
+    var CLASS11_COMMERCE_COMBINED = [
+        { tag: "Class 11 Commerce · Accountancy", q: "Closing Capital ₹1,40,000, Drawings ₹20,000, Additional Capital ₹30,000, Opening Capital ₹1,10,000. Net Profit:", a: "₹20,000", b: "₹30,000", c: "₹40,000", d: "₹10,000", ans: "A" },
+        { tag: "Class 11 Commerce · Business Studies", q: "Which organisation has perpetual succession and common seal?", a: "Sole Proprietorship", b: "Partnership", c: "Joint Stock Company", d: "HUF", ans: "C" },
+        { tag: "Class 11 Commerce · Economics", q: "If price elasticity of demand = 1, a 10% rise in price causes demand to:", a: "Fall by 10%", b: "Rise by 10%", c: "Remain unchanged", d: "Fall by 20%", ans: "A" },
+        { tag: "Class 11 Commerce · Statistics", q: "If Mean = 25 and Mode = 22, approximate Median is:", a: "24", b: "26", c: "23.5", d: "27", ans: "A" }
+    ];
+
+    var CLASS11_ARTS_COMBINED = [
+        { tag: "Class 11 Arts · History", q: "Which Harappan site is famous for its dockyard?", a: "Lothal", b: "Kalibangan", c: "Rakhigarhi", d: "Banawali", ans: "A" },
+        { tag: "Class 11 Arts · Political Science", q: "Which part of Indian Constitution deals with Fundamental Rights?", a: "Part II", b: "Part III", c: "Part IV", d: "Part V", ans: "B" },
+        { tag: "Class 11 Arts · Geography", q: "Which rock is formed by cooling of magma?", a: "Sedimentary", b: "Igneous", c: "Metamorphic", d: "Calcareous", ans: "B" },
+        { tag: "Class 11 Arts · Economics", q: "Outward shift of Production Possibility Curve indicates:", a: "Economic growth / resource expansion", b: "Unemployment", c: "Decrease in efficiency", d: "Population fall", ans: "A" }
+    ];
+
+    var STATE_BOARD_EN_20_PYQ = [
+        { q: "Relation between radius of curvature (R) and focal length (f) of a spherical mirror:", a: "R = f", b: "R = 2f", c: "f = 2R", d: "R = f/2", ans: "B" },
+        { q: "Who discovered magnetic effect of electric current?", a: "Faraday", b: "Oersted", c: "Ampere", d: "Maxwell", ans: "B" },
+        { q: "1 kilowatt-hour (kWh) equals:", a: "3.6 × 10^5 J", b: "3.6 × 10^6 J", c: "3.0 × 10^6 J", d: "1.0 × 10^5 J", ans: "B" },
+        { q: "Image in human eye is formed on:", a: "Cornea", b: "Iris", c: "Retina", d: "Pupil", ans: "C" },
+        { q: "Least distance of distinct vision for normal eye:", a: "10 cm", b: "20 cm", c: "25 cm", d: "50 cm", ans: "C" },
+        { q: "Chemical formula of bleaching powder:", a: "CaCl2", b: "CaOCl2", c: "Ca(OH)2", d: "CaCO3", ans: "B" },
+        { q: "pH value of pure water at 25°C:", a: "5.6", b: "7.0", c: "8.5", d: "14.0", ans: "B" },
+        { q: "Most electronegative element:", a: "Oxygen", b: "Chlorine", c: "Fluorine", d: "Nitrogen", ans: "C" },
+        { q: "Functional group in ethanol:", a: "-CHO", b: "-COOH", c: "-OH", d: "-CO-", ans: "C" },
+        { q: "Number of periods in modern periodic table:", a: "6", b: "7", c: "8", d: "18", ans: "B" }
+    ];
+
+    var CLASS12_20_PYQ = [
+        { q: "Electric flux through closed surface enclosing q:", a: "q / ε0", b: "ε0 / q", c: "q · ε0", d: "Zero", ans: "A" },
+        { q: "SI unit of capacitance:", a: "Henry", b: "Farad", c: "Weber", d: "Tesla", ans: "B" },
+        { q: "Kirchhoff's junction rule is conservation of:", a: "Energy", b: "Charge", c: "Momentum", d: "Mass", ans: "B" },
+        { q: "Lenz's law is consequence of conservation of:", a: "Charge", b: "Momentum", c: "Energy", d: "Angular momentum", ans: "C" },
+        { q: "Power factor in AC circuit equals:", a: "sin φ", b: "cos φ", c: "tan φ", d: "ωL", ans: "B" },
+        { q: "If A is 3×3 matrix and |A| = 5, then |2A| equals:", a: "10", b: "20", c: "40", d: "125", ans: "C" },
+        { q: "Derivative of e^(3x) with respect to x is:", a: "e^(3x)", b: "3e^(3x)", c: "3xe^(2x)", d: "e^(3x)/3", ans: "B" },
+        { q: "Codon AUG codes for:", a: "Valine", b: "Methionine", c: "Glycine", d: "Alanine", ans: "B" }
+    ];
+
+    var JEE_PYQ = [
+        { q: "In series LCR circuit at resonance, phase difference between V and I is:", a: "0", b: "π/2", c: "π", d: "π/4", ans: "A" },
+        { q: "Evaluate ∫[0 to π/2] (sin^2 x) / (sin^2 x + cos^2 x) dx:", a: "π/4", b: "π/2", c: "π", d: "0", ans: "A" }
+    ];
+
+    var NEET_PYQ = [
+        { q: "Hormone surge triggering ovulation around day 14:", a: "Progesterone", b: "LH (Luteinizing Hormone)", c: "Oxytocin", d: "FSH", ans: "B" },
+        { q: "Reagent converting primary alcohols to aldehydes:", a: "PCC", b: "Acidified KMnO4", c: "Hot HNO3", d: "NaOH", ans: "A" }
+    ];
+
+    var GENERAL_PYQ = [
+        { q: "Amendment lowering voting age in India from 21 to 18:", a: "42nd Amendment", b: "44th Amendment", c: "61st Amendment", d: "73rd Amendment", ans: "C" },
+        { q: "River known as 'Sorrow of Bihar':", a: "Ganga", b: "Kosi", c: "Son", d: "Gandak", ans: "B" }
+    ];
+
+    var JEE_PYQ_BANK = [
+        { tag: "JEE Main + Adv PYQ · Kinematics", q: "Particle starts from rest with constant acceleration a. Ratio of distance in 3rd second to 5th second is:", a: "5/9", b: "3/5", c: "9/25", d: "1/3", ans: "A" },
+        { tag: "JEE Main + Adv PYQ · Gravitation", q: "If Earth radius shrinks by 2% keeping mass constant, surface g:", a: "Increases by ~4%", b: "Decreases by ~4%", c: "Increases by ~2%", d: "Unchanged", ans: "A" },
+        { tag: "JEE Main + Adv PYQ · Electrostatics", q: "Axial electric potential of dipole p at distance r >> a is:", a: "kp / r²", b: "2kp / r³", c: "kp / r³", d: "2kp / r²", ans: "A" },
+        { tag: "JEE Main + Adv PYQ · Ray Optics", q: "Critical angle from medium of refractive index √2 to air is:", a: "45°", b: "30°", c: "60°", d: "90°", ans: "A" },
+        { tag: "JEE Main + Adv PYQ · Chemical Bonding", q: "Bond order of O2^+ ion according to MOT is:", a: "2.5", b: "2.0", c: "1.5", d: "3.0", ans: "A" },
+        { tag: "JEE Main + Adv PYQ · Calculus", q: "Minimum value of f(x) = x + 4/x for x > 0 is:", a: "4", b: "2", c: "8", d: "1", ans: "A" },
+        { tag: "JEE Main + Adv PYQ · Integral", q: "Evaluate ∫_{-1}^{1} |x| dx:", a: "1", b: "0", c: "2", d: "-1", ans: "A" },
+        { tag: "JEE Main + Adv PYQ · Vectors", q: "If |a × b| = √3 (a · b), angle between a and b is:", a: "60°", b: "30°", c: "45°", d: "90°", ans: "A" }
+    ];
+
+    function buildJeeMockSet(setNum, title, subject, extraQs) {
+        var qs = [];
+        for (var i = 0; i < 6; i++) {
+            var baseQ = JEE_PYQ_BANK[(setNum * 3 + i) % JEE_PYQ_BANK.length];
+            qs.push({
+                tag: baseQ.tag + " · Set " + setNum,
+                q: "[Set " + setNum + "] " + baseQ.q,
+                a: baseQ.a,
+                b: baseQ.b,
+                c: baseQ.c,
+                d: baseQ.d,
+                ans: baseQ.ans
+            });
+        }
+        if (Array.isArray(extraQs)) {
+            extraQs.forEach(function (eq) { qs.push(eq); });
+        }
+        return {
+            id: "jee-ma-pyq-set-" + setNum,
+            portal: "JEE Main + Adv",
+            title: title,
+            subject: subject,
+            duration: 45,
+            pos: 4,
+            neg: 1,
+            isCustom: false,
+            questions: qs
+        };
+    }
+
+    var EXTRA_JEE_SETS = [];
+    for (var sIdx = 1; sIdx <= 30; sIdx++) {
+        var labelNum = sIdx < 10 ? "0" + sIdx : String(sIdx);
+        var figExtra = [];
+        if (sIdx % 3 === 1) {
+            figExtra.push(JEE_35_FIGURE_PYQS[(sIdx - 1) % JEE_35_FIGURE_PYQS.length]);
+        }
+        EXTRA_JEE_SETS.push(
+            buildJeeMockSet(
+                sIdx,
+                "JEE Main + Adv PYQ Mock #" + labelNum + " (PCM PYQs)",
+                "PCM PYQ Set " + labelNum,
+                figExtra
+            )
+        );
+    }
+
+    var BUILTIN_TESTS = [
+        { id: "jee-tough-35-figure-pyq", portal: "JEE Main + Adv", title: "JEE Main + Adv Toughest 35 Figure PYQs Mock", subject: "PCM 35 Figure PYQs", duration: 90, pos: 4, neg: 1, isCustom: false, questions: JEE_35_FIGURE_PYQS },
+        { id: "jee-main-adv-combined", portal: "JEE Main + Adv", title: "JEE Main + Advanced Combined Mock (PYQs & Figures)", subject: "PCM (Main + Adv)", duration: 50, pos: 4, neg: 1, isCustom: false, questions: JEE_COMBINED_MAIN_ADV },
+        { id: "c10-toughest-combined", portal: "Class 10", title: "Class 10 Toughest Combined Mock (All Subjects)", subject: "Class 10 Toughest All", duration: 40, pos: 1, neg: 0, isCustom: false, questions: CLASS10_TOUGHEST_COMBINED },
+        { id: "c10-combined-full", portal: "Class 10", title: "Class 10 Combined Mock Test", subject: "Sci, Math, SST & Eng", duration: 30, pos: 1, neg: 0, isCustom: false, questions: CLASS10_COMBINED_FULL },
+        { id: "c11-sci-combined", portal: "Class 11 Science", title: "Class 11 Science Combined Mock Test", subject: "Phy, Chem, Math & Bio", duration: 30, pos: 1, neg: 0, isCustom: false, questions: CLASS11_SCIENCE_COMBINED },
+        { id: "c11-com-combined", portal: "Class 11 Commerce", title: "Class 11 Commerce Combined Mock Test", subject: "Acc, BST, Eco & Stats", duration: 30, pos: 1, neg: 0, isCustom: false, questions: CLASS11_COMMERCE_COMBINED },
+        { id: "c11-arts-combined", portal: "Class 11 Arts", title: "Class 11 Arts Combined Mock Test", subject: "His, Pol Sci, Geo & Eco", duration: 30, pos: 1, neg: 0, isCustom: false, questions: CLASS11_ARTS_COMBINED },
+        { id: "state-board-en-20", portal: "State Boards", title: "State Board English Medium Mock (PYQs)", subject: "English Medium PYQs", duration: 30, pos: 1, neg: 0, isCustom: false, questions: STATE_BOARD_EN_20_PYQ },
+        { id: "c12-board-20", portal: "Class 12", title: "Class 12 Board Mock Test (PYQs)", subject: "PCM & Biology PYQs", duration: 35, pos: 1, neg: 0, isCustom: false, questions: CLASS12_20_PYQ },
+        { id: "jee-main-pyq", portal: "JEE", title: "JEE Main Mock Test (PYQs)", subject: "Physics & Mathematics", duration: 40, pos: 4, neg: 1, isCustom: false, questions: JEE_PYQ },
+        { id: "neet-ug-pyq", portal: "NEET", title: "NEET Mock Test (PYQs)", subject: "Biology & Chemistry", duration: 40, pos: 4, neg: 1, isCustom: false, questions: NEET_PYQ },
+        { id: "general-gk-pyq", portal: "General", title: "General Studies & GK Mock Test", subject: "Polity & Geography", duration: 20, pos: 1, neg: 0, isCustom: false, questions: GENERAL_PYQ }
+    ].concat(EXTRA_JEE_SETS);
+
+    /* Reliable Storage Layer (localStorage + window.name fallback so attempts never reset on reload) */
+    var memoryStore = {};
+    function loadWindowNameStore() {
+        try {
+            if (window.name && window.name.indexOf("EDUPATH_MT::") === 0) {
+                var parsed = JSON.parse(window.name.slice("EDUPATH_MT::".length));
+                if (parsed && typeof parsed === "object") {
+                    Object.keys(parsed).forEach(function (k) {
+                        memoryStore[k] = parsed[k];
+                    });
+                }
+            }
+        } catch (_e) {}
+    }
+    loadWindowNameStore();
+
+    function syncWindowNameStore() {
+        try {
+            window.name = "EDUPATH_MT::" + JSON.stringify(memoryStore);
+        } catch (_e) {}
+    }
+
+    function readJson(key, fallback) {
+        try {
+            var raw = window.localStorage.getItem(key);
+            if (raw !== null) {
+                var parsed = JSON.parse(raw);
+                memoryStore[key] = parsed;
+                return parsed;
+            }
+        } catch (_e) {}
+        if (Object.prototype.hasOwnProperty.call(memoryStore, key)) {
+            return memoryStore[key];
+        }
+        return fallback;
+    }
+
+    function writeJson(key, val) {
+        memoryStore[key] = val;
+        syncWindowNameStore();
+        try {
+            window.localStorage.setItem(key, JSON.stringify(val));
+        } catch (_e) {}
+    }
+
+    function escapeHtml(str) {
+        return String(str || "")
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;");
+    }
+
+    function round2(n) {
+        return Math.round((Number(n) || 0) * 100) / 100;
+    }
+
+    var rootWrap = document.getElementById("mtRootWrap");
+    var currentUserName = rootWrap ? (rootWrap.getAttribute("data-user-name") || "Student") : "Student";
+    var currentUserRole = rootWrap ? (rootWrap.getAttribute("data-user-role") || "admin") : "admin";
+    var currentPortal = rootWrap ? (rootWrap.getAttribute("data-initial-portal") || "") : "";
+    if (currentPortal.toLowerCase() === "all") {
+        currentPortal = "";
+    }
+
+    function getUserAttemptKey(testId) {
+        return String(currentUserName || "Student").trim().toLowerCase() + "::" + String(testId || "default");
+    }
+
+    function getSingleAttemptRecord(testId) {
+        var allAtt = readJson(ATT_MAP_KEY, {});
+        if (!allAtt || typeof allAtt !== "object") return null;
+        return allAtt[getUserAttemptKey(testId)] || null;
+    }
+
+    function setSingleAttemptRecord(testId, data) {
+        var allAtt = readJson(ATT_MAP_KEY, {});
+        if (!allAtt || typeof allAtt !== "object") allAtt = {};
+        allAtt[getUserAttemptKey(testId)] = data;
+        writeJson(ATT_MAP_KEY, allAtt);
+    }
+
+    function getBucketKey(testObj) {
+        return String((testObj && testObj.id) || "default");
+    }
+
+    var deletedBuiltinIds = readJson(DELETED_IDS_KEY, []);
+    var customTests = readJson(CUSTOM_TESTS_KEY, []);
+    var allBuiltin = BUILTIN_TESTS.filter(function (t) { return deletedBuiltinIds.indexOf(String(t.id)) === -1; });
+    var localTests = (Array.isArray(customTests) ? customTests : []).concat(allBuiltin);
+
+    var gateStatusPill = document.getElementById("mtGateStatusPill");
+    var changeClassBtn = document.getElementById("mtChangeClassBtn");
+    var testListContainer = document.getElementById("mtTestListContainer");
+    var visibleCountEl = document.getElementById("mtVisibleTestCount");
+    var emptyTestMsg = document.getElementById("mtEmptyTestMsg");
+    var activeCatBadge = document.getElementById("mtActiveCategoryBadge");
+    var mobileBackBtn = document.getElementById("mtMobileBackBtn");
+
+    var sideSummaryCard = document.getElementById("mtSideSummaryCard");
+    var sideSummaryTitle = document.getElementById("mtSideSummaryTitle");
+    var sideMarksEl = document.getElementById("mtSideMarks");
+    var sideCorrectEl = document.getElementById("mtSideCorrect");
+    var sideWrongEl = document.getElementById("mtSideWrong");
+    var sideSkippedEl = document.getElementById("mtSideSkipped");
+    var sideSkippedListEl = document.getElementById("mtSideSkippedList");
+
+    var examBar = document.getElementById("mtExamBar");
+    var examTitle = document.getElementById("mtExamTitle");
+    var barAttBadge = document.getElementById("mtBarAttemptedBadge");
+    var examMeta = document.getElementById("mtExamMeta");
+    var topSendBtn = document.getElementById("mtTopSendTestBtn");
+    var clock = document.getElementById("mtCountdown");
+    var mcqForm = document.getElementById("mtMcqForm");
+    var lbCard = document.getElementById("mtDynamicLeaderboardCard");
+    var lbTitle = document.getElementById("mtDynamicLeaderboardTitle");
+    var lbBody = document.getElementById("mtDynamicLeaderboardBody");
+    var cardDelLbBtn = document.getElementById("mtCardDeleteLbBtn");
+    var adminDelLbBtn = document.getElementById("mtAdminDeleteLeaderboardBtn");
+
+    var steps = [];
+    var stepCounter = null;
+    var ansCounter = null;
+    var currentIdx = 0;
+    var activeLocalTest = null;
+    var selectedServerCard = null;
+    var timerId = null;
+
+    function updateSideSummaryCard(testObj, stats, skippedList) {
+        if (!sideSummaryCard) return;
+        if (!testObj || !stats) {
+            sideSummaryCard.style.display = "none";
+            return;
+        }
+        sideSummaryCard.style.display = "block";
+        if (sideSummaryTitle) sideSummaryTitle.textContent = testObj.title;
+        if (sideMarksEl) sideMarksEl.textContent = stats.score + " / " + stats.maxMarks;
+        if (sideCorrectEl) sideCorrectEl.textContent = String(stats.correct);
+        if (sideWrongEl) sideWrongEl.textContent = String(stats.wrong);
+        if (sideSkippedEl) sideSkippedEl.textContent = String(stats.skipped);
+        if (sideSkippedListEl) {
+            if (Array.isArray(skippedList) && skippedList.length > 0) {
+                var qNums = skippedList.map(function (s) { return "Q" + s.num; }).join(", ");
+                sideSkippedListEl.innerHTML = "<strong>Skipped Questions:</strong> " + escapeHtml(qNums);
+            } else {
+                sideSkippedListEl.innerHTML = "<span style='color:#047857;'><strong>Skipped Questions:</strong> None</span>";
+            }
+        }
+    }
+
+    function syncClassGateState() {
+        if (!rootWrap) return;
+        if (!currentPortal) {
+            rootWrap.classList.add("mt-class-unselected");
+            if (activeCatBadge) activeCatBadge.textContent = "Select Class First";
+            if (gateStatusPill) gateStatusPill.textContent = "Pending Selection";
+        } else {
+            rootWrap.classList.remove("mt-class-unselected");
+            if (activeCatBadge) activeCatBadge.textContent = "Class: " + currentPortal;
+            if (gateStatusPill) gateStatusPill.textContent = currentPortal + " Selected";
+        }
+    }
+
+    if (changeClassBtn) {
+        changeClassBtn.addEventListener("click", function () {
+            if (timerId) clearInterval(timerId);
+            currentPortal = "";
+            activeLocalTest = null;
+            selectedServerCard = null;
+            updateSideSummaryCard(null, null, null);
+            syncClassGateState();
+            setPhoneStage("select");
+        });
+    }
+
+    function refreshAttemptedBadges() {
+        document.querySelectorAll(".mt-local-card").forEach(function (card) {
+            var lid = card.getAttribute("data-local-id");
+            var rec = getSingleAttemptRecord(lid);
+            var badge = card.querySelector(".mt-local-att-badge");
+            var pill = card.querySelector(".mt-local-score-pill");
+            if (rec && rec.stats) {
+                card.classList.add("attempted-lock");
+                if (badge) badge.style.display = "inline-flex";
+                if (pill) {
+                    pill.style.display = "inline-block";
+                    pill.textContent = "Attempted • " + rec.stats.score + "/" + rec.stats.maxMarks + " (Wrong: " + rec.stats.wrong + ", Skip: " + rec.stats.skipped + ")";
+                }
+            } else {
+                card.classList.remove("attempted-lock");
+                if (badge) badge.style.display = "none";
+                if (pill) pill.style.display = "none";
+            }
+        });
+
+        document.querySelectorAll(".mt-server-test-card").forEach(function (card) {
+            var sid = card.getAttribute("data-test-id");
+            var rec = getSingleAttemptRecord(sid);
+            var badge = card.querySelector(".mt-server-att-badge");
+            var pill = card.querySelector(".mt-server-score-pill");
+            if (rec && rec.stats) {
+                card.classList.add("attempted-lock");
+                if (badge) badge.style.display = "inline-flex";
+                if (pill) {
+                    pill.style.display = "inline-block";
+                    pill.textContent = "Attempted • " + rec.stats.score + "/" + rec.stats.maxMarks;
+                }
+            } else {
+                card.classList.remove("attempted-lock");
+                if (badge) badge.style.display = "none";
+                if (pill) pill.style.display = "none";
+            }
+        });
+    }
+
+    function setPhoneStage(stage) {
+        if (!rootWrap) return;
+        var prevExam = rootWrap.classList.contains("mt-phone-stage-exam");
+        var nextExam = stage === "exam";
+        rootWrap.classList.remove("mt-phone-stage-select", "mt-phone-stage-exam");
+        rootWrap.classList.add(nextExam ? "mt-phone-stage-exam" : "mt-phone-stage-select");
+        if (window.innerWidth <= 860 && prevExam !== nextExam) {
+            window.scrollTo({ top: 0, behavior: "auto" });
+        }
+    }
+
+    if (mobileBackBtn) {
+        mobileBackBtn.addEventListener("click", function () {
+            if (timerId) clearInterval(timerId);
+            setPhoneStage("select");
+        });
+    }
+
+    function showAdminBanner(msg, isErr) {
+        var box = document.getElementById("mtAdminStatusBox");
+        if (!box) return;
+        box.style.display = "block";
+        box.style.background = isErr ? "rgba(239, 68, 68, 0.12)" : "rgba(16, 185, 129, 0.14)";
+        box.style.color = isErr ? "#b91c1c" : "#047857";
+        box.textContent = msg;
+    }
+
+    function syncAdminTargetFields(testObj) {
+        var nameEl = document.getElementById("mtSelectedTestName");
+        var addQId = document.getElementById("mtAddQTestId");
+        var delQId = document.getElementById("mtDelTestId");
+        if (!testObj) {
+            if (nameEl) nameEl.textContent = "None";
+            if (addQId) addQId.value = "";
+            if (delQId) delQId.value = "";
+            return;
+        }
+        if (nameEl) nameEl.textContent = testObj.title;
+        if (addQId) addQId.value = String(testObj.id || "");
+        if (delQId) delQId.value = String(testObj.id || "");
+    }
+
+    function isStepAnswered(stepBox) {
+        if (!stepBox) return false;
+        return !!stepBox.querySelector('input[type="radio"]:checked');
+    }
+
+    function setHint(idx, msg) {
+        var hintEl = document.getElementById("mtHint_" + idx);
+        if (hintEl) hintEl.textContent = msg || "";
+    }
+
+    function countAnswered() {
+        var answered = 0;
+        steps.forEach(function (box) {
+            if (isStepAnswered(box)) answered++;
+        });
+        if (ansCounter && steps.length) {
+            ansCounter.textContent = answered + " / " + steps.length + " Answered";
+        }
+    }
+
+    function showStep(idx) {
+        if (!steps.length) return;
+        if (idx < 0) idx = 0;
+        if (idx >= steps.length) idx = steps.length - 1;
+        currentIdx = idx;
+        steps.forEach(function (box, i) {
+            box.style.display = i === currentIdx ? "block" : "none";
+        });
+        if (stepCounter) {
+            stepCounter.textContent = "Question " + (currentIdx + 1) + " of " + steps.length;
+        }
+        countAnswered();
+    }
+
+    function startTestTimer(minutes) {
+        if (timerId) clearInterval(timerId);
+        if (!clock) return;
+        var mins = parseInt(minutes || "30", 10);
+        var secsLeft = (isNaN(mins) || mins < 1 ? 30 : mins) * 60;
+        var done = false;
+        clock.classList.remove("urgent", "locked");
+
+        function draw() {
+            var val = Math.max(0, secsLeft);
+            var m = Math.floor(val / 60);
+            var s = val % 60;
+            clock.textContent = "Timer " + (m < 10 ? "0" + m : m) + ":" + (s < 10 ? "0" + s : s);
+            if (secsLeft <= 60) clock.classList.add("urgent");
+        }
+
+        draw();
+        timerId = setInterval(function () {
+            secsLeft -= 1;
+            draw();
+            if (secsLeft <= 0 && !done) {
+                done = true;
+                clearInterval(timerId);
+                if (activeLocalTest) {
+                    evaluateLocalMockTest();
+                } else if (mcqForm) {
+                    if (typeof mcqForm.requestSubmit === "function") mcqForm.requestSubmit();
+                    else mcqForm.submit();
+                }
+            }
+        }, 1000);
+    }
+
+    function bindStepControls(isLockedMode) {
+        steps = Array.prototype.slice.call(document.querySelectorAll(".mt-q-step"));
+        stepCounter = document.getElementById("mtStepCounter");
+        ansCounter = document.getElementById("mtAnsweredCounter");
+        currentIdx = 0;
+
+        document.querySelectorAll(".mt-next-btn").forEach(function (btn) {
+            btn.addEventListener("click", function (ev) {
+                if (ev) ev.preventDefault();
+                setHint(currentIdx, "");
+                showStep(currentIdx + 1);
+            });
+        });
+
+        document.querySelectorAll(".mt-prev-btn").forEach(function (btn) {
+            btn.addEventListener("click", function (ev) {
+                if (ev) ev.preventDefault();
+                setHint(currentIdx, "");
+                showStep(currentIdx - 1);
+            });
+        });
+
+        document.querySelectorAll(".mt-pal-btn").forEach(function (pBtn) {
+            pBtn.addEventListener("click", function () {
+                var targetIdx = parseInt(pBtn.getAttribute("data-goto-idx"), 10);
+                if (!isNaN(targetIdx)) {
+                    showStep(targetIdx);
+                }
+            });
+        });
+
+        if (!isLockedMode) {
+            document.querySelectorAll(".mt-clear-btn").forEach(function (btn) {
+                btn.addEventListener("click", function () {
+                    var rName = btn.getAttribute("data-qname");
+                    if (!rName) return;
+                    var radios = document.getElementsByName(rName);
+                    for (var i = 0; i < radios.length; i++) radios[i].checked = false;
+                    setHint(currentIdx, "");
+                    countAnswered();
+                });
+            });
+
+            document.querySelectorAll(".mt-radio-opt").forEach(function (r) {
+                r.addEventListener("change", function () {
+                    setHint(currentIdx, "");
+                    countAnswered();
+                });
+            });
+        }
+
+        if (steps.length > 0) showStep(0);
+    }
+
+    function bindLeaderboardAdminActions(testObj, bucketKey) {
+        if (currentUserRole !== "admin" || !lbBody) return;
+
+        lbBody.querySelectorAll(".mt-lb-save-btn").forEach(function (btn) {
+            btn.addEventListener("click", function () {
+                var idx = parseInt(btn.getAttribute("data-lb-idx"), 10);
+                var inp = lbBody.querySelector('.mt-lb-score-input[data-lb-idx="' + idx + '"]');
+                if (isNaN(idx) || !inp) return;
+                var newScore = parseFloat(inp.value);
+                if (isNaN(newScore)) {
+                    showAdminBanner("Enter a valid numeric score.", true);
+                    return;
+                }
+                var store = readJson(LB_STORE_KEY, {});
+                var list = Array.isArray(store[bucketKey]) ? store[bucketKey].slice() : [];
+                if (!list[idx]) return;
+                var maxM = Number(list[idx].max_marks) || 1;
+                list[idx].best_score = round2(newScore);
+                list[idx].best_pct = maxM > 0 ? Math.max(0, Math.round((list[idx].best_score / maxM) * 1000) / 10) : 0;
+                list.sort(function (a, b) {
+                    if (Number(b.best_score) !== Number(a.best_score)) return Number(b.best_score) - Number(a.best_score);
+                    return Number(b.best_pct) - Number(a.best_pct);
+                });
+                store[bucketKey] = list;
+                writeJson(LB_STORE_KEY, store);
+                renderLeaderboardCard(testObj, null, false);
+                showAdminBanner('Updated score for "' + list[idx].user_name + '" on leaderboard.', false);
+            });
+        });
+
+        lbBody.querySelectorAll(".mt-lb-rem-btn").forEach(function (btn) {
+            btn.addEventListener("click", function () {
+                var idx = parseInt(btn.getAttribute("data-lb-idx"), 10);
+                var store = readJson(LB_STORE_KEY, {});
+                var list = Array.isArray(store[bucketKey]) ? store[bucketKey].slice() : [];
+                if (isNaN(idx) || !list[idx]) return;
+                var removedName = list[idx].user_name;
+                list.splice(idx, 1);
+                store[bucketKey] = list;
+                writeJson(LB_STORE_KEY, store);
+                renderLeaderboardCard(testObj, null, false);
+                showAdminBanner('Removed "' + removedName + '" from leaderboard.', false);
+            });
+        });
+    }
+
+    /* Professional Leaderboard Renderer (Always Visible & Customised) */
+    function renderLeaderboardCard(testObj, stats, saveScore) {
+        if (!lbCard || !testObj) return;
+        var subjName = String(testObj.subject || "General").trim() || "General";
+        var bucketKey = getBucketKey(testObj);
+        var store = readJson(LB_STORE_KEY, {});
+        var list = Array.isArray(store[bucketKey]) ? store[bucketKey].slice() : [];
+
+        if (saveScore && stats) {
+            var attemptedCount = stats.correct + stats.wrong;
+            var acc = attemptedCount > 0 ? Math.round((stats.correct / attemptedCount) * 1000) / 10 : 0;
+            var existingIdx = list.findIndex(function (r) {
+                return String(r.user_name || "").toLowerCase() === currentUserName.toLowerCase();
+            });
+            var entry = {
+                user_name: currentUserName,
+                subject: subjName,
+                best_score: round2(stats.score),
+                max_marks: round2(stats.maxMarks),
+                correct: stats.correct,
+                wrong: stats.wrong,
+                skipped: stats.skipped,
+                best_pct: acc
+            };
+            if (existingIdx !== -1) {
+                list[existingIdx] = entry;
+            } else {
+                list.push(entry);
+            }
+            list.sort(function (a, b) {
+                if (Number(b.best_score) !== Number(a.best_score)) return Number(b.best_score) - Number(a.best_score);
+                return Number(b.best_pct) - Number(a.best_pct);
+            });
+            store[bucketKey] = list;
+            writeJson(LB_STORE_KEY, store);
+        }
+
+        if (lbTitle) lbTitle.textContent = "Leaderboard — " + testObj.title;
+        if (lbBody) {
+            var isAdmin = currentUserRole === "admin";
+            var colSpan = isAdmin ? 8 : 7;
+            var html =
+                '<div class="mt-table-wrap"><table class="mt-table"><thead><tr>' +
+                '<th>Rank</th><th>Student</th><th>Marks</th><th>Correct</th><th>Wrong</th><th>Skipped</th><th>Accuracy</th>' +
+                (isAdmin ? '<th>Admin Edit</th>' : '') +
+                '</tr></thead><tbody>';
+
+            if (!list.length) {
+                html += '<tr><td colspan="' + colSpan + '" style="text-align:center; color:var(--muted, #64748b); padding:14px;">No attempts recorded on this leaderboard yet.</td></tr>';
+            } else {
+                list.forEach(function (r, i) {
+                    var isMe = String(r.user_name || "").toLowerCase() === currentUserName.toLowerCase();
+                    var rankClass = i === 0 ? "r1" : (i === 1 ? "r2" : (i === 2 ? "r3" : ""));
+                    var adminCell = "";
+                    if (isAdmin) {
+                        adminCell =
+                            '<td><div class="mt-lb-admin-editor">' +
+                            '<input type="number" step="0.25" class="mt-lb-score-input" data-lb-idx="' + i + '" value="' + r.best_score + '">' +
+                            '<button type="button" class="mt-lb-mini-btn mt-lb-save-btn" data-lb-idx="' + i + '">Save</button>' +
+                            '<button type="button" class="mt-lb-mini-btn mt-lb-rem-btn" data-lb-idx="' + i + '">Delete</button>' +
+                            '</div></td>';
+                    }
+                    html +=
+                        '<tr class="' + (isMe ? "mt-me-row" : "") + '">' +
+                        '<td><span class="mt-rank-medal ' + rankClass + '">#' + (i + 1) + '</span></td>' +
+                        '<td>' + escapeHtml(r.user_name) + (isMe ? ' <span style="font-size:0.7rem; color:#047857;">(You)</span>' : '') + '</td>' +
+                        '<td><strong>' + r.best_score + ' / ' + r.max_marks + '</strong></td>' +
+                        '<td style="color:#10b981; font-weight:700;">' + (r.correct !== undefined ? r.correct : "-") + '</td>' +
+                        '<td style="color:#ef4444; font-weight:700;">' + (r.wrong !== undefined ? r.wrong : "-") + '</td>' +
+                        '<td style="color:#d97706; font-weight:700;">' + (r.skipped !== undefined ? r.skipped : "-") + '</td>' +
+                        '<td>' + r.best_pct + '%</td>' +
+                        adminCell +
+                        '</tr>';
+                });
+            }
+            html += '</tbody></table></div>';
+            lbBody.innerHTML = html;
+            bindLeaderboardAdminActions(testObj, bucketKey);
+        }
+
+        var isPhoneView = window.innerWidth <= 860;
+        var hasAttemptedThisTest = !!getSingleAttemptRecord(testObj.id) || !!saveScore;
+        if (isPhoneView && !hasAttemptedThisTest) {
+            lbCard.style.display = "none";
+        } else {
+            lbCard.style.display = "block";
+        }
+    }
+
+    function deleteLeaderboardForCurrentTarget() {
+        if (currentUserRole !== "admin") return;
+        var targetObj = activeLocalTest || (selectedServerCard ? {
+            id: selectedServerCard.getAttribute("data-test-id") || "",
+            title: selectedServerCard.getAttribute("data-title") || "Test",
+            subject: selectedServerCard.getAttribute("data-subject") || "General"
+        } : null);
+
+        if (!targetObj) {
+            showAdminBanner("Select a mock test first.", true);
+            return;
+        }
+
+        var bucketKey = getBucketKey(targetObj);
+        var store = readJson(LB_STORE_KEY, {});
+        delete store[bucketKey];
+        writeJson(LB_STORE_KEY, store);
+
+        renderLeaderboardCard(targetObj, null, false);
+        showAdminBanner('Leaderboard deleted for "' + targetObj.title + '".', false);
+    }
+
+    if (cardDelLbBtn) cardDelLbBtn.addEventListener("click", deleteLeaderboardForCurrentTarget);
+    if (adminDelLbBtn) adminDelLbBtn.addEventListener("click", deleteLeaderboardForCurrentTarget);
+
+    /* Render Locked MCQ Review Mode: Green for Correct Option, Red for Wrong Selected Option */
+    function renderLockedMcqReview(testObj, record, saveToLeaderboard) {
+        if (timerId) clearInterval(timerId);
+        var stats = record.stats;
+        var choices = record.choices || {};
+        var skippedList = record.skippedList || [];
+        var qList = Array.isArray(testObj.questions) ? testObj.questions : [];
+
+        if (clock) {
+            clock.classList.remove("urgent");
+            clock.classList.add("locked");
+            clock.textContent = "Locked • Attempted";
+        }
+        if (barAttBadge) barAttBadge.style.display = "inline-flex";
+        if (topSendBtn) topSendBtn.style.display = "none";
+        if (examMeta) {
+            examMeta.innerHTML =
+                escapeHtml(testObj.portal) + " · " + escapeHtml(testObj.subject) +
+                ' · <span id="mtStepCounter">Question 1 of ' + qList.length + '</span> · ' +
+                '<strong style="color:#047857;">Locked Review (Green = Correct, Red = Wrong)</strong>';
+        }
+
+        updateSideSummaryCard(testObj, stats, skippedList);
+
+        if (mcqForm) {
+            var csrfEl = mcqForm.querySelector('input[name="csrf_token"]');
+            var html = '<input type="hidden" name="csrf_token" value="' + escapeHtml(csrfEl ? csrfEl.value : "") + '">';
+
+            html +=
+                '<div class="mt-locked-banner">' +
+                '<div>' +
+                '<strong style="font-size:0.95rem; color:#047857;">Attempted &amp; Locked — ' + escapeHtml(testObj.title) + '</strong>' +
+                '<div style="font-size:0.8rem; color:var(--muted, #64748b); margin-top:2px;">' +
+                'Re-attempt is disabled. Green highlights the correct answer; Red highlights your wrong selection.' +
+                '</div>' +
+                '</div>' +
+                '<span class="mt-att-badge">Score: ' + stats.score + ' / ' + stats.maxMarks + '</span>' +
+                '</div>';
+
+            /* Question Navigator Palette */
+            if (qList.length > 0) {
+                html += '<div class="mt-q-palette">';
+                qList.forEach(function (qItem, pIdx) {
+                    var uAns = choices[pIdx] || "";
+                    var pCls = !uAns ? "pal-skip" : (uAns === qItem.ans ? "pal-correct" : "pal-wrong");
+                    html += '<button type="button" class="mt-pal-btn ' + pCls + '" data-goto-idx="' + pIdx + '">Q' + (pIdx + 1) + '</button>';
+                });
+                html += '</div>';
+            }
+
+            qList.forEach(function (item, idx) {
+                var isFirst = idx === 0;
+                var isLast = idx === qList.length - 1;
+                var chosen = choices[idx] || "";
+                var isSkipped = !chosen;
+                var isRight = chosen === item.ans;
+
+                var statusPillHtml = isSkipped
+                    ? '<span class="mt-st-skip" style="font-size:0.8rem;">Skipped (0)</span>'
+                    : (isRight
+                        ? '<span class="mt-st-correct" style="font-size:0.8rem;">Correct (+' + (testObj.pos || 1) + ')</span>'
+                        : '<span class="mt-st-wrong" style="font-size:0.8rem;">Wrong (-' + (testObj.neg || 0) + ')</span>');
+
+                var figHtml = "";
+                if (item.figureSvg) {
+                    figHtml =
+                        '<div class="mt-figure-box">' + item.figureSvg +
+                        (item.figureCaption ? '<div class="mt-figure-caption">' + escapeHtml(item.figureCaption) + '</div>' : '') +
+                        '</div>';
+                }
+
+                var opts = [
+                    { key: "A", text: item.a },
+                    { key: "B", text: item.b },
+                    { key: "C", text: item.c },
+                    { key: "D", text: item.d }
+                ];
+
+                var optsHtml = "";
+                opts.forEach(function (op) {
+                    var isCorrectOpt = op.key === item.ans;
+                    var isSelectedOpt = op.key === chosen;
+                    var extraCls = " opt-locked";
+                    var tagHtml = "";
+
+                    if (isCorrectOpt) {
+                        extraCls += " opt-correct-ans";
+                        tagHtml = '<span class="mt-opt-tag tag-green">' + (isSelectedOpt ? "Your Choice • Correct" : "Correct Answer") + '</span>';
+                    } else if (isSelectedOpt && !isCorrectOpt) {
+                        extraCls += " opt-wrong-ans";
+                        tagHtml = '<span class="mt-opt-tag tag-red">Your Choice • Wrong</span>';
+                    }
+
+                    optsHtml +=
+                        '<div class="mt-opt' + extraCls + '">' +
+                        '<span class="mt-opt-left">' +
+                        '<input type="radio" disabled ' + (isSelectedOpt ? "checked" : "") + '>' +
+                        '<span><strong>' + op.key + '.</strong> ' + escapeHtml(op.text) + '</span>' +
+                        '</span>' +
+                        tagHtml +
+                        '</div>';
+                });
+
+                html +=
+                    '<div class="mt-step-box mt-q-step" data-step-index="' + idx + '" style="' + (isFirst ? "" : "display:none;") + '">' +
+                    '<div class="mt-step-top">' +
+                    '<span class="pill active">Question ' + (idx + 1) + ' / ' + qList.length + '</span>' +
+                    statusPillHtml +
+                    '</div>' +
+                    (item.tag ? '<div class="mt-q-subtag">' + escapeHtml(item.tag) + '</div>' : '') +
+                    '<div class="mt-q-title">' + escapeHtml(item.q) + '</div>' +
+                    figHtml +
+                    optsHtml +
+                    '<div class="mt-nav-row">' +
+                    (!isFirst ? '<button type="button" class="mt-box-btn mt-box-prev mt-prev-btn">← Previous</button>' : '<span></span>') +
+                    '<div class="mt-nav-right-group">' +
+                    (!isLast ? '<button type="button" class="mt-box-btn mt-box-next mt-next-btn">Next →</button>' : '') +
+                    '</div>' +
+                    '</div>' +
+                    '</div>';
+            });
+
+            mcqForm.innerHTML = html;
+            bindStepControls(true);
+        }
+
+        refreshAttemptedBadges();
+        renderLeaderboardCard(testObj, stats, saveToLeaderboard);
+    }
+
+    function evaluateLocalMockTest() {
+        if (!activeLocalTest || !mcqForm) return;
+        var prior = getSingleAttemptRecord(activeLocalTest.id);
+        if (prior && prior.stats) {
+            renderLockedMcqReview(activeLocalTest, prior, false);
+            return;
+        }
+
+        var qList = Array.isArray(activeLocalTest.questions) ? activeLocalTest.questions : [];
+        if (!qList.length) return;
+
+        var pos = parseFloat(activeLocalTest.pos || 1);
+        var neg = parseFloat(activeLocalTest.neg || 0);
+        var correct = 0, wrong = 0, skipped = 0, score = 0;
+        var skippedList = [];
+        var choicesMap = {};
+
+        qList.forEach(function (item, idx) {
+            var qName = "local_q_" + activeLocalTest.id + "_" + idx;
+            var checked = mcqForm.querySelector('input[name="' + qName + '"]:checked');
+            var chosen = checked ? checked.value : "";
+            choicesMap[idx] = chosen;
+
+            if (!chosen) {
+                skipped++;
+                skippedList.push({ num: idx + 1, q: item.q });
+            } else if (chosen === item.ans) {
+                correct++;
+                score = round2(score + pos);
+            } else {
+                wrong++;
+                score = round2(score - neg);
+            }
+        });
+
+        var maxMarks = round2(qList.length * pos);
+        var statsObj = { score: score, maxMarks: maxMarks, correct: correct, wrong: wrong, skipped: skipped };
+        var recordObj = { stats: statsObj, choices: choicesMap, skippedList: skippedList };
+
+        setSingleAttemptRecord(activeLocalTest.id, recordObj);
+        renderLockedMcqReview(activeLocalTest, recordObj, true);
+    }
+
+    if (topSendBtn) {
+        topSendBtn.addEventListener("click", function () {
+            if (activeLocalTest) {
+                evaluateLocalMockTest();
+            } else if (mcqForm && mcqForm.querySelector(".mt-q-step")) {
+                if (typeof mcqForm.requestSubmit === "function") mcqForm.requestSubmit();
+                else mcqForm.submit();
+            }
+        });
+    }
+
+    function openLocalMockTest(testObj, goExamOnPhone) {
+        if (!currentPortal) {
+            syncClassGateState();
+            return;
+        }
+        activeLocalTest = testObj;
+        selectedServerCard = null;
+        syncAdminTargetFields(testObj);
+
+        if (examTitle) examTitle.textContent = testObj.title;
+        var qList = Array.isArray(testObj.questions) ? testObj.questions : [];
+
+        document.querySelectorAll(".mt-local-card").forEach(function (c) {
+            c.classList.toggle("active", c.getAttribute("data-local-id") === String(testObj.id));
+        });
+        document.querySelectorAll(".mt-server-test-card").forEach(function (c) {
+            c.classList.remove("active");
+        });
+
+        /* Check if already attempted -> immediately lock and highlight Green/Red */
+        var priorAttempt = getSingleAttemptRecord(testObj.id);
+        if (priorAttempt && priorAttempt.stats) {
+            if (goExamOnPhone) setPhoneStage("exam");
+            renderLockedMcqReview(testObj, priorAttempt, false);
+            return;
+        }
+
+        updateSideSummaryCard(null, null, null);
+        if (barAttBadge) barAttBadge.style.display = "none";
+        if (topSendBtn) topSendBtn.style.display = qList.length ? "inline-flex" : "none";
+        if (examMeta) {
+            examMeta.innerHTML =
+                escapeHtml(testObj.portal) + " · " + escapeHtml(testObj.subject) + " · " +
+                '<span id="mtStepCounter">Question 1 of ' + qList.length + '</span> · ' +
+                '<span id="mtAnsweredCounter">0 / ' + qList.length + ' Answered</span>';
+        }
+
+        if (mcqForm) {
+            var csrfEl = mcqForm.querySelector('input[name="csrf_token"]');
+            var html = '<input type="hidden" name="csrf_token" value="' + escapeHtml(csrfEl ? csrfEl.value : "") + '">';
+            if (!qList.length) {
+                html +=
+                    '<div class="glass-card"><h2 style="font-size:1.1rem; margin-bottom:6px;">' + escapeHtml(testObj.title) + '</h2>' +
+                    '<p style="color:var(--muted, #64748b); font-size:0.88rem; margin:0;">No questions added to this test yet.</p></div>';
+            } else {
+                qList.forEach(function (item, idx) {
+                    var qName = "local_q_" + testObj.id + "_" + idx;
+                    var isFirst = idx === 0;
+                    var isLast = idx === qList.length - 1;
+                    var figHtml = "";
+                    if (item.figureSvg) {
+                        figHtml =
+                            '<div class="mt-figure-box">' + item.figureSvg +
+                            (item.figureCaption ? '<div class="mt-figure-caption">' + escapeHtml(item.figureCaption) + '</div>' : '') +
+                            '</div>';
+                    }
+
+                    html +=
+                        '<div class="mt-step-box mt-q-step" data-step-index="' + idx + '" style="' + (isFirst ? "" : "display:none;") + '">' +
+                        '<div class="mt-step-top">' +
+                        '<span class="pill active">Question ' + (idx + 1) + ' / ' + qList.length + '</span>' +
+                        '<button type="button" class="mt-clear-btn" data-qname="' + qName + '">Clear Option</button>' +
+                        '</div>' +
+                        (item.tag ? '<div class="mt-q-subtag">' + escapeHtml(item.tag) + '</div>' : '') +
+                        '<div class="mt-q-title">' + escapeHtml(item.q) + '</div>' +
+                        figHtml +
+                        '<label class="mt-opt"><span class="mt-opt-left"><input type="radio" class="mt-radio-opt" name="' + qName + '" value="A"><span><strong>A.</strong> ' + escapeHtml(item.a) + '</span></span></label>' +
+                        '<label class="mt-opt"><span class="mt-opt-left"><input type="radio" class="mt-radio-opt" name="' + qName + '" value="B"><span><strong>B.</strong> ' + escapeHtml(item.b) + '</span></span></label>' +
+                        '<label class="mt-opt"><span class="mt-opt-left"><input type="radio" class="mt-radio-opt" name="' + qName + '" value="C"><span><strong>C.</strong> ' + escapeHtml(item.c) + '</span></span></label>' +
+                        '<label class="mt-opt"><span class="mt-opt-left"><input type="radio" class="mt-radio-opt" name="' + qName + '" value="D"><span><strong>D.</strong> ' + escapeHtml(item.d) + '</span></span></label>' +
+                        '<div class="mt-hint-msg" id="mtHint_' + idx + '"></div>' +
+                        '<div class="mt-nav-row">' +
+                        (!isFirst ? '<button type="button" class="mt-box-btn mt-box-prev mt-prev-btn">← Previous</button>' : '<span></span>') +
+                        '<div class="mt-nav-right-group">' +
+                        (!isLast
+                            ? '<button type="button" class="mt-box-btn mt-box-next mt-next-btn">Next →</button>'
+                            : '<button type="button" class="mt-box-btn mt-box-send mt-local-submit-btn">Send Test</button>') +
+                        '</div>' +
+                        '</div>' +
+                        '</div>';
+                });
+            }
+            mcqForm.innerHTML = html;
+            bindStepControls(false);
+
+            mcqForm.querySelectorAll(".mt-local-submit-btn").forEach(function (subBtn) {
+                subBtn.addEventListener("click", function (ev) {
+                    ev.preventDefault();
+                    evaluateLocalMockTest();
+                });
+            });
+            mcqForm.querySelectorAll(".mt-send-btn").forEach(function (srvBtn) {
+                srvBtn.addEventListener("click", function (ev) {
+                    if (activeLocalTest) {
+                        ev.preventDefault();
+                        evaluateLocalMockTest();
+                    }
+                });
+            });
+        }
+
+        renderLeaderboardCard(testObj, null, false);
+        startTestTimer(testObj.duration || 30);
+        if (goExamOnPhone) setPhoneStage("exam");
+    }
+
+    if (mcqForm) {
+        mcqForm.addEventListener("submit", function (ev) {
+            if (activeLocalTest) {
+                ev.preventDefault();
+                evaluateLocalMockTest();
+            }
+        });
+        mcqForm.addEventListener("click", function (ev) {
+            var subBtn = ev.target && ev.target.closest ? ev.target.closest(".mt-local-submit-btn") : null;
+            if (subBtn) {
+                ev.preventDefault();
+                evaluateLocalMockTest();
+            }
+        });
+    }
+
+    function clearArenaForClassSelection(portalName) {
+        if (timerId) clearInterval(timerId);
+        activeLocalTest = null;
+        selectedServerCard = null;
+        updateSideSummaryCard(null, null, null);
+        if (examTitle) examTitle.textContent = portalName + " Mock Tests";
+        if (examMeta) examMeta.textContent = "Select a mock test from the left list to start";
+        if (barAttBadge) barAttBadge.style.display = "none";
+        if (topSendBtn) topSendBtn.style.display = "none";
+        if (clock) {
+            clock.classList.remove("urgent", "locked");
+            clock.textContent = "--:--";
+        }
+        if (mcqForm) {
+            var csrfEl = mcqForm.querySelector('input[name="csrf_token"]');
+            mcqForm.innerHTML =
+                '<input type="hidden" name="csrf_token" value="' + escapeHtml(csrfEl ? csrfEl.value : "") + '">' +
+                '<div class="glass-card"><h3 style="font-size:1.05rem; margin-bottom:6px;">' + escapeHtml(portalName) + ' Unlocked</h3>' +
+                '<p style="color:var(--muted, #64748b); font-size:0.88rem; margin:0;">Click any mock test card in the list to enter the exam screen.</p></div>';
+        }
+        if (lbCard) lbCard.style.display = "none";
+    }
+
+    function renderTestsForPortal(portalVal, clearPreviousQuestion) {
+        currentPortal = portalVal || "";
+        syncClassGateState();
+        if (!currentPortal) return;
+
+        if (clearPreviousQuestion) {
+            clearArenaForClassSelection(currentPortal);
+        }
+
+        document.querySelectorAll(".mt-cat-pill").forEach(function (pill) {
+            var p = pill.getAttribute("data-portal") || "";
+            pill.classList.toggle("active", p.toLowerCase() === currentPortal.toLowerCase());
+        });
+
+        var isAll = currentPortal.toLowerCase() === "all";
+        var serverCards = Array.prototype.slice.call(document.querySelectorAll("#mtTestListContainer .mt-server-test-card"));
+        var serverMatchCount = 0;
+        serverCards.forEach(function (card) {
+            var p = (card.getAttribute("data-portal") || "").toLowerCase();
+            var show = isAll || p === currentPortal.toLowerCase();
+            card.style.display = show ? "" : "none";
+            if (show) serverMatchCount++;
+        });
+
+        document.querySelectorAll("#mtTestListContainer .mt-local-card").forEach(function (c) { c.remove(); });
+        var matchingLocal = isAll
+            ? localTests.slice()
+            : localTests.filter(function (t) {
+                return String(t.portal || "").toLowerCase() === currentPortal.toLowerCase();
+            });
+
+        matchingLocal.forEach(function (t) {
+            var card = document.createElement("a");
+            card.href = "#";
+            card.className = "mt-test-card mt-local-card" + (activeLocalTest && String(activeLocalTest.id) === String(t.id) ? " active" : "");
+            card.setAttribute("data-local-id", String(t.id));
+            var qLen = Array.isArray(t.questions) ? t.questions.length : 0;
+            var negHtml = Number(t.neg) > 0
+                ? '<strong class="mt-neg-badge">-' + escapeHtml(t.neg) + ' Neg</strong>'
+                : '<strong class="mt-noneg-badge">No Neg</strong>';
+
+            card.innerHTML =
+                '<div class="mt-card-top">' +
+                '<div style="font-weight: 800; font-size: 0.94rem;">' + escapeHtml(t.title) + '</div>' +
+                '<span class="mt-att-badge mt-local-att-badge" style="display:none;">Attempted</span>' +
+                '</div>' +
+                '<div style="font-size: 0.75rem; color: var(--muted, #64748b); margin-top: 4px;">' +
+                escapeHtml(t.portal) + ' · ' + escapeHtml(t.subject) + ' · ' + escapeHtml(t.duration) + 'm · ' + qLen + ' Qs · ' + negHtml +
+                '</div>' +
+                '<div class="mt-card-score-pill mt-local-score-pill" style="display:none;"></div>';
+
+            card.addEventListener("click", function (ev) {
+                ev.preventDefault();
+                openLocalMockTest(t, true);
+            });
+            if (testListContainer) testListContainer.appendChild(card);
+        });
+
+        refreshAttemptedBadges();
+        var totalShown = serverMatchCount + matchingLocal.length;
+        if (visibleCountEl) visibleCountEl.textContent = String(totalShown);
+        if (emptyTestMsg) emptyTestMsg.style.display = totalShown > 0 ? "none" : "block";
+    }
+
+    document.querySelectorAll(".mt-cat-pill").forEach(function (pill) {
+        pill.addEventListener("click", function (ev) {
+            ev.preventDefault();
+            var pVal = pill.getAttribute("data-portal") || "";
+            renderTestsForPortal(pVal, true);
+            setPhoneStage("select");
+        });
+    });
+
+    document.querySelectorAll(".mt-server-test-card").forEach(function (card) {
+        card.addEventListener("click", function (ev) {
+            if (!currentPortal) {
+                ev.preventDefault();
+                syncClassGateState();
+                return;
+            }
+            ev.preventDefault();
+            var sObj = {
+                id: card.getAttribute("data-test-id") || "",
+                portal: card.getAttribute("data-portal") || currentPortal || "Class 10",
+                title: card.getAttribute("data-title") || card.textContent.trim(),
+                subject: card.getAttribute("data-subject") || "General",
+                duration: parseInt(card.getAttribute("data-duration") || "20", 10) || 20,
+                pos: parseFloat(card.getAttribute("data-pos") || "1") || 1,
+                neg: parseFloat(card.getAttribute("data-neg") || "0") || 0,
+                questions: []
+            };
+            selectedServerCard = card;
+            activeLocalTest = null;
+            syncAdminTargetFields(sObj);
+            document.querySelectorAll(".mt-server-test-card").forEach(function (c) {
+                c.classList.toggle("active", c === card);
+            });
+            document.querySelectorAll(".mt-local-card").forEach(function (c) {
+                c.classList.remove("active");
+            });
+            if (examTitle) examTitle.textContent = sObj.title;
+            var prior = getSingleAttemptRecord(sObj.id);
+            if (prior && prior.stats) {
+                updateSideSummaryCard(sObj, prior.stats, prior.skippedList || []);
+                if (barAttBadge) barAttBadge.style.display = "inline-flex";
+                if (topSendBtn) topSendBtn.style.display = "none";
+                if (clock) {
+                    clock.classList.remove("urgent");
+                    clock.classList.add("locked");
+                    clock.textContent = "Locked • Attempted";
+                }
+            } else {
+                updateSideSummaryCard(null, null, null);
+                if (barAttBadge) barAttBadge.style.display = "none";
+                if (topSendBtn) topSendBtn.style.display = "none";
+                startTestTimer(sObj.duration);
+            }
+            if (examMeta) {
+                examMeta.textContent = sObj.portal + " · " + sObj.subject + " · " + sObj.duration + "m";
+            }
+            renderLeaderboardCard(sObj, null, false);
+            if (window.innerWidth <= 860) setPhoneStage("exam");
+        });
+    });
+
+    var createTestForm = document.getElementById("mtCreateTestForm");
+    if (createTestForm) {
+        createTestForm.addEventListener("submit", function (ev) {
+            ev.preventDefault();
+            var titleVal = (document.getElementById("mtCreateTitle").value || "").trim();
+            var subjVal = (document.getElementById("mtCreateSubject").value || "").trim();
+            var portalVal = document.getElementById("mtCreatePortal").value || "JEE Main + Adv";
+            var durVal = parseInt(document.getElementById("mtCreateDuration").value, 10) || 45;
+            var posVal = parseFloat(document.getElementById("mtCreatePos").value) || 4;
+            var negVal = parseFloat(document.getElementById("mtCreateNeg").value) || 1;
+            if (!titleVal || !subjVal) return;
+
+            var newMock = {
+                id: "custom_" + Date.now(),
+                portal: portalVal,
+                title: titleVal,
+                subject: subjVal,
+                duration: durVal,
+                pos: posVal,
+                neg: negVal,
+                isCustom: true,
+                questions: []
+            };
+            localTests.unshift(newMock);
+            writeJson(CUSTOM_TESTS_KEY, localTests.filter(function (x) { return !!x.isCustom; }));
+            currentPortal = portalVal;
+            renderTestsForPortal(currentPortal, false);
+            openLocalMockTest(newMock, false);
+            showAdminBanner('Mock test "' + titleVal + '" created!', false);
+            createTestForm.reset();
+        });
+    }
+
+    var addQuestionForm = document.getElementById("mtAddQuestionForm");
+    if (addQuestionForm) {
+        addQuestionForm.addEventListener("submit", function (ev) {
+            ev.preventDefault();
+            var qVal = (document.getElementById("mtQText").value || "").trim();
+            var aVal = (document.getElementById("mtOptA").value || "").trim();
+            var bVal = (document.getElementById("mtOptB").value || "").trim();
+            var cVal = (document.getElementById("mtOptC").value || "").trim();
+            var dVal = (document.getElementById("mtOptD").value || "").trim();
+            var ansVal = document.getElementById("mtCorrectOpt").value || "A";
+            if (!qVal || !aVal || !bVal || !cVal || !dVal) return;
+
+            var target = activeLocalTest || localTests[0];
+            if (!target) {
+                showAdminBanner("Select or create a mock test first.", true);
+                return;
+            }
+            target.questions = Array.isArray(target.questions) ? target.questions : [];
+            target.questions.push({ q: qVal, a: aVal, b: bVal, c: cVal, d: dVal, ans: ansVal });
+            writeJson(CUSTOM_TESTS_KEY, localTests.filter(function (x) { return !!x.isCustom; }));
+            currentPortal = target.portal || currentPortal || "JEE Main + Adv";
+            openLocalMockTest(target, false);
+            renderTestsForPortal(currentPortal, false);
+            showAdminBanner('Question added to "' + target.title + '".', false);
+            addQuestionForm.reset();
+        });
+    }
+
+    var deleteTestForm = document.getElementById("mtDeleteTestForm");
+    if (deleteTestForm) {
+        deleteTestForm.addEventListener("submit", function (ev) {
+            ev.preventDefault();
+            if (activeLocalTest) {
+                var targetId = String(activeLocalTest.id);
+                var idx = localTests.findIndex(function (x) { return String(x.id) === targetId; });
+                if (idx !== -1) localTests.splice(idx, 1);
+                if (!activeLocalTest.isCustom && deletedBuiltinIds.indexOf(targetId) === -1) {
+                    deletedBuiltinIds.push(targetId);
+                    writeJson(DELETED_IDS_KEY, deletedBuiltinIds);
+                }
+                writeJson(CUSTOM_TESTS_KEY, localTests.filter(function (x) { return !!x.isCustom; }));
+                activeLocalTest = null;
+                syncAdminTargetFields(null);
+                if (currentPortal) renderTestsForPortal(currentPortal, true);
+                showAdminBanner("Mock test deleted.", false);
+                return;
+            }
+            if (selectedServerCard) {
+                var bId = selectedServerCard.getAttribute("data-test-id") || "";
+                var fd = new URLSearchParams();
+                var csrfEl = deleteTestForm.querySelector('input[name="csrf_token"]');
+                if (csrfEl) fd.append("csrf_token", csrfEl.value);
+                fd.append("action", "delete_test");
+                fd.append("test_id", bId);
+                fetch(deleteTestForm.getAttribute("action") || "/mock-tests", {
+                    method: "POST",
+                    body: fd,
+                    credentials: "same-origin"
+                }).finally(function () {
+                    selectedServerCard.remove();
+                    selectedServerCard = null;
+                    syncAdminTargetFields(null);
+                    if (currentPortal) renderTestsForPortal(currentPortal, true);
+                    showAdminBanner("Selected mock test deleted.", false);
+                });
+            } else {
+                showAdminBanner("Select a test from the list first.", true);
+            }
+        });
+    }
+
+    var portalSel = document.getElementById("mtCreatePortal");
+    var posInp = document.getElementById("mtCreatePos");
+    var negInp = document.getElementById("mtCreateNeg");
+    if (portalSel && posInp && negInp) {
+        portalSel.addEventListener("change", function () {
+            var v = portalSel.value;
+            if (v === "JEE Main + Adv" || v === "JEE" || v === "NEET") {
+                posInp.value = "4";
+                negInp.value = "1";
+            } else {
+                posInp.value = "1";
+                negInp.value = "0";
+            }
+        });
+    }
+
+    syncClassGateState();
+    if (currentPortal) {
+        renderTestsForPortal(currentPortal, !document.querySelectorAll(".mt-q-step").length);
+    }
+    if (document.querySelectorAll(".mt-q-step").length > 0 && currentPortal) {
+        if (topSendBtn) topSendBtn.style.display = "inline-flex";
+        bindStepControls(false);
+        startTestTimer(examBar ? examBar.getAttribute("data-duration") : 30);
+        setPhoneStage("exam");
+    } else {
+        setPhoneStage("select");
+    }
+
+    window.addEventListener("resize", function () {
+        var curTarget = activeLocalTest || (selectedServerCard ? {
+            id: selectedServerCard.getAttribute("data-test-id") || "",
+            title: selectedServerCard.getAttribute("data-title") || "Test",
+            subject: selectedServerCard.getAttribute("data-subject") || "General"
+        } : null);
+        if (curTarget && lbCard) {
+            renderLeaderboardCard(curTarget, null, false);
+        }
+    });
+})();
+</script>
+{% endblock %}

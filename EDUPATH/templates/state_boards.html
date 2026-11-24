@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+    .big-hero { background: var(--card); border: 1px solid var(--border); border-radius: 22px; padding: 26px; margin-bottom: 24px; box-shadow: 0 10px 26px rgba(0,0,0,0.03); }
+    .board-card {
+        background: var(--card); border: 1px solid var(--border); border-left: 6px solid var(--accent);
+        border-radius: 18px; padding: 22px; margin-bottom: 20px; box-shadow: 0 8px 22px rgba(0,0,0,0.03);
+    }
+    .ch-links { display: flex; flex-direction: column; gap: 8px; margin-top: 14px; }
+    .ch-link-btn {
+        display: flex; justify-content: space-between; align-items: center; gap: 8px;
+        padding: 10px 13px; border-radius: 11px; background: var(--bg); border: 1px solid var(--border);
+        color: var(--text); text-decoration: none; font-size: 0.89rem; font-weight: 600; transition: 0.18s;
+    }
+    .ch-link-btn:hover { border-color: var(--accent); color: var(--accent); }
+</style>
+
+<div class="big-hero">
+    <h1 style="font-size: 1.95rem; margin-bottom: 6px;">🏛️ Bihar Board & State Boards Portal</h1>
+    <p style="color: var(--muted); font-size: 0.96rem; line-height: 1.6; margin-bottom: 14px;">
+        Bihar Board aur baaki State Boards ke har chapter/section par click karke uska portal kholein.
+    </p>
+    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+        <a href="{{ url_for('state_boards', board='All') }}" class="pill {{ 'active' if selected_board == 'All' }}">All Boards</a>
+        {% for b in boards_info %}
+            <a href="{{ url_for('state_boards', board=b['name']) }}" class="pill {{ 'active' if selected_board == b['name'] }}">{{ b['name'] }}</a>
+        {% endfor %}
+    </div>
+</div>
+
+{% for b in boards_info %}
+    {% if selected_board == 'All' or selected_board == b['name'] %}
+    <div class="board-card">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 8px;">
+            <h2 style="font-size: 1.25rem;">{{ b['name'] }}</h2>
+            <span style="font-size: 0.74rem; font-weight: 800; padding: 4px 10px; border-radius: 99px; background: color-mix(in srgb, var(--accent) 14%, transparent); color: var(--accent);">
+                {{ b['badge'] }}
+            </span>
+        </div>
+        <p style="font-size: 0.86rem; font-weight: 700; color: var(--accent); margin-bottom: 6px;">{{ b['classes'] }}</p>
+        <p style="font-size: 0.92rem; color: var(--muted); line-height: 1.6;">{{ b['description'] }}</p>
+
+        <div class="ch-links">
+            {% for ch in b['chapters'] %}
+            <a href="{{ url_for('chapter_portal', portal_type=b['name'], slug=slugify(ch), title=ch, subject=b['name']) }}" class="ch-link-btn">
+                <span>{{ ch }}</span>
+                <span style="font-size: 0.78rem; color: var(--accent); font-weight: 800;">Portal →</span>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+{% endfor %}
+{% endblock %}

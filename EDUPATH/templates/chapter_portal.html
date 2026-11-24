@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+    .ch-hero {
+        background: var(--card); border: 1px solid var(--border); border-left: 6px solid var(--accent);
+        border-radius: 22px; padding: 26px; margin-bottom: 24px; box-shadow: 0 10px 26px rgba(0,0,0,0.03);
+    }
+    .item-line {
+        display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;
+        padding: 14px 16px; border-radius: 14px; background: var(--bg); border: 1px solid var(--border);
+        margin-bottom: 10px;
+    }
+</style>
+
+<div class="ch-hero">
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 10px;">
+        <span style="font-size: 0.76rem; font-weight: 800; padding: 4px 12px; border-radius: 99px; background: color-mix(in srgb, var(--accent) 14%, transparent); color: var(--accent);">
+            {{ portal_type }} • {{ subject_label }}
+        </span>
+        <a href="javascript:history.back()" class="btn-outline" style="padding: 7px 14px; font-size: 0.84rem;">← Back</a>
+    </div>
+    <h1 style="font-size: 1.75rem; margin-bottom: 6px;">{{ chapter_title }}</h1>
+    <p style="color: var(--muted); font-size: 0.94rem;">
+        Is chapter ke dedicated video lectures aur PDF notes — clean line-by-line arranged.
+    </p>
+</div>
+
+<div class="grid-2">
+    <div class="glass-card">
+        <h3 style="margin-bottom: 14px;">🎬 Chapter Video Lectures ({{ videos|length }})</h3>
+        {% if videos %}
+            {% for v in videos %}
+            <div class="glass-card" style="padding: 15px; margin-bottom: 14px; background: var(--bg);">
+                <video controls preload="metadata"
+                       {% if v['thumbnail_file'] %}poster="{{ url_for('serve_file', filename=v['thumbnail_file']) }}"{% endif %}
+                       style="width: 100%; border-radius: 12px; max-height: 220px; object-fit: cover; margin-bottom: 10px;">
+                    <source src="{{ url_for('serve_file', filename=v['video_file']) }}" type="video/mp4">
+                </video>
+                <div style="font-weight: 700; font-size: 1rem; margin-bottom: 4px;">{{ v['title'] }}</div>
+                <div style="font-size: 0.78rem; color: var(--muted); margin-bottom: 10px;">{{ v['created_at'] }} • By {{ v['added_by'] }}</div>
+                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                    <a href="{{ url_for('download_file', filename=v['video_file']) }}" class="btn-outline" style="padding: 7px 13px; font-size: 0.82rem;">⬇ Download</a>
+                    {% if user['role'] == 'admin' %}
+                        <a href="{{ url_for('delete_video', vid_id=v['id']) }}" class="btn-outline" style="padding: 7px 13px; font-size: 0.82rem; border-color: #ef4444; color: #ef4444;">Delete</a>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p style="color: var(--muted); font-size: 0.9rem;">Is chapter ka abhi koi lecture add nahi hua hai.</p>
+        {% endif %}
+    </div>
+
+    <div class="glass-card">
+        <h3 style="margin-bottom: 14px;">📚 Chapter PDF Notes ({{ notes|length }})</h3>
+        {% if notes %}
+            {% for n in notes %}
+            <div class="item-line">
+                <div>
+                    <div style="font-weight: 700; font-size: 0.95rem;">📄 {{ n['title'] }}</div>
+                    <div style="font-size: 0.78rem; color: var(--muted);">{{ n['created_at'] }} • By {{ n['uploaded_by'] }}</div>
+                </div>
+                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                    <a href="{{ url_for('serve_file', filename=n['filename']) }}" target="_blank" class="btn-outline" style="padding: 7px 13px; font-size: 0.82rem;">👁 View</a>
+                    <a href="{{ url_for('download_file', filename=n['filename']) }}" class="btn" style="padding: 7px 13px; font-size: 0.82rem;">⬇ PDF</a>
+                    {% if user['role'] == 'admin' %}
+                        <a href="{{ url_for('delete_note', note_id=n['id']) }}" class="btn-outline" style="padding: 7px 11px; font-size: 0.82rem; border-color: #ef4444; color: #ef4444;">Delete</a>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p style="color: var(--muted); font-size: 0.9rem;">Is chapter ka abhi koi PDF note add nahi hua hai.</p>
+        {% endif %}
+    </div>
+</div>
+
+{% if user['role'] == 'admin' %}
+<div class="grid-2">
+    <div class="glass-card">
+        <h3 style="margin-bottom: 12px;">➕ Admin: Add Lecture to This Chapter</h3>
+        <form method="POST" enctype="multipart/form-data">
+            <input type="hidden" name="add_type" value="lecture">
+            <input type="hidden" name="chapter_name" value="{{ chapter_title }}">
+            <input type="hidden" name="subject" value="{{ subject_label }}">
+
+            <label style="font-size: 0.84rem; font-weight: 700;">Lecture Title</label>
+            <input type="text" name="title" required placeholder="e.g., {{ chapter_title }} — Full Lecture">
+
+            <label style="font-size: 0.84rem; font-weight: 700;">Video File (.mp4, .mov, .webm)</label>
+            <input type="file" name="video_file" accept="video/*" required>
+
+            <label style="font-size: 0.84rem; font-weight: 700;">Thumbnail Image (Optional)</label>
+            <input type="file" name="thumbnail_file" accept="image/*">
+
+            <button type="submit" class="btn">Upload Chapter Lecture</button>
+        </form>
+    </div>
+
+    <div class="glass-card">
+        <h3 style="margin-bottom: 12px;">➕ Admin: Add PDF Note to This Chapter</h3>
+        <form method="POST" enctype="multipart/form-data">
+            <input type="hidden" name="add_type" value="note">
+            <input type="hidden" name="chapter_name" value="{{ chapter_title }}">
+            <input type="hidden" name="subject" value="{{ subject_label }}">
+
+            <label style="font-size: 0.84rem; font-weight: 700;">PDF Note Title</label>
+            <input type="text" name="title" required placeholder="e.g., {{ chapter_title }} — Notes PDF">
+
+            <label style="font-size: 0.84rem; font-weight: 700;">PDF File (.pdf)</label>
+            <input type="file" name="pdf_file" accept="application/pdf" required>
+
+            <button type="submit" class="btn">Upload Chapter PDF</button>
+        </form>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,1443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CBSE Competency-Based Questions (CBQ) Practice Hub | Edupath</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg-page: #f3f7f5;
+      --bg-surface: #ffffff;
+      --bg-subtle: #eaf3ee;
+      --text-main: #0f241b;
+      --text-muted: #4b655a;
+      --emerald-900: #064e3b;
+      --emerald-800: #065f46;
+      --emerald-700: #047857;
+      --emerald-600: #059669;
+      --emerald-500: #10b981;
+      --emerald-100: #d1fae5;
+      --emerald-50: #ecfdf5;
+      --amber-600: #d97706;
+      --amber-50: #fffbeb;
+      --rose-600: #e11d48;
+      --rose-50: #fff1f2;
+      --border-soft: #d5e5dd;
+      --shadow-sm: 0 2px 8px rgba(6, 78, 59, 0.06);
+      --shadow-md: 0 10px 25px rgba(6, 78, 59, 0.09);
+      --shadow-lg: 0 18px 40px rgba(6, 78, 59, 0.14);
+      --radius-sm: 10px;
+      --radius-md: 16px;
+      --radius-lg: 22px;
+      --transition: 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--bg-page);
+      color: var(--text-main);
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Top Navigation */
+    .navbar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border-soft);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .nav-container {
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 0.85rem 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      text-decoration: none;
+      color: var(--text-main);
+    }
+
+    .brand-logo {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--emerald-700), var(--emerald-500));
+      display: grid;
+      place-items: center;
+      color: #fff;
+      font-weight: 800;
+      font-size: 1.15rem;
+      box-shadow: 0 6px 16px rgba(5, 150, 105, 0.3);
+    }
+
+    .brand-text {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .brand-name {
+      font-weight: 800;
+      font-size: 1.15rem;
+      letter-spacing: -0.02em;
+      color: var(--emerald-900);
+      line-height: 1.1;
+    }
+
+    .brand-tag {
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--emerald-700);
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+    }
+
+    .nav-stats {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      flex-wrap: wrap;
+    }
+
+    .stat-chip {
+      background: var(--emerald-50);
+      border: 1px solid var(--emerald-100);
+      color: var(--emerald-900);
+      padding: 0.4rem 0.8rem;
+      border-radius: 999px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .stat-chip span.mono {
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--emerald-700);
+    }
+
+    /* Hero Section */
+    .hero {
+      background: radial-gradient(circle at top right, #10b981 0%, #047857 45%, #064e3b 100%);
+      color: #ffffff;
+      padding: 2.5rem 1.25rem 3rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image: radial-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+      background-size: 22px 22px;
+      pointer-events: none;
+    }
+
+    .hero-inner {
+      max-width: 1240px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: 1.4fr 1fr;
+      gap: 2rem;
+      align-items: center;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      background: rgba(255, 255, 255, 0.14);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      padding: 0.35rem 0.85rem;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      margin-bottom: 0.9rem;
+    }
+
+    .hero h1 {
+      font-size: clamp(1.75rem, 3.6vw, 2.65rem);
+      font-weight: 800;
+      line-height: 1.15;
+      letter-spacing: -0.03em;
+      margin-bottom: 0.85rem;
+    }
+
+    .hero p {
+      color: #d1fae5;
+      font-size: 0.98rem;
+      max-width: 620px;
+      margin-bottom: 1.25rem;
+    }
+
+    .hero-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .hero-pill {
+      background: rgba(6, 78, 59, 0.55);
+      border: 1px solid rgba(209, 250, 229, 0.25);
+      padding: 0.35rem 0.75rem;
+      border-radius: 8px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: #ecfdf5;
+    }
+
+    .progress-card {
+      background: rgba(255, 255, 255, 0.97);
+      color: var(--text-main);
+      border-radius: var(--radius-lg);
+      padding: 1.35rem 1.5rem;
+      box-shadow: var(--shadow-lg);
+      border: 1px solid rgba(255, 255, 255, 0.5);
+    }
+
+    .progress-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.65rem;
+    }
+
+    .progress-title {
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: var(--emerald-900);
+    }
+
+    .progress-pct {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      font-size: 1rem;
+      color: var(--emerald-700);
+    }
+
+    .progress-bar-track {
+      height: 10px;
+      background: var(--emerald-100);
+      border-radius: 999px;
+      overflow: hidden;
+      margin-bottom: 0.9rem;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--emerald-600), var(--emerald-500));
+      border-radius: 999px;
+      transition: width 0.4s ease;
+    }
+
+    .progress-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.6rem;
+      text-align: center;
+    }
+
+    .mini-stat {
+      background: var(--bg-subtle);
+      border-radius: var(--radius-sm);
+      padding: 0.55rem 0.4rem;
+    }
+
+    .mini-stat strong {
+      display: block;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1.05rem;
+      color: var(--emerald-900);
+    }
+
+    .mini-stat small {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    /* Main Layout */
+    .main-container {
+      max-width: 1240px;
+      width: 100%;
+      margin: -1.35rem auto 3rem;
+      padding: 0 1.25rem;
+      position: relative;
+      z-index: 2;
+      flex: 1;
+    }
+
+    /* Filter Toolbar */
+    .filter-panel {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-soft);
+      border-radius: var(--radius-lg);
+      padding: 1.25rem;
+      box-shadow: var(--shadow-md);
+      margin-bottom: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .filter-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.85rem;
+    }
+
+    .filter-group {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      flex-wrap: wrap;
+    }
+
+    .filter-label {
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text-muted);
+      margin-right: 0.25rem;
+    }
+
+    .pill-btn {
+      border: 1px solid var(--border-soft);
+      background: var(--bg-page);
+      color: var(--text-main);
+      padding: 0.45rem 0.85rem;
+      border-radius: 999px;
+      font-family: inherit;
+      font-size: 0.84rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all var(--transition);
+    }
+
+    .pill-btn:hover {
+      border-color: var(--emerald-500);
+      background: var(--emerald-50);
+      color: var(--emerald-900);
+    }
+
+    .pill-btn.active {
+      background: var(--emerald-700);
+      border-color: var(--emerald-700);
+      color: #ffffff;
+      box-shadow: 0 4px 12px rgba(4, 120, 87, 0.25);
+    }
+
+    .controls-bar {
+      display: grid;
+      grid-template-columns: 1fr auto auto auto;
+      gap: 0.65rem;
+      align-items: center;
+    }
+
+    .search-box {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 0.62rem 0.9rem 0.62rem 2.35rem;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-soft);
+      background: var(--bg-page);
+      font-family: inherit;
+      font-size: 0.9rem;
+      color: var(--text-main);
+      transition: border-color var(--transition), box-shadow var(--transition);
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: var(--emerald-600);
+      background: #fff;
+      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.16);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 0.8rem;
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      pointer-events: none;
+    }
+
+    .select-control {
+      padding: 0.62rem 0.85rem;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-soft);
+      background: var(--bg-page);
+      font-family: inherit;
+      font-size: 0.86rem;
+      font-weight: 600;
+      color: var(--text-main);
+      cursor: pointer;
+    }
+
+    .select-control:focus {
+      outline: none;
+      border-color: var(--emerald-600);
+    }
+
+    .btn-secondary {
+      padding: 0.62rem 0.95rem;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-soft);
+      background: #ffffff;
+      color: var(--emerald-900);
+      font-family: inherit;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all var(--transition);
+      white-space: nowrap;
+    }
+
+    .btn-secondary:hover {
+      background: var(--emerald-50);
+      border-color: var(--emerald-500);
+    }
+
+    /* Questions Stack */
+    .questions-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    .q-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-soft);
+      border-radius: var(--radius-lg);
+      padding: 1.4rem 1.5rem;
+      box-shadow: var(--shadow-sm);
+      transition: transform var(--transition), box-shadow var(--transition), border-color var(--transition);
+    }
+
+    .q-card:hover {
+      box-shadow: var(--shadow-md);
+      border-color: #b7d7c7;
+    }
+
+    .q-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      margin-bottom: 0.85rem;
+    }
+
+    .q-meta {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      flex-wrap: wrap;
+    }
+
+    .q-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      font-weight: 700;
+      background: var(--emerald-900);
+      color: #ffffff;
+      padding: 0.25rem 0.6rem;
+      border-radius: 6px;
+    }
+
+    .badge {
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 0.24rem 0.65rem;
+      border-radius: 999px;
+      border: 1px solid transparent;
+    }
+
+    .badge-type {
+      background: var(--emerald-50);
+      color: var(--emerald-800);
+      border-color: var(--emerald-100);
+    }
+
+    .badge-sub {
+      background: #f0fdf4;
+      color: #166534;
+      border-color: #bbf7d0;
+    }
+
+    .badge-diff-easy {
+      background: #ecfdf5;
+      color: #047857;
+      border-color: #a7f3d0;
+    }
+
+    .badge-diff-medium {
+      background: var(--amber-50);
+      color: var(--amber-600);
+      border-color: #fde68a;
+    }
+
+    .badge-diff-hard {
+      background: var(--rose-50);
+      color: var(--rose-600);
+      border-color: #fecdd3;
+    }
+
+    .bookmark-btn {
+      border: 1px solid var(--border-soft);
+      background: #ffffff;
+      color: var(--text-muted);
+      padding: 0.32rem 0.7rem;
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all var(--transition);
+    }
+
+    .bookmark-btn:hover,
+    .bookmark-btn.saved {
+      background: var(--amber-50);
+      border-color: #f59e0b;
+      color: #b45309;
+    }
+
+    /* Case / Source Stimulus Box */
+    .stimulus-box {
+      background: linear-gradient(135deg, #f4faf7 0%, #ebf6f0 100%);
+      border-left: 4px solid var(--emerald-600);
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+      padding: 1rem 1.15rem;
+      margin-bottom: 1rem;
+      font-size: 0.92rem;
+      color: #153326;
+    }
+
+    .stimulus-label {
+      font-size: 0.72rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--emerald-700);
+      margin-bottom: 0.35rem;
+      display: block;
+    }
+
+    .q-prompt {
+      font-size: 1.03rem;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 1rem;
+    }
+
+    /* Options */
+    .options-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 0.65rem;
+      margin-bottom: 1rem;
+    }
+
+    .option-btn {
+      text-align: left;
+      padding: 0.78rem 0.95rem;
+      border-radius: var(--radius-sm);
+      border: 1.5px solid var(--border-soft);
+      background: #ffffff;
+      color: var(--text-main);
+      font-family: inherit;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      display: flex;
+      align-items: flex-start;
+      gap: 0.65rem;
+      transition: all var(--transition);
+    }
+
+    .option-btn:hover:not(:disabled) {
+      border-color: var(--emerald-500);
+      background: var(--emerald-50);
+      transform: translateY(-1px);
+    }
+
+    .option-key {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      font-size: 0.8rem;
+      min-width: 24px;
+      height: 24px;
+      border-radius: 6px;
+      display: grid;
+      place-items: center;
+      background: var(--bg-subtle);
+      color: var(--emerald-900);
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .option-btn.selected {
+      border-color: var(--emerald-600);
+      background: var(--emerald-50);
+    }
+
+    .option-btn.correct {
+      border-color: #059669;
+      background: #ecfdf5;
+      color: #064e3b;
+      font-weight: 600;
+    }
+
+    .option-btn.correct .option-key {
+      background: #059669;
+      color: #ffffff;
+    }
+
+    .option-btn.wrong {
+      border-color: #e11d48;
+      background: #fff1f2;
+      color: #881337;
+    }
+
+    .option-btn.wrong .option-key {
+      background: #e11d48;
+      color: #ffffff;
+    }
+
+    /* Subjective / Case Sub-questions */
+    .subq-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+
+    .subq-item {
+      background: var(--bg-page);
+      border: 1px solid var(--border-soft);
+      border-radius: var(--radius-sm);
+      padding: 0.85rem 1rem;
+    }
+
+    .subq-q {
+      font-weight: 600;
+      font-size: 0.92rem;
+      margin-bottom: 0.45rem;
+    }
+
+    .subq-textarea {
+      width: 100%;
+      min-height: 68px;
+      border: 1px solid var(--border-soft);
+      border-radius: 8px;
+      padding: 0.6rem 0.75rem;
+      font-family: inherit;
+      font-size: 0.88rem;
+      resize: vertical;
+      background: #ffffff;
+    }
+
+    .subq-textarea:focus {
+      outline: none;
+      border-color: var(--emerald-600);
+    }
+
+    /* Actions & Explanation */
+    .q-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--emerald-700), var(--emerald-600));
+      color: #ffffff;
+      border: none;
+      padding: 0.55rem 1rem;
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform var(--transition), box-shadow var(--transition);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(5, 150, 105, 0.28);
+    }
+
+    .btn-ghost {
+      background: var(--bg-subtle);
+      color: var(--emerald-900);
+      border: 1px solid var(--border-soft);
+      padding: 0.52rem 0.9rem;
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 0.84rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all var(--transition);
+    }
+
+    .btn-ghost:hover {
+      background: var(--emerald-100);
+    }
+
+    .feedback-box {
+      margin-top: 0.9rem;
+      padding: 0.95rem 1.1rem;
+      border-radius: var(--radius-sm);
+      background: var(--emerald-50);
+      border: 1px solid var(--emerald-100);
+      font-size: 0.89rem;
+      color: var(--text-main);
+      display: none;
+    }
+
+    .feedback-box.show {
+      display: block;
+      animation: fadeSlide 0.25s ease;
+    }
+
+    .feedback-box.incorrect-banner {
+      background: #fff8f8;
+      border-color: #fecdd3;
+    }
+
+    .feedback-status {
+      font-weight: 800;
+      margin-bottom: 0.35rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .feedback-status.ok {
+      color: var(--emerald-800);
+    }
+
+    .feedback-status.bad {
+      color: var(--rose-600);
+    }
+
+    .marking-tip {
+      margin-top: 0.5rem;
+      padding-top: 0.5rem;
+      border-top: 1px dashed rgba(4, 120, 87, 0.25);
+      font-size: 0.83rem;
+      color: var(--emerald-900);
+    }
+
+    @keyframes fadeSlide {
+      from {
+        opacity: 0;
+        transform: translateY(4px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Empty State */
+    .empty-state {
+      text-align: center;
+      padding: 3rem 1.5rem;
+      background: var(--bg-surface);
+      border: 1px dashed var(--border-soft);
+      border-radius: var(--radius-lg);
+    }
+
+    .empty-state h3 {
+      color: var(--emerald-900);
+      margin-bottom: 0.4rem;
+    }
+
+    .empty-state p {
+      color: var(--text-muted);
+      font-size: 0.92rem;
+      margin-bottom: 1rem;
+    }
+
+    /* Footer */
+    .footer {
+      background: var(--emerald-900);
+      color: #d1fae5;
+      padding: 1.5rem 1.25rem;
+      text-align: center;
+      font-size: 0.85rem;
+    }
+
+    .footer strong {
+      color: #ffffff;
+    }
+
+    @media (max-width: 900px) {
+      .hero-inner {
+        grid-template-columns: 1fr;
+      }
+
+      .controls-bar {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .search-box {
+        grid-column: 1 / -1;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .controls-bar {
+        grid-template-columns: 1fr;
+      }
+
+      .q-card {
+        padding: 1.1rem;
+      }
+
+      .progress-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="navbar">
+    <div class="nav-container">
+      <a href="#" class="brand">
+        <div class="brand-logo">E</div>
+        <div class="brand-text">
+          <span class="brand-name">EDUPATH</span>
+          <span class="brand-tag">CBSE CBQ Practice Lab</span>
+        </div>
+      </a>
+      <div class="nav-stats">
+        <div class="stat-chip">Score: <span class="mono" id="navScore">0</span></div>
+        <div class="stat-chip">Attempted: <span class="mono" id="navAttempted">0/0</span></div>
+        <div class="stat-chip">Saved: <span class="mono" id="navSaved">0</span></div>
+      </div>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="hero-inner">
+      <div>
+        <div class="hero-badge">✦ Updated CBSE Competency-Based Questions (Class 10)</div>
+        <h1>Master Assertion-Reason, Case Study &amp; Concept CBQs</h1>
+        <p>
+          Practice application-oriented CBSE questions across Science, Mathematics, and Social Science with instant feedback, step-by-step explanations, marking-scheme tips, and automatic progress tracking.
+        </p>
+        <div class="hero-pills">
+          <span class="hero-pill">Assertion &amp; Reason</span>
+          <span class="hero-pill">Case-Based Passages</span>
+          <span class="hero-pill">Analytical MCQs</span>
+          <span class="hero-pill">Local Progress Saved</span>
+        </div>
+      </div>
+
+      <div class="progress-card">
+        <div class="progress-header">
+          <span class="progress-title">Your CBQ Mastery Progress</span>
+          <span class="progress-pct" id="masteryPct">0%</span>
+        </div>
+        <div class="progress-bar-track">
+          <div class="progress-bar-fill" id="masteryBar"></div>
+        </div>
+        <div class="progress-grid">
+          <div class="mini-stat">
+            <strong id="statCorrect">0</strong>
+            <small>Correct</small>
+          </div>
+          <div class="mini-stat">
+            <strong id="statReviewed">0</strong>
+            <small>Reviewed</small>
+          </div>
+          <div class="mini-stat">
+            <strong id="statTotal">0</strong>
+            <small>Total CBQs</small>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <main class="main-container">
+    <section class="filter-panel" aria-label="Question Filters">
+      <div class="filter-row">
+        <div class="filter-group" id="subjectFilters">
+          <span class="filter-label">Subject:</span>
+          <button class="pill-btn active" data-subject="all">All Subjects</button>
+          <button class="pill-btn" data-subject="Science">Science</button>
+          <button class="pill-btn" data-subject="Mathematics">Mathematics</button>
+          <button class="pill-btn" data-subject="Social Science">Social Science</button>
+        </div>
+
+        <div class="filter-group" id="typeFilters">
+          <span class="filter-label">Format:</span>
+          <button class="pill-btn active" data-type="all">All Types</button>
+          <button class="pill-btn" data-type="Assertion-Reason">Assertion-Reason</button>
+          <button class="pill-btn" data-type="Case-Based">Case Study</button>
+          <button class="pill-btn" data-type="Concept MCQ">Concept MCQ</button>
+        </div>
+      </div>
+
+      <div class="controls-bar">
+        <div class="search-box">
+          <span class="search-icon">🔍</span>
+          <input
+            type="search"
+            id="searchInput"
+            class="search-input"
+            placeholder="Search topic, chapter, keyword (e.g., refraction, quadratic, federalism)..."
+          />
+        </div>
+
+        <select id="difficultySelect" class="select-control" aria-label="Filter by difficulty">
+          <option value="all">All Levels</option>
+          <option value="Easy">Easy</option>
+          <option value="Medium">Medium</option>
+          <option value="Hard">Hard</option>
+        </select>
+
+        <select id="statusSelect" class="select-control" aria-label="Filter by attempt status">
+          <option value="all">All Questions</option>
+          <option value="unattempted">Unattempted</option>
+          <option value="correct">Correct Only</option>
+          <option value="bookmarked">Bookmarked</option>
+        </select>
+
+        <button type="button" id="resetBtn" class="btn-secondary">Reset Progress</button>
+      </div>
+    </section>
+
+    <section class="questions-list" id="questionsContainer" aria-live="polite"></section>
+  </main>
+
+  <footer class="footer">
+    <strong>EDUPATH</strong> — Structured Competency-Based Practice for CBSE Learners • Progress saved locally in your browser.
+  </footer>
+
+  <script>
+    const CBQ_DATA = [
+      {
+        id: "cbq-1",
+        subject: "Science",
+        chapter: "Light – Reflection and Refraction",
+        type: "Assertion-Reason",
+        difficulty: "Medium",
+        question: "Read the Assertion (A) and Reason (R) carefully and choose the correct option:",
+        stimulus: "Assertion (A): A convex lens of focal length 15 cm forms a real and inverted image of the same size as the object when placed at 30 cm from the lens.\nReason (R): For a convex lens, an object placed at 2F produces a real image of equal magnification at 2F on the other side.",
+        options: [
+          "Both A and R are true, and R is the correct explanation of A.",
+          "Both A and R are true, but R is not the correct explanation of A.",
+          "A is true, but R is false.",
+          "A is false, but R is true."
+        ],
+        answerIndex: 0,
+        explanation: "Here, f = +15 cm, so 2f = 30 cm. When an object is placed at 2f (30 cm), the image is formed at 2f on the other side with magnification m = -1 (real, inverted, and same size). R accurately states this lens property and explains A.",
+        markingTip: "In CBSE Assertion-Reason questions, first verify A and R independently, then check whether R directly justifies why A happens."
+      },
+      {
+        id: "cbq-2",
+        subject: "Science",
+        chapter: "Electricity",
+        type: "Case-Based",
+        difficulty: "Hard",
+        question: "Analyze the household circuit scenario and answer the sub-questions:",
+        stimulus: "Riya connects a 1000 W electric iron and a 60 W LED lamp in parallel across a 220 V AC mains line protected by a 5 A fuse. Later, she adds a 1500 W room heater to the same socket strip.",
+        subQuestions: [
+          {
+            label: "(i) What happens when the 1500 W heater is switched on along with the iron and lamp?",
+            answer: "Total power = 1000 + 60 + 1500 = 2560 W. Total current I = P/V = 2560 / 220 ≈ 11.64 A, which exceeds the 5 A fuse rating and causes the fuse to blow (preventing overheating/short-circuit damage)."
+          },
+          {
+            label: "(ii) Why are household appliances connected in parallel rather than in series?",
+            answer: "In parallel, each appliance gets the full 220 V potential difference and can be switched on/off independently without affecting others."
+          }
+        ],
+        explanation: "Using P = VI, total current exceeds 5 A once the heater is added. The fuse melts to break the circuit safely.",
+        markingTip: "Always show the formula (I = P/V), substitute values with units, and state the practical safety outcome."
+      },
+      {
+        id: "cbq-3",
+        subject: "Science",
+        chapter: "Life Processes",
+        type: "Concept MCQ",
+        difficulty: "Easy",
+        question: "During vigorous exercise, muscle cells experience cramps primarily due to:",
+        options: [
+          "Complete absence of glucose in muscle cells",
+          "Accumulation of lactic acid from anaerobic breakdown of pyruvate",
+          "Excessive formation of ATP in mitochondria",
+          "Conversion of ethanol into carbon dioxide"
+        ],
+        answerIndex: 1,
+        explanation: "When oxygen supply in muscle cells is insufficient during heavy exercise, pyruvate undergoes anaerobic respiration to form lactic acid and energy. Lactic acid build-up causes muscle cramps.",
+        markingTip: "Remember the three pathways of glucose breakdown in CBSE Biology: yeast (ethanol + CO2), muscle cells (lactic acid), and mitochondria (CO2 + water + high ATP)."
+      },
+      {
+        id: "cbq-4",
+        subject: "Mathematics",
+        chapter: "Quadratic Equations",
+        type: "Case-Based",
+        difficulty: "Medium",
+        question: "Solve the garden fencing case study:",
+        stimulus: "A rectangular community garden has a perimeter of 80 m and an area of 375 m². Let the length of the garden be x metres.",
+        subQuestions: [
+          {
+            label: "(i) Form the quadratic equation in terms of x.",
+            answer: "Since perimeter = 2(l + b) = 80, breadth b = (40 - x) m. Area = x(40 - x) = 375 ⇒ x² - 40x + 375 = 0."
+          },
+          {
+            label: "(ii) Find the dimensions of the garden.",
+            answer: "Factoring x² - 40x + 375 = 0 gives (x - 25)(x - 15) = 0, so x = 25 m or 15 m. Thus the dimensions are 25 m and 15 m."
+          }
+        ],
+        explanation: "Sum of roots is 40 and product is 375, giving 25 and 15 as the length and breadth.",
+        markingTip: "Verify both roots against physical constraints (positive length and breadth) and include units (m) in the final answer."
+      },
+      {
+        id: "cbq-5",
+        subject: "Mathematics",
+        chapter: "Introduction to Trigonometry",
+        type: "Assertion-Reason",
+        difficulty: "Medium",
+        question: "Evaluate the Assertion and Reason:",
+        stimulus: "Assertion (A): For an acute angle θ, sin θ can never be greater than 1.\nReason (R): In a right-angled triangle, the hypotenuse is the longest side.",
+        options: [
+          "Both A and R are true, and R is the correct explanation of A.",
+          "Both A and R are true, but R is not the correct explanation of A.",
+          "A is true, but R is false.",
+          "A is false, but R is true."
+        ],
+        answerIndex: 0,
+        explanation: "In a right triangle, sin θ = Perpendicular / Hypotenuse. Because the hypotenuse is the longest side, Perpendicular ≤ Hypotenuse, so sin θ ≤ 1 for acute angles.",
+        markingTip: "Link trigonometric ratios directly to side lengths in a right triangle to avoid sign or ratio mistakes."
+      },
+      {
+        id: "cbq-6",
+        subject: "Social Science",
+        chapter: "Federalism",
+        type: "Concept MCQ",
+        difficulty: "Easy",
+        question: "Which of the following best reflects 'holding together' federalism in India?",
+        options: [
+          "Independent states unite voluntarily and keep equal power with the centre",
+          "A large country divides power between the national government and constituent states, giving unequal powers to certain units",
+          "State governments can unilaterally alter constitutional boundaries",
+          "All subjects belong exclusively to state lists"
+        ],
+        answerIndex: 1,
+        explanation: "In a 'holding together' federation like India, a large country divides power between the central authority and states, and some units (such as certain Union Territories or special-provision states) have distinct arrangements.",
+        markingTip: "Contrast 'coming together' (USA, Australia, Switzerland) with 'holding together' (India, Spain, Belgium)."
+      },
+      {
+        id: "cbq-7",
+        subject: "Social Science",
+        chapter: "Sectors of the Indian Economy",
+        type: "Case-Based",
+        difficulty: "Medium",
+        question: "Read the data snapshot and answer:",
+        stimulus: "In a village, 6 members of a family work on a small 1-hectare plot of wheat. Even if 2 of them shift to a nearby town for part-time work, total wheat output on the plot remains unchanged.",
+        subQuestions: [
+          {
+            label: "(i) Which type of unemployment is illustrated here?",
+            answer: "Disguised unemployment (underemployment), where more people are engaged in work than needed and their marginal productivity is zero."
+          },
+          {
+            label: "(ii) Suggest one way to create productive employment in rural areas.",
+            answer: "Investing in local agro-processing, cold storage, irrigation, or rural small-scale enterprises/transport."
+          }
+        ],
+        explanation: "Removing 2 workers does not reduce output, showing disguised unemployment typical of agriculture.",
+        markingTip: "Define the economic term clearly first, then give a concrete, context-relevant measure."
+      },
+      {
+        id: "cbq-8",
+        subject: "Science",
+        chapter: "Acids, Bases and Salts",
+        type: "Concept MCQ",
+        difficulty: "Medium",
+        question: "A solution turns phenolphthalein pink and has a pH value close to 11. Adding dilute HCl dropwise will:",
+        options: [
+          "Increase its pH above 12",
+          "Gradually decrease its pH toward 7 and eventually turn phenolphthalein colourless",
+          "Convert it into a strong base",
+          "Have no effect on hydrogen ion concentration"
+        ],
+        answerIndex: 1,
+        explanation: "Phenolphthalein is pink in basic solutions (pH > 8.2). Adding dilute HCl neutralizes OH⁻ ions with H⁺ ions, lowering pH and turning the solution colourless once acidic/neutral.",
+        markingTip: "Keep indicator colour changes in mind: phenolphthalein is colourless in acidic/neutral media and pink in basic media."
+      }
+    ];
+
+    const STORAGE_KEY = "edupath_cbq_state_v1";
+
+    const defaultState = {
+      mcqAnswers: {},
+      subjectiveShown: {},
+      subjectiveNotes: {},
+      bookmarks: {}
+    };
+
+    let state = loadState();
+    let activeSubject = "all";
+    let activeType = "all";
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return structuredClone(defaultState);
+        return { ...structuredClone(defaultState), ...JSON.parse(raw) };
+      } catch {
+        return structuredClone(defaultState);
+      }
+    }
+
+    function saveState() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      } catch {}
+    }
+
+    function getQuestionStatus(q) {
+      if (q.type === "Case-Based") {
+        return state.subjectiveShown[q.id] ? "reviewed" : "unattempted";
+      }
+      if (state.mcqAnswers[q.id] === undefined) return "unattempted";
+      return state.mcqAnswers[q.id] === q.answerIndex ? "correct" : "wrong";
+    }
+
+    function updateDashboard() {
+      const total = CBQ_DATA.length;
+      let correctCount = 0;
+      let reviewedCount = 0;
+      let attemptedCount = 0;
+
+      CBQ_DATA.forEach((q) => {
+        const status = getQuestionStatus(q);
+        if (status !== "unattempted") attemptedCount++;
+        if (status === "correct") correctCount++;
+        if (status === "reviewed") reviewedCount++;
+      });
+
+      const savedCount = Object.values(state.bookmarks).filter(Boolean).length;
+      const mastery = Math.round(((correctCount + reviewedCount) / total) * 100);
+
+      document.getElementById("navScore").textContent = correctCount;
+      document.getElementById("navAttempted").textContent = `${attemptedCount}/${total}`;
+      document.getElementById("navSaved").textContent = savedCount;
+
+      document.getElementById("masteryPct").textContent = `${mastery}%`;
+      document.getElementById("masteryBar").style.width = `${mastery}%`;
+      document.getElementById("statCorrect").textContent = correctCount;
+      document.getElementById("statReviewed").textContent = reviewedCount;
+      document.getElementById("statTotal").textContent = total;
+    }
+
+    function getFilteredQuestions() {
+      const query = document.getElementById("searchInput").value.trim().toLowerCase();
+      const diff = document.getElementById("difficultySelect").value;
+      const statusFilter = document.getElementById("statusSelect").value;
+
+      return CBQ_DATA.filter((q) => {
+        if (activeSubject !== "all" && q.subject !== activeSubject) return false;
+        if (activeType !== "all" && q.type !== activeType) return false;
+        if (diff !== "all" && q.difficulty !== diff) return false;
+
+        const status = getQuestionStatus(q);
+        const isBookmarked = Boolean(state.bookmarks[q.id]);
+
+        if (statusFilter === "unattempted" && status !== "unattempted") return false;
+        if (statusFilter === "correct" && status !== "correct") return false;
+        if (statusFilter === "bookmarked" && !isBookmarked) return false;
+
+        if (query) {
+          const subText = (q.subQuestions || []).map((s) => `${s.label} ${s.answer}`).join(" ");
+          const optText = (q.options || []).join(" ");
+          const hay = `${q.subject} ${q.chapter} ${q.type} ${q.question} ${q.stimulus} ${optText} ${subText} ${q.explanation}`.toLowerCase();
+          if (!hay.includes(query)) return false;
+        }
+
+        return true;
+      });
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;");
+    }
+
+    function renderQuestions() {
+      const container = document.getElementById("questionsContainer");
+      const list = getFilteredQuestions();
+
+      if (!list.length) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <h3>No matching CBQs found</h3>
+            <p>Try clearing your search keyword or switching subject/difficulty filters.</p>
+            <button type="button" class="btn-primary" id="clearFiltersBtn">Show All Questions</button>
+          </div>
+        `;
+        document.getElementById("clearFiltersBtn")?.addEventListener("click", () => {
+          activeSubject = "all";
+          activeType = "all";
+          document.querySelectorAll("#subjectFilters .pill-btn").forEach((b, idx) => b.classList.toggle("active", idx === 0));
+          document.querySelectorAll("#typeFilters .pill-btn").forEach((b, idx) => b.classList.toggle("active", idx === 0));
+          document.getElementById("searchInput").value = "";
+          document.getElementById("difficultySelect").value = "all";
+          document.getElementById("statusSelect").value = "all";
+          renderQuestions();
+        });
+        updateDashboard();
+        return;
+      }
+
+      const letters = ["A", "B", "C", "D"];
+
+      container.innerHTML = list.map((q, idx) => {
+        const diffClass = `badge-diff-${q.difficulty.toLowerCase()}`;
+        const isSaved = Boolean(state.bookmarks[q.id]);
+        const userChoice = state.mcqAnswers[q.id];
+        const hasAnsweredMcq = userChoice !== undefined;
+        const isSubjectiveShown = Boolean(state.subjectiveShown[q.id]);
+
+        let bodyHtml = "";
+        if (q.options) {
+          bodyHtml = `
+            <div class="options-grid">
+              ${q.options.map((opt, oIdx) => {
+                let cls = "option-btn";
+                if (hasAnsweredMcq) {
+                  if (oIdx === q.answerIndex) cls += " correct";
+                  else if (oIdx === userChoice) cls += " wrong";
+                }
+                return `
+                  <button
+                    type="button"
+                    class="${cls}"
+                    data-action="mcq"
+                    data-qid="${q.id}"
+                    data-oidx="${oIdx}"
+                  >
+                    <span class="option-key">${letters[oIdx]}</span>
+                    <span>${escapeHtml(opt)}</span>
+                  </button>
+                `;
+              }).join("")}
+            </div>
+          `;
+        } else if (q.subQuestions) {
+          bodyHtml = `
+            <div class="subq-list">
+              ${q.subQuestions.map((sq, sIdx) => {
+                const noteVal = state.subjectiveNotes[`${q.id}_${sIdx}`] || "";
+                return `
+                  <div class="subq-item">
+                    <div class="subq-q">${escapeHtml(sq.label)}</div>
+                    <textarea
+                      class="subq-textarea"
+                      placeholder="Write your draft response here..."
+                      data-note-key="${q.id}_${sIdx}"
+                    >${escapeHtml(noteVal)}</textarea>
+                  </div>
+                `;
+              }).join("")}
+            </div>
+          `;
+        }
+
+        const showFeedback = (q.options && hasAnsweredMcq) || (!q.options && isSubjectiveShown);
+        const isCorrectMcq = q.options && userChoice === q.answerIndex;
+
+        let feedbackContent = "";
+        if (q.options) {
+          feedbackContent = `
+            <div class="feedback-status ${isCorrectMcq ? "ok" : "bad"}">
+              ${isCorrectMcq ? "✓ Correct! Well reasoned." : `✕ Not quite. Correct option: ${letters[q.answerIndex]}`}
+            </div>
+            <div>${escapeHtml(q.explanation)}</div>
+          `;
+        } else {
+          feedbackContent = `
+            <div class="feedback-status ok">✓ Model Answer &amp; Key Points</div>
+            ${(q.subQuestions || []).map((sq) => `
+              <div style="margin-bottom:0.4rem;">
+                <strong>${escapeHtml(sq.label)}</strong><br/>
+                <span>${escapeHtml(sq.answer)}</span>
+              </div>
+            `).join("")}
+            <div style="margin-top:0.35rem;">${escapeHtml(q.explanation)}</div>
+          `;
+        }
+
+        return `
+          <article class="q-card" id="${q.id}">
+            <div class="q-top">
+              <div class="q-meta">
+                <span class="q-num">Q${idx + 1}</span>
+                <span class="badge badge-sub">${escapeHtml(q.subject)}</span>
+                <span class="badge badge-type">${escapeHtml(q.type)}</span>
+                <span class="badge ${diffClass}">${escapeHtml(q.difficulty)}</span>
+                <span class="badge badge-type">${escapeHtml(q.chapter)}</span>
+              </div>
+              <button
+                type="button"
+                class="bookmark-btn ${isSaved ? "saved" : ""}"
+                data-action="bookmark"
+                data-qid="${q.id}"
+              >
+                ${isSaved ? "★ Bookmarked" : "☆ Bookmark"}
+              </button>
+            </div>
+
+            ${q.stimulus ? `
+              <div class="stimulus-box">
+                <span class="stimulus-label">Competency Context / Case</span>
+                <div style="white-space: pre-line;">${escapeHtml(q.stimulus)}</div>
+              </div>
+            ` : ""}
+
+            <div class="q-prompt">${escapeHtml(q.question)}</div>
+
+            ${bodyHtml}
+
+            <div class="q-actions">
+              ${!q.options ? `
+                <button type="button" class="btn-primary" data-action="toggle-model" data-qid="${q.id}">
+                  ${isSubjectiveShown ? "Hide Model Answer" : "Check Model Answer"}
+                </button>
+              ` : `
+                <button type="button" class="btn-ghost" data-action="retry-mcq" data-qid="${q.id}">
+                  Clear Selection
+                </button>
+              `}
+            </div>
+
+            <div class="feedback-box ${showFeedback ? "show" : ""} ${q.options && hasAnsweredMcq && !isCorrectMcq ? "incorrect-banner" : ""}">
+              ${feedbackContent}
+              <div class="marking-tip"><strong>Exam Tip:</strong> ${escapeHtml(q.markingTip)}</div>
+            </div>
+          </article>
+        `;
+      }).join("");
+
+      updateDashboard();
+    }
+
+    document.getElementById("questionsContainer").addEventListener("click", (e) => {
+      const target = e.target.closest("[data-action]");
+      if (!target) return;
+
+      const action = target.dataset.action;
+      const qid = target.dataset.qid;
+
+      if (action === "mcq") {
+        const oidx = Number(target.dataset.oidx);
+        state.mcqAnswers[qid] = oidx;
+        saveState();
+        renderQuestions();
+      } else if (action === "retry-mcq") {
+        delete state.mcqAnswers[qid];
+        saveState();
+        renderQuestions();
+      } else if (action === "toggle-model") {
+        state.subjectiveShown[qid] = !state.subjectiveShown[qid];
+        saveState();
+        renderQuestions();
+      } else if (action === "bookmark") {
+        state.bookmarks[qid] = !state.bookmarks[qid];
+        saveState();
+        renderQuestions();
+      }
+    });
+
+    document.getElementById("questionsContainer").addEventListener("input", (e) => {
+      if (e.target.matches(".subq-textarea")) {
+        const key = e.target.dataset.noteKey;
+        state.subjectiveNotes[key] = e.target.value;
+        saveState();
+      }
+    });
+
+    document.querySelectorAll("#subjectFilters .pill-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll("#subjectFilters .pill-btn").forEach((b) => b.classList.remove("active"));
+        btn.classList.add("active");
+        activeSubject = btn.dataset.subject;
+        renderQuestions();
+      });
+    });
+
+    document.querySelectorAll("#typeFilters .pill-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll("#typeFilters .pill-btn").forEach((b) => b.classList.remove("active"));
+        btn.classList.add("active");
+        activeType = btn.dataset.type;
+        renderQuestions();
+      });
+    });
+
+    document.getElementById("searchInput").addEventListener("input", renderQuestions);
+    document.getElementById("difficultySelect").addEventListener("change", renderQuestions);
+    document.getElementById("statusSelect").addEventListener("change", renderQuestions);
+
+    document.getElementById("resetBtn").addEventListener("click", () => {
+      if (confirm("Reset all your CBQ answers, notes, and bookmarks?")) {
+        state = structuredClone(defaultState);
+        saveState();
+        renderQuestions();
+      }
+    });
+
+    renderQuestions();
+  </script>
+</body>
+</html>

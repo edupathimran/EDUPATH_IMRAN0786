@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EDUPATH | Flagship CBSE Learning Ecosystem</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
+        body {
+            background: #f8fafc; color: #0f172a; min-height: 100vh; overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 10% 10%, rgba(16, 185, 129, 0.14), transparent 40%),
+                radial-gradient(circle at 90% 90%, rgba(5, 150, 105, 0.10), transparent 40%);
+        }
+        header {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 20px 40px; border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+            backdrop-filter: blur(20px); position: sticky; top: 0; z-index: 100;
+            background: rgba(248, 250, 252, 0.88);
+        }
+        .nav-brand { display: flex; align-items: center; gap: 14px; text-decoration: none; color: #0f172a; }
+        
+        /* Ultra-Modern Tagda Logo Design */
+        .logo-badge {
+            width: 50px; height: 50px; border-radius: 16px;
+            background: linear-gradient(135deg, #064e3b, #047857);
+            border: 2px solid #10b981; display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 12px 25px rgba(16, 185, 129, 0.3); position: relative; overflow: hidden;
+        }
+        .logo-badge::after {
+            content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.22), transparent);
+            transform: rotate(45deg); animation: shine 3s infinite;
+        }
+        @keyframes shine { 0% { transform: translateX(-100%) rotate(45deg); } 100% { transform: translateX(100%) rotate(45deg); } }
+
+        .brand-text { font-size: 1.6rem; font-weight: 800; letter-spacing: 1.5px; background: linear-gradient(135deg, #064e3b, #059669); background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .nav-btns { display: flex; gap: 12px; }
+        .btn-glass {
+            padding: 10px 20px; border-radius: 12px; font-weight: 700; text-decoration: none;
+            background: #ffffff; border: 1px solid rgba(15, 23, 42, 0.12); color: #0f172a;
+            transition: 0.2s; font-size: 0.9rem; box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+        }
+        .btn-glass:hover { border-color: #10b981; color: #059669; }
+        .btn-primary {
+            padding: 10px 22px; border-radius: 12px; font-weight: 700; text-decoration: none;
+            background: linear-gradient(135deg, #10b981, #047857); color: #fff;
+            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.35); transition: 0.2s; font-size: 0.9rem;
+        }
+        .btn-primary:hover { transform: translateY(-2px); filter: brightness(1.05); }
+        
+        .hero { max-width: 960px; margin: 60px auto 30px; text-align: center; padding: 0 20px; }
+        .hero-badge {
+            display: inline-flex; align-items: center; gap: 8px; padding: 8px 18px; border-radius: 99px;
+            background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.35);
+            color: #047857; font-size: 0.85rem; font-weight: 700; margin-bottom: 22px;
+        }
+        h1 { font-size: 3.4rem; font-weight: 800; letter-spacing: 1px; line-height: 1.2; margin-bottom: 18px;
+             background: linear-gradient(135deg, #0f172a 20%, #059669 65%, #10b981 100%); background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        p.hero-desc { color: #475569; font-size: 1.12rem; line-height: 1.6; max-width: 720px; margin: 0 auto 32px; }
+        
+        .features-grid {
+            max-width: 1180px; margin: 50px auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 22px; padding: 0 20px;
+        }
+        .feature-card {
+            background: #ffffff; border: 1px solid rgba(15, 23, 42, 0.08);
+            border-radius: 22px; padding: 30px; transition: 0.3s; box-shadow: 0 12px 30px rgba(0,0,0,0.03);
+        }
+        .feature-card:hover { border-color: rgba(16, 185, 129, 0.45); transform: translateY(-4px); box-shadow: 0 18px 40px rgba(16,185,129,0.10); }
+        .feature-icon { font-size: 2rem; margin-bottom: 16px; display: inline-block; padding: 12px; border-radius: 14px; background: rgba(16, 185, 129, 0.12); }
+        .feature-card h3 { font-size: 1.3rem; margin-bottom: 10px; color: #0f172a; }
+        .feature-card p { color: #475569; font-size: 0.92rem; line-height: 1.5; }
+        
+        .stats-section {
+            max-width: 1060px; margin: 60px auto; background: linear-gradient(145deg, #ffffff, #ecfdf5);
+            border: 1px solid rgba(16, 185, 129, 0.25); border-radius: 26px; padding: 40px;
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 24px; text-align: center;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.04);
+        }
+        .stat-num { font-size: 2.6rem; font-weight: 800; color: #059669; margin-top: 6px; }
+        .stat-label { color: #475569; font-weight: 600; font-size: 0.92rem; }
+        footer { text-align: center; padding: 36px; color: #64748b; border-top: 1px solid rgba(15,23,42,0.08); font-size: 0.88rem; margin-top: 50px; }
+
+        /* Mobile Phone Perfect Responsiveness */
+        @media (max-width: 768px) {
+            header { padding: 16px 20px; }
+            .brand-text { font-size: 1.3rem; }
+            .logo-badge { width: 40px; height: 40px; border-radius: 12px; }
+            h1 { font-size: 2.1rem !important; }
+            p.hero-desc { font-size: 0.98rem; }
+            .btn-glass, .btn-primary { padding: 8px 14px; font-size: 0.82rem; }
+            .stats-section { margin: 30px 16px; padding: 26px; }
+            .features-grid { padding: 0 16px; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <a href="/" class="nav-brand">
+            <div class="logo-badge">
+                <svg width="24" height="24" viewBox="0 0 100 100" fill="none">
+                    <polygon points="50,12 92,35 50,58 8,35" fill="#FFFFFF"/>
+                    <path d="M20 46V72C20 72 35 65 50 78C65 65 80 72 80 72V46" stroke="#A7F3D0" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </div>
+            <span class="brand-text">EDUPATH</span>
+        </a>
+        <div class="nav-btns">
+            <a href="/login" class="btn-glass">Sign In</a>
+            <a href="/login" class="btn-primary">Register →</a>
+        </div>
+    </header>
+
+    <div class="hero">
+        <div class="hero-badge">✨ Official CBSE 2026-27 Learning Ecosystem</div>
+        <h1>Master Your Board Exams With AI & Video Portals</h1>
+        <p class="hero-desc">EDUPATH brings you official CBSE sample papers, exam date sheets, high-definition video lectures, PDF notes vaults, and an advanced AI Doubt Solver.</p>
+        <div style="display: flex; gap: 14px; justify-content: center; flex-wrap: wrap;">
+            <a href="/login" class="btn-primary" style="padding: 14px 32px; font-size: 1rem;">Get Started Now →</a>
+        </div>
+    </div>
+
+    <div class="stats-section">
+        <div>
+            <div class="stat-label">Published Video Lectures</div>
+            <div class="stat-num">{{ v_count }}</div>
+        </div>
+        <div>
+            <div class="stat-label">PDF Notes & SQPs</div>
+            <div class="stat-num">{{ n_count }}</div>
+        </div>
+        <div>
+            <div class="stat-label">Target Exam Batch</div>
+            <div class="stat-num">2027</div>
+        </div>
+    </div>
+
+    <div class="features-grid">
+        <div class="feature-card">
+            <div class="feature-icon">🤖</div>
+            <h3>Smart AI Doubt Solver</h3>
+            <p>Stuck on tough Physics numericals or Maths identities? Ask our AI mentor anytime for step-by-step NCERT explanations.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">🎬</div>
+            <h3>Direct Video Portal</h3>
+            <p>Access structured subject-wise video lectures with custom thumbnails and direct offline download options.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">📚</div>
+            <h3>PDF Notes & CBSE Papers</h3>
+            <p>Download official CBSE sample question papers, marking schemes, and chapter revision formula sheets instantly.</p>
+        </div>
+    </div>
+
+    <footer>© 2026 EDUPATH Flagship Learning Ecosystem. Built by Syed Muhammad Imran.</footer>
+</body>
+</html>

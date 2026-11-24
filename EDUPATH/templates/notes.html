@@ -1,0 +1,56 @@
+{% extends "base_2.html" %}
+{% block content %}
+{% set cur_subj = active_subj if active_subj is defined and active_subj else 'All' %}
+{% set notes_list = notes if notes is defined and notes else [] %}
+{% set cur_user = user if user is defined and user else none %}
+{% set cur_csrf = csrf_token if csrf_token is defined and csrf_token else '' %}
+
+<div style="margin-bottom: 22px;">
+    <h1 style="font-size: 1.95rem; margin-bottom: 6px;">EDUPATH PDF Notes & Material</h1>
+    <p style="color: var(--muted); font-size: 0.95rem;">Subject ke hisaab se PDF notes filter karein, browser mein open karein ya download karein.</p>
+</div>
+
+<div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 22px;">
+    {% set subj_list = ['All', 'Physics', 'Chemistry', 'Mathematics', 'Biology', 'Science (086)', 'Mathematics (041 / 241)', 'Social Science (087)', 'English (184 / 101)', 'Hindi (002 / 085)'] %}
+    {% for s in subj_list %}
+        {% set is_curr = 'active' if cur_subj == s else '' %}
+        <a href="{{ url_for('notes', subject=s) }}" class="pill {{ is_curr }}">{{ s }}</a>
+    {% endfor %}
+</div>
+
+{% if notes_list %}
+<div class="grid-2">
+    {% for n in notes_list %}
+    {% set raw_file = n.filename if n.filename is defined and n.filename else (n.file_path if n.file_path is defined and n.file_path else '') %}
+    {% set clean_file = raw_file.split('/')[-1].split('\\')[-1] if raw_file else '' %}
+    {% set view_url = url_for('serve_file', filename=clean_file) if clean_file else '#' %}
+    {% set dl_url = url_for('download_file', filename=clean_file) if clean_file else '#' %}
+    <div class="glass-card" style="display: flex; flex-direction: column; justify-content: space-between; gap: 12px; margin-bottom: 0;">
+        <div>
+            <span style="font-size: 0.74rem; font-weight: 800; padding: 3px 10px; border-radius: 99px; background: var(--bg); border: 1px solid var(--border); color: var(--accent);">
+                {{ n.subject if n.subject is defined and n.subject else 'General' }}{% if n.portal_type is defined and n.portal_type %} • {{ n.portal_type }}{% endif %}
+            </span>
+            <h3 style="font-size: 1.15rem; margin-top: 8px; margin-bottom: 4px;">{{ n.title if n.title is defined else 'Untitled Note' }}</h3>
+            {% if n.chapter_name is defined and n.chapter_name %}
+                <div style="font-size: 0.82rem; color: var(--accent); font-weight: 700; margin-bottom: 4px;">Chapter: {{ n.chapter_name }}</div>
+            {% endif %}
+            <div style="font-size: 0.78rem; color: var(--muted);">{{ n.created_at if n.created_at is defined else '' }}{% if n.uploaded_by is defined and n.uploaded_by %} • By {{ n.uploaded_by }}{% endif %}</div>
+        </div>
+
+        <div style="display: flex; gap: 8px; flex-wrap: wrap; padding-top: 10px; border-top: 1px solid var(--border);">
+            {% if clean_file %}
+                <a href="{{ view_url }}" target="_blank" rel="noopener noreferrer" class="btn" style="padding: 8px 14px; font-size: 0.84rem;">Open PDF</a>
+                <a href="{{ dl_url }}" download="{{ clean_file }}" class="btn-outline" style="padding: 8px 14px; font-size: 0.84rem;">Download PDF</a>
+            {% else %}
+                <span style="font-size: 0.82rem; color: var(--muted);">File link unavailable</span>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="glass-card" style="text-align: center; padding: 36px 18px;">
+    <p style="color: var(--muted);">Abhi koi PDF note available nahi hai.</p>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,1269 @@
+{% extends "base.html" %}
+{% block content %}
+{% set vis = (chat_visibility if chat_visibility else get_chat_visibility())|lower %}
+{% set vis = 'private' if vis == 'private' else 'public' %}
+<style>
+    :root {
+        --em-primary: #10b981;
+        --em-deep: #059669;
+        --em-dark: #047857;
+        --em-soft: rgba(16, 185, 129, 0.12);
+        --em-border: rgba(16, 185, 129, 0.34);
+    }
+
+    header nav,
+    header .navbar,
+    header .top-nav,
+    .mobile-topbar,
+    .top-navbar {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-bottom: 1.5px solid rgba(16, 185, 129, 0.28);
+    }
+
+    .mobile-topbar .mobile-center-brand,
+    header nav > .navbar-brand,
+    header nav > .brand,
+    .top-navbar > .navbar-brand,
+    .top-navbar > .brand {
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+        margin: 0;
+        color: var(--em-dark);
+        font-weight: 900;
+        letter-spacing: 0.04em;
+        text-decoration: none;
+    }
+
+    .sidebar .brand,
+    .sidebar .logo,
+    .sidebar [class*="brand"],
+    .sidebar [class*="logo"],
+    #sidebar .brand,
+    #sidebar .logo,
+    #sidebar [class*="brand"],
+    #sidebar [class*="logo"],
+    .side-drawer .brand,
+    .side-drawer .logo,
+    .side-drawer [class*="brand"],
+    .side-drawer [class*="logo"],
+    #sideDrawer .brand,
+    #sideDrawer .logo,
+    #sideDrawer [class*="brand"],
+    #sideDrawer [class*="logo"],
+    .drawer-header [class*="brand"],
+    .drawer-header [class*="logo"],
+    .drawer-brand,
+    .brand-box,
+    .msg-sidebar [class*="brand"],
+    .msg-sidebar [class*="logo"],
+    .msg-side-panel [class*="brand"],
+    .msg-side-panel [class*="logo"],
+    .chat-sidebar [class*="brand"],
+    .chat-sidebar [class*="logo"],
+    .chat-side-panel [class*="brand"],
+    .chat-side-panel [class*="logo"],
+    .msg-sender-left [class*="brand"],
+    .msg-sender-left [class*="logo"] {
+        position: static !important;
+        left: auto !important;
+        right: auto !important;
+        transform: none !important;
+    }
+
+    .sidebar img,
+    #sidebar img,
+    .side-drawer img,
+    #sideDrawer img,
+    .msg-sidebar img,
+    .msg-side-panel img,
+    .chat-sidebar img,
+    .chat-side-panel img {
+        max-width: 46px;
+        max-height: 46px;
+        object-fit: cover;
+        flex-shrink: 0;
+    }
+
+    .msg-page-wrap,
+    .msg-page-wrap * {
+        box-sizing: border-box;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    .msg-page-wrap {
+        max-width: 980px;
+        margin: 0 auto;
+        color: var(--text, #0f172a);
+    }
+
+    .msg-hero-card {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 14px;
+        flex-wrap: wrap;
+        margin-bottom: 14px;
+        padding: 16px 20px;
+        border-radius: 18px;
+        background:
+            radial-gradient(circle at 92% 18%, rgba(16, 185, 129, 0.16), transparent 55%),
+            linear-gradient(135deg, rgba(5, 150, 105, 0.09), var(--card, #ffffff));
+        border: 1px solid var(--em-border);
+        box-shadow: 0 8px 22px rgba(4, 120, 87, 0.06);
+    }
+
+    .edupath-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 3px 10px;
+        border-radius: 999px;
+        font-size: 0.72rem;
+        font-weight: 800;
+        color: #ffffff;
+        background: linear-gradient(135deg, var(--em-primary), var(--em-dark));
+        box-shadow: 0 3px 10px rgba(5, 150, 105, 0.25);
+        line-height: 1.2;
+        white-space: nowrap;
+    }
+
+    .edupath-reply-highlight {
+        margin-top: 10px;
+        margin-left: 44px;
+        padding: 12px 14px;
+        border-radius: 14px;
+        background:
+            radial-gradient(circle at 94% 16%, rgba(16, 185, 129, 0.15), transparent 58%),
+            linear-gradient(135deg, rgba(16, 185, 129, 0.09), var(--card, #ffffff));
+        border: 1px solid rgba(16, 185, 129, 0.34);
+        border-left: 4px solid var(--em-deep);
+        box-shadow: 0 6px 16px rgba(4, 120, 87, 0.07);
+    }
+
+    .edupath-name-tag {
+        color: var(--em-dark);
+        font-weight: 800;
+        background: rgba(16, 185, 129, 0.14);
+        padding: 1px 7px;
+        border-radius: 6px;
+        border: 1px solid rgba(16, 185, 129, 0.25);
+    }
+
+    .mode-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 3px 10px;
+        border-radius: 999px;
+        font-size: 0.75rem;
+        font-weight: 800;
+        border: 1px solid rgba(16, 185, 129, 0.35);
+        background: rgba(16, 185, 129, 0.12);
+        color: var(--em-dark);
+        line-height: 1.25;
+    }
+
+    .msg-compose-box {
+        padding: 18px !important;
+        margin-bottom: 18px !important;
+        border-radius: 18px !important;
+        border: 1px solid rgba(16, 185, 129, 0.25) !important;
+        box-shadow: 0 8px 20px rgba(4, 120, 87, 0.05) !important;
+    }
+
+    .msg-compose-box textarea {
+        width: 100%;
+        border-radius: 12px;
+        border: 1.5px solid var(--border, #cbd5e1);
+        background: var(--bg, #f8fafc);
+        color: var(--text, #0f172a);
+        padding: 11px 13px;
+        font-family: inherit;
+        transition: border-color 0.16s ease, box-shadow 0.16s ease, background-color 0.16s ease;
+    }
+
+    .msg-compose-box textarea:focus {
+        outline: none;
+        border-color: var(--em-deep);
+        background: var(--card, #ffffff);
+        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.16);
+    }
+
+    .msg-item-card {
+        padding: 16px !important;
+        margin-bottom: 12px !important;
+        border-radius: 18px !important;
+        border: 1px solid rgba(16, 185, 129, 0.2) !important;
+        box-shadow: 0 6px 18px rgba(15, 23, 42, 0.04) !important;
+        transition: border-color 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    .msg-item-card:hover {
+        border-color: rgba(16, 185, 129, 0.42) !important;
+        box-shadow: 0 10px 24px rgba(4, 120, 87, 0.08) !important;
+    }
+
+    .msg-sender-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 10px;
+        flex-wrap: wrap;
+    }
+
+    .msg-sender-left {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-width: 0;
+        flex: 1 1 auto;
+    }
+
+    .msg-avatar-badge {
+        position: relative;
+        flex: 0 0 34px;
+        width: 34px;
+        height: 34px;
+        min-width: 34px;
+        min-height: 34px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--em-primary), var(--em-dark));
+        color: #ffffff;
+        font-size: 0.86rem;
+        font-weight: 900;
+        line-height: 1;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        user-select: none;
+        box-shadow: 0 4px 10px rgba(5, 150, 105, 0.24);
+    }
+
+    .msg-avatar-badge::before,
+    .msg-avatar-badge::after {
+        display: none !important;
+        content: none !important;
+    }
+
+    .msg-sender-name {
+        font-size: 0.92rem;
+        font-weight: 800;
+        color: var(--text, #0f172a);
+        letter-spacing: -0.01em;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .msg-bubble-text {
+        padding: 12px 14px;
+        border-radius: 13px;
+        background: rgba(16, 185, 129, 0.05);
+        border: 1px solid rgba(16, 185, 129, 0.2);
+        color: var(--text, #0f172a);
+        white-space: pre-line;
+        word-break: break-word;
+        font-size: 0.91rem;
+        line-height: 1.5;
+    }
+
+    .msg-react-bar {
+        display: flex;
+        gap: 7px;
+        flex-wrap: wrap;
+        margin-top: 10px;
+        padding-left: 44px;
+    }
+
+    .admin-liked-by-strip {
+        margin-top: 7px;
+        padding-left: 44px;
+        font-size: 0.75rem;
+        color: var(--muted, #64748b);
+        font-weight: 700;
+    }
+
+    .premium-emo-pill {
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 6px !important;
+        padding: 6px 12px !important;
+        border-radius: 999px !important;
+        font-size: 0.82rem !important;
+        font-weight: 800 !important;
+        line-height: 1 !important;
+        border: 1.5px solid rgba(16, 185, 129, 0.30) !important;
+        background: linear-gradient(180deg, rgba(16, 185, 129, 0.08), var(--card, #ffffff)) !important;
+        color: var(--text, #0f172a) !important;
+        box-shadow: 0 2px 7px rgba(4, 120, 87, 0.06) !important;
+        transition: transform 0.1s cubic-bezier(0.2, 0.9, 0.3, 1), background-color 0.14s ease, border-color 0.14s ease, color 0.14s ease, box-shadow 0.14s ease !important;
+        user-select: none;
+        cursor: pointer;
+    }
+
+    .premium-emo-pill:hover {
+        transform: translateY(-1px);
+        border-color: var(--em-deep) !important;
+        background: rgba(16, 185, 129, 0.13) !important;
+        box-shadow: 0 4px 12px rgba(5, 150, 105, 0.16) !important;
+    }
+
+    .premium-emo-pill:active,
+    .premium-emo-pill.popping {
+        transform: scale(0.94) !important;
+        background: rgba(16, 185, 129, 0.18) !important;
+    }
+
+    .premium-emo-pill.active {
+        background: linear-gradient(135deg, var(--em-primary), var(--em-dark)) !important;
+        color: #ffffff !important;
+        border-color: var(--em-dark) !important;
+        box-shadow: 0 4px 14px rgba(5, 150, 105, 0.32) !important;
+    }
+
+    .emo-glyph {
+        font-size: 0.94rem;
+        line-height: 1;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .emo-count {
+        font-variant-numeric: tabular-nums;
+        font-size: 0.78rem;
+        font-weight: 800;
+        line-height: 1;
+    }
+
+    .msg-send-btn {
+        display: inline-flex !important;
+        align-items: center;
+        justify-content: center;
+        width: 100% !important;
+        margin-top: 10px !important;
+        padding: 11px 16px !important;
+        font-size: 0.9rem !important;
+        font-weight: 800 !important;
+        background: linear-gradient(135deg, var(--em-primary), var(--em-dark)) !important;
+        color: #ffffff !important;
+        border: none !important;
+        border-radius: 12px !important;
+        box-shadow: 0 6px 16px rgba(5, 150, 105, 0.28) !important;
+        transition: transform 0.14s ease, box-shadow 0.14s ease, filter 0.14s ease !important;
+        cursor: pointer;
+    }
+
+    .msg-send-btn:hover {
+        filter: brightness(1.04);
+        box-shadow: 0 8px 20px rgba(5, 150, 105, 0.35) !important;
+    }
+
+    .msg-send-btn:active {
+        transform: scale(0.985) !important;
+    }
+
+    .msg-mode-btn {
+        padding: 8px 14px;
+        font-size: 0.82rem;
+        font-weight: 800;
+        border-radius: 11px;
+        border: 1.5px solid rgba(16, 185, 129, 0.42);
+        background: rgba(16, 185, 129, 0.10);
+        color: var(--em-dark);
+        cursor: pointer;
+        transition: background-color 0.14s ease, border-color 0.14s ease, transform 0.1s ease;
+    }
+
+    .msg-mode-btn:hover {
+        background: rgba(16, 185, 129, 0.18);
+        border-color: var(--em-deep);
+    }
+
+    .msg-mode-btn:active {
+        transform: scale(0.97);
+        background: rgba(16, 185, 129, 0.24);
+    }
+
+    .msg-reply-row {
+        display: flex;
+        gap: 8px;
+        margin-top: 10px;
+        align-items: center;
+    }
+
+    .msg-reply-row input {
+        margin: 0;
+        padding: 9px 12px;
+        font-size: 0.86rem;
+        flex: 1 1 auto;
+        min-width: 0;
+        border-radius: 10px;
+        border: 1.5px solid var(--border, #cbd5e1);
+        background: var(--bg, #f8fafc);
+        color: var(--text, #0f172a);
+        transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+    }
+
+    .msg-reply-row input:focus {
+        outline: none;
+        border-color: var(--em-deep);
+        background: var(--card, #ffffff);
+        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+    }
+
+    .msg-reply-btn {
+        padding: 9px 14px;
+        font-size: 0.82rem;
+        font-weight: 800;
+        border-radius: 10px;
+        border: 1.5px solid rgba(16, 185, 129, 0.45);
+        background: rgba(16, 185, 129, 0.12);
+        color: var(--em-dark);
+        white-space: nowrap;
+        flex: 0 0 auto;
+        cursor: pointer;
+        transition: background-color 0.14s ease, transform 0.1s ease;
+    }
+
+    .msg-reply-btn:hover {
+        background: rgba(16, 185, 129, 0.2);
+    }
+
+    .msg-reply-btn:active {
+        transform: scale(0.97);
+        background: rgba(16, 185, 129, 0.26);
+    }
+
+    .msg-peer-thread {
+        margin-top: 10px;
+        margin-left: 44px;
+        display: flex;
+        flex-direction: column;
+        gap: 7px;
+    }
+
+    .msg-peer-item {
+        padding: 9px 12px;
+        border-radius: 11px;
+        background: rgba(15, 23, 42, 0.03);
+        border: 1px solid rgba(16, 185, 129, 0.18);
+    }
+
+    .msg-peer-meta {
+        display: flex;
+        justify-content: space-between;
+        gap: 8px;
+        font-size: 0.76rem;
+        margin-bottom: 3px;
+    }
+
+    .msg-peer-body {
+        font-size: 0.86rem;
+        line-height: 1.45;
+        white-space: pre-line;
+    }
+
+    .msg-del-btn {
+        border: none;
+        background: none;
+        font-size: 0.76rem;
+        color: #ef4444;
+        font-weight: 800;
+        padding: 3px 6px;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: background-color 0.12s ease;
+    }
+
+    .msg-del-btn:hover {
+        background: rgba(239, 68, 68, 0.10);
+    }
+
+    .msg-del-btn:active {
+        background: rgba(239, 68, 68, 0.16);
+    }
+
+    .msg-block-btn {
+        border: none;
+        background: none;
+        color: #d97706;
+        font-size: 0.76rem;
+        font-weight: 800;
+        cursor: pointer;
+        padding: 3px 6px;
+        border-radius: 6px;
+        transition: background-color 0.12s ease;
+    }
+
+    .msg-block-btn:active {
+        background: rgba(217, 119, 6, 0.14);
+    }
+
+    /* Important Notice Portal Styles */
+    .imp-notice-portal {
+        margin-top: 18px;
+        margin-bottom: 18px;
+        padding: 18px;
+        border-radius: 18px;
+        background:
+            radial-gradient(circle at 95% 12%, rgba(16, 185, 129, 0.14), transparent 55%),
+            linear-gradient(135deg, rgba(5, 150, 105, 0.06), var(--card, #ffffff));
+        border: 1.5px solid var(--em-border);
+        box-shadow: 0 8px 22px rgba(4, 120, 87, 0.06);
+    }
+
+    .imp-notice-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-bottom: 14px;
+    }
+
+    .imp-notice-title-wrap {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .imp-notice-title {
+        margin: 0;
+        font-size: 1.12rem;
+        font-weight: 900;
+        color: var(--text, #0f172a);
+    }
+
+    .imp-admin-panel {
+        padding: 15px;
+        margin-bottom: 16px;
+        border-radius: 15px;
+        background: var(--bg, #f8fafc);
+        border: 1.5px dashed rgba(5, 150, 105, 0.45);
+    }
+
+    .imp-form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+        margin-bottom: 10px;
+    }
+
+    .imp-field {
+        width: 100%;
+        border-radius: 10px;
+        border: 1.5px solid var(--border, #cbd5e1);
+        background: var(--card, #ffffff);
+        color: var(--text, #0f172a);
+        padding: 9px 12px;
+        font-family: inherit;
+        font-size: 0.88rem;
+    }
+
+    .imp-field:focus {
+        outline: none;
+        border-color: var(--em-deep);
+        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+    }
+
+    .imp-post-btn {
+        padding: 9px 16px;
+        border-radius: 11px;
+        border: none;
+        background: linear-gradient(135deg, var(--em-primary), var(--em-dark));
+        color: #ffffff;
+        font-size: 0.85rem;
+        font-weight: 800;
+        cursor: pointer;
+        box-shadow: 0 4px 12px rgba(5, 150, 105, 0.25);
+    }
+
+    .imp-notice-card {
+        padding: 15px;
+        margin-bottom: 12px;
+        border-radius: 15px;
+        background: var(--card, #ffffff);
+        border: 1px solid rgba(16, 185, 129, 0.24);
+        box-shadow: 0 5px 15px rgba(15, 23, 42, 0.04);
+    }
+
+    .imp-notice-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-bottom: 8px;
+    }
+
+    .imp-notice-heading {
+        margin: 0;
+        font-size: 0.98rem;
+        font-weight: 800;
+        color: var(--text, #0f172a);
+    }
+
+    .imp-tag-pill {
+        display: inline-flex;
+        align-items: center;
+        padding: 2px 9px;
+        border-radius: 999px;
+        font-size: 0.7rem;
+        font-weight: 800;
+        background: rgba(16, 185, 129, 0.14);
+        color: var(--em-dark);
+        border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .imp-attach-box {
+        margin-top: 10px;
+        padding: 10px 12px;
+        border-radius: 12px;
+        background: rgba(16, 185, 129, 0.05);
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .imp-video-frame {
+        width: 100%;
+        max-height: 320px;
+        border-radius: 10px;
+        background: #000000;
+    }
+
+    .imp-pdf-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 7px 12px;
+        border-radius: 9px;
+        font-size: 0.82rem;
+        font-weight: 800;
+        text-decoration: none;
+        background: rgba(16, 185, 129, 0.14);
+        color: var(--em-dark);
+        border: 1px solid rgba(16, 185, 129, 0.35);
+    }
+
+    .imp-chat-list {
+        margin-top: 10px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .imp-chat-msg {
+        padding: 8px 11px;
+        border-radius: 10px;
+        background: rgba(15, 23, 42, 0.03);
+        border: 1px solid rgba(16, 185, 129, 0.16);
+        font-size: 0.84rem;
+    }
+
+    @media (max-width: 768px) {
+        .msg-page-wrap {
+            max-width: 100% !important;
+            padding: 0 2px !important;
+        }
+
+        .msg-hero-card {
+            padding: 13px 14px !important;
+            border-radius: 16px !important;
+            margin-bottom: 12px !important;
+            gap: 10px !important;
+        }
+
+        .msg-page-title {
+            font-size: 1.24rem !important;
+            line-height: 1.25 !important;
+            margin-bottom: 5px !important;
+        }
+
+        .msg-page-sub {
+            font-size: 0.8rem !important;
+            line-height: 1.42 !important;
+        }
+
+        .msg-mode-btn {
+            width: 100%;
+            text-align: center;
+            padding: 8px 12px;
+            font-size: 0.8rem;
+        }
+
+        .msg-compose-box {
+            padding: 13px !important;
+            border-radius: 15px !important;
+            margin-bottom: 14px !important;
+        }
+
+        .msg-compose-box textarea {
+            height: 78px !important;
+            min-height: 78px !important;
+            font-size: 16px !important;
+            padding: 10px 12px !important;
+            border-radius: 11px !important;
+        }
+
+        .msg-send-btn {
+            padding: 10.5px 14px !important;
+            font-size: 0.88rem !important;
+            border-radius: 11px !important;
+        }
+
+        .msg-item-card {
+            padding: 12px !important;
+            border-radius: 16px !important;
+            margin-bottom: 11px !important;
+        }
+
+        .msg-sender-header {
+            gap: 6px;
+            margin-bottom: 8px;
+        }
+
+        .msg-sender-left {
+            gap: 8px;
+        }
+
+        .msg-avatar-badge {
+            flex: 0 0 30px !important;
+            width: 30px !important;
+            height: 30px !important;
+            min-width: 30px !important;
+            min-height: 30px !important;
+            max-width: 30px !important;
+            max-height: 30px !important;
+            border-radius: 50% !important;
+            font-size: 0.78rem !important;
+            line-height: 30px !important;
+            padding: 0 !important;
+        }
+
+        .msg-sender-name {
+            font-size: 0.86rem !important;
+            max-width: 170px;
+        }
+
+        .edupath-badge {
+            font-size: 0.66rem !important;
+            padding: 2px 8px !important;
+        }
+
+        .msg-bubble-text {
+            padding: 10px 12px !important;
+            font-size: 0.88rem !important;
+            border-radius: 12px !important;
+            line-height: 1.45 !important;
+        }
+
+        .msg-react-bar,
+        .admin-liked-by-strip,
+        .msg-peer-thread {
+            margin-left: 0 !important;
+            padding-left: 0 !important;
+            gap: 6px !important;
+        }
+
+        .edupath-reply-highlight {
+            margin-left: 0 !important;
+            padding: 10px 12px !important;
+            border-radius: 12px !important;
+        }
+
+        .premium-emo-pill {
+            padding: 5.5px 10px !important;
+            font-size: 0.78rem !important;
+        }
+
+        .msg-reply-row {
+            flex-direction: row !important;
+            gap: 6px !important;
+        }
+
+        .msg-reply-row input {
+            padding: 8px 10px !important;
+            font-size: 16px !important;
+        }
+
+        .msg-reply-row button {
+            padding: 8px 12px !important;
+            font-size: 0.8rem !important;
+        }
+
+        .imp-notice-portal {
+            padding: 13px !important;
+            border-radius: 16px !important;
+        }
+
+        .imp-form-grid {
+            grid-template-columns: 1fr !important;
+        }
+
+        .imp-field {
+            font-size: 16px !important;
+        }
+    }
+</style>
+
+<div class="msg-page-wrap">
+    <div class="msg-hero-card">
+        <div style="min-width: 0; flex: 1 1 260px;">
+            <h1 class="msg-page-title" style="font-size: 1.75rem; margin-bottom: 5px;">Direct Message Box</h1>
+            <p class="msg-page-sub" style="color: var(--muted); font-size: 0.9rem; margin: 0;">
+                {% if user['role'] == 'admin' %}
+                    Mode: <span class="mode-pill">{{ 'PUBLIC CHAT' if vis == 'public' else 'PRIVATE CHAT' }}</span> — Replying sends a notification to the student from <span class="edupath-name-tag">EDUPATH</span>.
+                {% else %}
+                    {% if vis == 'public' %}
+                        Mode: <span class="mode-pill">PUBLIC CHAT</span> — Messages in this box are visible to all registered students and <span class="edupath-name-tag">EDUPATH</span>. You can like/react and reply in public chat.
+                    {% else %}
+                        Mode: <span class="mode-pill">PRIVATE CHAT</span> — Your messages are visible only to <span class="edupath-name-tag">EDUPATH</span>. Peer replies and reactions are disabled in private mode.
+                    {% endif %}
+                {% endif %}
+            </p>
+        </div>
+
+        {% if user['role'] == 'admin' %}
+        <form id="toggleChatModeForm" method="POST" action="{{ url_for('toggle_chat_visibility') }}" style="margin:0;">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <input type="hidden" name="chat_visibility" value="{{ 'private' if vis == 'public' else 'public' }}">
+            <button type="submit" id="toggleChatModeBtn" class="msg-mode-btn">
+                {{ 'Switch to Private' if vis == 'public' else 'Switch to Public' }}
+            </button>
+        </form>
+        {% endif %}
+    </div>
+
+    <div class="glass-card msg-compose-box">
+        <form method="POST" action="{{ url_for('ai_doubt') }}" onsubmit="const b=this.querySelector('button[type=submit]'); if(b){b.disabled=true; b.innerText='Sending...';}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <input type="hidden" name="action_type" value="send_message">
+            <label style="font-size: 0.86rem; font-weight: 700; display: block; margin-bottom: 6px;">Write Your Message</label>
+            <textarea name="question" rows="3" required placeholder="Type your message or doubt here..."></textarea>
+            <button type="submit" class="msg-send-btn">Send Message</button>
+        </form>
+    </div>
+
+    <h3 style="margin-bottom: 10px; font-size: 1.05rem;">
+        {% if user['role'] == 'admin' %}
+            Messages ({{ vis|upper }})
+        {% else %}
+            {{ 'Public & Your Messages' if vis == 'public' else 'Your Private Messages' }}
+        {% endif %}
+    </h3>
+
+    {% if doubts %}
+        {% for d in doubts %}
+        {% set display_sender = d['user_name'] if (user['role'] == 'admin' or vis == 'public') else 'Your Message' %}
+        <div class="glass-card msg-item-card" id="msgCard_{{ d['id'] }}">
+            <div class="msg-sender-header">
+                <div class="msg-sender-left">
+                    <span class="msg-avatar-badge">{{ (display_sender[0] if display_sender else 'U')|upper }}</span>
+                    <strong class="msg-sender-name">{{ display_sender }}</strong>
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                    <span style="font-size: 0.76rem; color: var(--muted);">{{ d['created_at'] }}</span>
+                    {% if user['role'] == 'admin' and d['user_id'] and d['user_id'] != user['id'] %}
+                        <form method="POST" action="{{ url_for('toggle_block_user', target_user_id=d['user_id']) }}" style="display:inline; margin:0;">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                            <button type="submit" class="msg-block-btn">
+                                Block / Unblock User
+                            </button>
+                        </form>
+                    {% endif %}
+                    {% if user['role'] == 'admin' %}
+                        <form method="POST" action="{{ url_for('delete_doubt', doubt_id=d['id']) }}" class="js-delete-msg-form" data-card-id="msgCard_{{ d['id'] }}" style="display:inline; margin:0;">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                            <button type="submit" class="msg-del-btn">Delete</button>
+                        </form>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="msg-bubble-text">{{ d['question'] }}</div>
+
+            {% if vis == 'public' %}
+            <div class="msg-react-bar">
+                {% for emo in ["👍", "❤️", "🔥", "💡"] %}
+                <form method="POST" action="{{ url_for('react_doubt', doubt_id=d['id']) }}" class="js-react-form" style="display: inline; margin: 0;">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                    <input type="hidden" name="reaction" value="{{ emo }}">
+                    <button type="submit" class="premium-emo-pill {{ 'active' if emo in d['user_reactions'] }}">
+                        <span class="emo-glyph">{{ emo }}</span>
+                        <span class="emo-count">{{ d['reactions'].get(emo, 0) }}</span>
+                    </button>
+                </form>
+                {% endfor %}
+            </div>
+
+            {% if user['role'] == 'admin' and d['liked_by'] is defined and d['liked_by'] %}
+            <div class="admin-liked-by-strip">
+                Reacted by: {{ d['liked_by']|join(', ') }}
+            </div>
+            {% endif %}
+            {% endif %}
+
+            {% if d['admin_reply'] %}
+            <div class="edupath-reply-highlight">
+                <div style="display: flex; align-items: center; justify-content: space-between; gap: 6px; flex-wrap: wrap; margin-bottom: 5px;">
+                    <span class="edupath-badge">EDUPATH • {{ d['replied_by'] or 'Syed Muhammad Imran' }}</span>
+                    {% if d['replied_at'] %}
+                        <span style="font-size: 0.74rem; color: var(--muted); font-weight: 600;">{{ d['replied_at'] }}</span>
+                    {% endif %}
+                </div>
+                <div style="font-size: 0.9rem; font-weight: 600; line-height: 1.5; white-space: pre-line;">{{ d['admin_reply'] }}</div>
+            </div>
+            {% endif %}
+
+            {% if vis == 'public' and d['replies'] is defined and d['replies'] %}
+            <div class="msg-peer-thread">
+                {% for r in d['replies'] %}
+                <div class="msg-peer-item">
+                    <div class="msg-peer-meta">
+                        <strong>{{ r['user_name'] }}</strong>
+                        <span style="color: var(--muted);">{{ r['created_at'] }}</span>
+                    </div>
+                    <div class="msg-peer-body">{{ r['reply_text'] }}</div>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            {% if user['role'] == 'admin' %}
+            <form method="POST" action="{{ url_for('reply_doubt', doubt_id=d['id']) }}" class="msg-reply-row">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                <input type="text" name="admin_reply" value="{{ d['admin_reply'] or '' }}" placeholder="Write a reply from EDUPATH..." required>
+                <button type="submit" class="msg-reply-btn">Reply</button>
+            </form>
+            {% elif vis == 'public' %}
+            <form method="POST" action="{{ url_for('reply_doubt', doubt_id=d['id']) }}" class="msg-reply-row">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                <input type="hidden" name="reply_kind" value="peer">
+                <input type="text" name="reply_text" placeholder="Reply to {{ display_sender }}..." required>
+                <button type="submit" class="msg-reply-btn">Reply</button>
+            </form>
+            {% endif %}
+        </div>
+        {% endfor %}
+    {% else %}
+    <div class="glass-card" style="text-align: center; padding: 24px; border-radius: 16px;">
+        <p style="color: var(--muted); font-size: 0.88rem; margin: 0;">No messages yet.</p>
+    </div>
+    {% endif %}
+
+    <!-- Important Notice Portal (Same across every page/portal with Admin Control) -->
+    {% set notice_items = important_notices if important_notices is defined else [] %}
+    <section class="imp-notice-portal" id="importantNoticePortal" data-portal-scope="global">
+        <div class="imp-notice-header">
+            <div class="imp-notice-title-wrap">
+                <span class="edupath-badge">IMPORTANT NOTICE PORTAL</span>
+                <h3 class="imp-notice-title">Official Notices, Videos, PDFs &amp; Notice Chat</h3>
+            </div>
+            <span class="mode-pill">{{ 'ADMIN CONTROL ACTIVE' if user['role'] == 'admin' else 'STUDENT VIEW' }}</span>
+        </div>
+
+        {% if user['role'] == 'admin' %}
+        <div class="imp-admin-panel">
+            <div style="font-size: 0.86rem; font-weight: 800; margin-bottom: 10px; color: var(--em-dark);">
+                Admin Control — Publish Important Notice (Text, Video Link/Upload, PDF Link/Upload, Chat Toggle)
+            </div>
+            <form method="POST" action="{{ url_for('add_important_notice') if 'add_important_notice' in (view_funcs if view_funcs is defined else []) else '#importantNoticePortal' }}" data-notice-action="create" enctype="multipart/form-data">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                <input type="hidden" name="portal_scope" value="global">
+                <div class="imp-form-grid">
+                    <input type="text" name="title" class="imp-field" placeholder="Notice Title (e.g., Board Exam & Formula Sheet)" required>
+                    <input type="text" name="tag" class="imp-field" placeholder="Tag / Category (e.g., Class 10, PDF, Video)">
+                </div>
+                <textarea name="body" rows="3" class="imp-field" style="margin-bottom: 10px;" placeholder="Write important notice details here..." required></textarea>
+                <div class="imp-form-grid">
+                    <input type="url" name="video_url" class="imp-field" placeholder="Video URL (YouTube / MP4 link, optional)">
+                    <input type="file" name="video_file" accept="video/*" class="imp-field">
+                </div>
+                <div class="imp-form-grid">
+                    <input type="url" name="pdf_url" class="imp-field" placeholder="PDF URL (Google Drive / PDF link, optional)">
+                    <input type="file" name="pdf_file" accept="application/pdf,.pdf" class="imp-field">
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap;">
+                    <label style="display: inline-flex; align-items: center; gap: 6px; font-size: 0.82rem; font-weight: 700;">
+                        <input type="checkbox" name="allow_chat" value="1" checked>
+                        Allow Notice Discussion Chat
+                    </label>
+                    <button type="submit" class="imp-post-btn">Publish Notice</button>
+                </div>
+            </form>
+        </div>
+        {% endif %}
+
+        {% if notice_items %}
+            {% for n in notice_items %}
+            <div class="imp-notice-card" id="impNotice_{{ n['id'] }}">
+                <div class="imp-notice-top">
+                    <div class="imp-notice-title-wrap">
+                        <h4 class="imp-notice-heading">{{ n['title'] }}</h4>
+                        {% if n['tag'] %}
+                            <span class="imp-tag-pill">{{ n['tag'] }}</span>
+                        {% endif %}
+                        {% if n['pinned'] %}
+                            <span class="edupath-badge">PINNED</span>
+                        {% endif %}
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                        <span style="font-size: 0.75rem; color: var(--muted);">{{ n['created_at'] }}</span>
+                        {% if user['role'] == 'admin' %}
+                            <form method="POST" action="{{ url_for('toggle_pin_notice', notice_id=n['id']) if 'toggle_pin_notice' in (view_funcs if view_funcs is defined else []) else '#impNotice_' ~ n['id'] }}" data-notice-action="pin" data-notice-id="{{ n['id'] }}" style="display: inline; margin: 0;">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                                <button type="submit" class="msg-block-btn">{{ 'Unpin' if n['pinned'] else 'Pin' }}</button>
+                            </form>
+                            <form method="POST" action="{{ url_for('toggle_notice_chat', notice_id=n['id']) if 'toggle_notice_chat' in (view_funcs if view_funcs is defined else []) else '#impNotice_' ~ n['id'] }}" data-notice-action="chat_toggle" data-notice-id="{{ n['id'] }}" style="display: inline; margin: 0;">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                                <button type="submit" class="msg-block-btn">{{ 'Lock Chat' if (n['allow_chat'] is not defined or n['allow_chat']) else 'Unlock Chat' }}</button>
+                            </form>
+                            <form method="POST" action="{{ url_for('delete_important_notice', notice_id=n['id']) if 'delete_important_notice' in (view_funcs if view_funcs is defined else []) else '#impNotice_' ~ n['id'] }}" class="js-delete-notice-form" data-notice-card-id="impNotice_{{ n['id'] }}" data-notice-id="{{ n['id'] }}" style="display: inline; margin: 0;">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                                <button type="submit" class="msg-del-btn" onclick="return confirm('Delete this important notice?');">Delete</button>
+                            </form>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div style="font-size: 0.9rem; line-height: 1.5; white-space: pre-line;">{{ n['body'] }}</div>
+
+                {% if n['video_url'] or n['video_file_url'] %}
+                {% set v_src = n['video_file_url'] or n['video_url'] %}
+                <div class="imp-attach-box">
+                    <div style="font-size: 0.78rem; font-weight: 800; margin-bottom: 6px; color: var(--em-dark);">Attached Video</div>
+                    {% if 'youtube.com/watch?v=' in v_src %}
+                        {% set yt_id = v_src.split('v=')[1].split('&')[0] %}
+                        <iframe class="imp-video-frame" src="https://www.youtube.com/embed/{{ yt_id }}" allowfullscreen loading="lazy"></iframe>
+                    {% elif 'youtu.be/' in v_src %}
+                        {% set yt_id = v_src.split('youtu.be/')[1].split('?')[0] %}
+                        <iframe class="imp-video-frame" src="https://www.youtube.com/embed/{{ yt_id }}" allowfullscreen loading="lazy"></iframe>
+                    {% else %}
+                        <video class="imp-video-frame" controls preload="metadata" src="{{ v_src }}"></video>
+                    {% endif %}
+                </div>
+                {% endif %}
+
+                {% if n['pdf_url'] or n['pdf_file_url'] %}
+                {% set p_src = n['pdf_file_url'] or n['pdf_url'] %}
+                <div class="imp-attach-box">
+                    <div style="font-size: 0.78rem; font-weight: 800; margin-bottom: 6px; color: var(--em-dark);">Attached PDF Study Material</div>
+                    <a href="{{ p_src }}" target="_blank" rel="noopener noreferrer" class="imp-pdf-link">Open / Download PDF</a>
+                </div>
+                {% endif %}
+
+                {% if n['chats'] is defined and n['chats'] %}
+                <div class="imp-chat-list">
+                    {% for c in n['chats'] %}
+                    <div class="imp-chat-msg">
+                        <div style="display: flex; justify-content: space-between; gap: 8px; font-size: 0.75rem; margin-bottom: 2px;">
+                            <strong>{{ c['user_name'] }}</strong>
+                            <span style="color: var(--muted);">{{ c['created_at'] }}</span>
+                        </div>
+                        <div style="white-space: pre-line;">{{ c['message'] }}</div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                {% if user['role'] == 'admin' or (n['allow_chat'] is not defined or n['allow_chat']) %}
+                <form method="POST" action="{{ url_for('post_notice_chat', notice_id=n['id']) if 'post_notice_chat' in (view_funcs if view_funcs is defined else []) else '#impNotice_' ~ n['id'] }}" data-notice-action="notice_chat" data-notice-id="{{ n['id'] }}" class="msg-reply-row">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                    <input type="text" name="message" placeholder="Write a message on this notice..." required>
+                    <button type="submit" class="msg-reply-btn">Send</button>
+                </form>
+                {% else %}
+                <div style="margin-top: 8px; font-size: 0.78rem; color: var(--muted); font-weight: 700;">
+                    Notice chat is locked by Admin.
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        {% else %}
+        <div class="glass-card" style="text-align: center; padding: 20px; border-radius: 14px;">
+            <p style="color: var(--muted); font-size: 0.86rem; margin: 0;">No important notices published yet.</p>
+        </div>
+        {% endif %}
+    </section>
+</div>
+
+<script>
+(function () {
+    var modeForm = document.getElementById("toggleChatModeForm");
+    var modeBtn = document.getElementById("toggleChatModeBtn");
+    if (modeForm && modeBtn) {
+        modeForm.addEventListener("submit", function () {
+            modeBtn.disabled = true;
+            modeBtn.textContent = "Switching...";
+        });
+    }
+
+    document.querySelectorAll(".js-delete-msg-form").forEach(function (delForm) {
+        delForm.addEventListener("submit", function (e) {
+            e.preventDefault();
+            var delBtn = delForm.querySelector(".msg-del-btn");
+            var cardId = delForm.getAttribute("data-card-id");
+            var cardEl = cardId ? document.getElementById(cardId) : null;
+            var csrfInp = delForm.querySelector('input[name="csrf_token"]');
+
+            if (delBtn) {
+                delBtn.disabled = true;
+                delBtn.textContent = "Deleting...";
+            }
+
+            var bodyData = new URLSearchParams();
+            if (csrfInp) bodyData.append("csrf_token", csrfInp.value);
+
+            fetch(delForm.action, {
+                method: "POST",
+                credentials: "same-origin",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                    "X-CSRF-Token": csrfInp ? csrfInp.value : "{{ csrf_token }}"
+                },
+                body: bodyData.toString()
+            }).then(function (res) {
+                if (res.ok || res.redirected) {
+                    if (cardEl) {
+                        cardEl.style.transition = "opacity 0.18s ease, transform 0.18s ease";
+                        cardEl.style.opacity = "0";
+                        cardEl.style.transform = "scale(0.98)";
+                        setTimeout(function () { cardEl.remove(); }, 180);
+                    } else {
+                        window.location.reload();
+                    }
+                } else {
+                    delForm.submit();
+                }
+            }).catch(function () {
+                delForm.submit();
+            });
+        });
+    });
+
+    document.querySelectorAll(".js-react-form").forEach(function (form) {
+        var inFlight = false;
+        form.addEventListener("submit", function (e) {
+            e.preventDefault();
+            if (inFlight) return;
+
+            var btn = form.querySelector(".premium-emo-pill");
+            var countEl = form.querySelector(".emo-count");
+            var csrfInp = form.querySelector('input[name="csrf_token"]');
+            var reactInp = form.querySelector('input[name="reaction"]');
+            if (!btn || !countEl) return;
+
+            inFlight = true;
+            var wasActive = btn.classList.contains("active");
+            var curCount = parseInt(countEl.textContent || "0", 10);
+            if (isNaN(curCount)) curCount = 0;
+
+            btn.classList.remove("popping");
+            void btn.offsetWidth;
+            btn.classList.add("popping");
+
+            btn.classList.toggle("active", !wasActive);
+            countEl.textContent = String(Math.max(0, wasActive ? curCount - 1 : curCount + 1));
+
+            var bodyData = new URLSearchParams();
+            if (csrfInp) bodyData.append("csrf_token", csrfInp.value);
+            if (reactInp) bodyData.append("reaction", reactInp.value);
+
+            fetch(form.action, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                    "X-CSRF-Token": csrfInp ? csrfInp.value : "{{ csrf_token }}"
+                },
+                body: bodyData.toString()
+            }).then(function (res) {
+                if (!res.ok) throw new Error("Request failed");
+            }).catch(function () {
+                btn.classList.toggle("active", wasActive);
+                countEl.textContent = String(curCount);
+            }).finally(function () {
+                inFlight = false;
+                setTimeout(function () {
+                    btn.classList.remove("popping");
+                }, 140);
+            });
+        });
+    });
+
+    document.querySelectorAll(".js-delete-notice-form").forEach(function (nForm) {
+        nForm.addEventListener("submit", function (e) {
+            var act = nForm.getAttribute("action") || "";
+            if (!act || act.charAt(0) === "#") {
+                e.preventDefault();
+                var cardId = nForm.getAttribute("data-notice-card-id");
+                var cardEl = cardId ? document.getElementById(cardId) : null;
+                if (cardEl) {
+                    cardEl.style.transition = "opacity 0.18s ease, transform 0.18s ease";
+                    cardEl.style.opacity = "0";
+                    cardEl.style.transform = "scale(0.98)";
+                    setTimeout(function () { cardEl.remove(); }, 180);
+                }
+                return;
+            }
+            e.preventDefault();
+            var delBtn = nForm.querySelector(".msg-del-btn");
+            var cardId2 = nForm.getAttribute("data-notice-card-id");
+            var cardEl2 = cardId2 ? document.getElementById(cardId2) : null;
+            var csrfInp = nForm.querySelector('input[name="csrf_token"]');
+
+            if (delBtn) {
+                delBtn.disabled = true;
+                delBtn.textContent = "Deleting...";
+            }
+
+            var bodyData = new URLSearchParams();
+            if (csrfInp) bodyData.append("csrf_token", csrfInp.value);
+
+            fetch(act, {
+                method: "POST",
+                credentials: "same-origin",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                    "X-CSRF-Token": csrfInp ? csrfInp.value : "{{ csrf_token }}"
+                },
+                body: bodyData.toString()
+            }).then(function (res) {
+                if (res.ok || res.redirected) {
+                    if (cardEl2) {
+                        cardEl2.style.transition = "opacity 0.18s ease, transform 0.18s ease";
+                        cardEl2.style.opacity = "0";
+                        cardEl2.style.transform = "scale(0.98)";
+                        setTimeout(function () { cardEl2.remove(); }, 180);
+                    } else {
+                        window.location.reload();
+                    }
+                } else {
+                    window.location.reload();
+                }
+            }).catch(function () {
+                window.location.reload();
+            });
+        });
+    });
+
+    document.querySelectorAll("#importantNoticePortal form[data-notice-action]").forEach(function (f) {
+        f.addEventListener("submit", function (e) {
+            var act = f.getAttribute("action") || "";
+            if (!act || act.charAt(0) === "#") {
+                e.preventDefault();
+                alert("Backend route is not configured yet for this notice action.");
+            }
+        });
+    });
+
+})();
+</script>
+{% endblock %}
